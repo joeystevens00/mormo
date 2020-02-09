@@ -1,0 +1,84 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Bug example",
+    "description": "Bug example for path variable as OData key.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost/service"
+    }
+  ],
+  "paths": {
+    "/project({project_id})": {
+      "get": {
+        "tags": [
+          "project"
+        ],
+        "summary": "Get entity from project by key",
+        "operationId": "project.GetProject",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "description": "key: project_id",
+            "required": true,
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer",
+              "format": "int32",
+              "nullable": true
+            }
+          }
+        ],
+        "x-ms-docs-operation-type": "operation",
+        "responses":  {
+          "200": {"description": "OK"}
+        }
+      }
+    },
+    "/subproject(project_id={project_id},subproject_id={subproject_id})": {
+      "get": {
+        "tags": [
+          "subproject"
+        ],
+        "summary": "Get entity from subproject by key",
+        "operationId": "subproject.GetSubproject",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "description": "key: project_id",
+            "required": true,
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer",
+              "format": "int32",
+              "nullable": true
+            }
+          },
+          {
+            "name": "subproject_id",
+            "in": "path",
+            "description": "key: subproject_id",
+            "required": true,
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer",
+              "format": "int32",
+              "nullable": true
+            }
+          }
+        ],
+        "x-ms-docs-operation-type": "operation",
+        "responses":  {
+          "200": {"description": "OK"}
+        }        
+      }
+    }
+  }
+}

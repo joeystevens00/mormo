@@ -1,0 +1,158 @@
+swagger: "2.0"
+info:
+  description: "redacted"
+  version: "1.0.0"
+  title: "Datahub API"
+  termsOfService: "#"
+  contact:
+    email: "redacted"
+
+host: "redacted.tld"
+basePath: "/api"
+schemes:
+- "https"
+paths:
+  "/services/deployments":
+    post:
+      tags:
+      - "Register"
+      summary: "redacted"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "ApplicationInstance"
+        required: true
+        schema:
+          $ref: "#/definitions/ApplicationInstance"
+      responses:
+        400:
+          $ref: "#/definitions/ErrorResponse"
+        200:
+          $ref: "#/definitions/ApplicationInstanceRegistered"
+
+
+
+securityDefinitions:
+  api_key:
+    type: "apiKey"
+    name: "api_key"
+    in: "header"
+  version_info:
+    type: "apiKey"
+    name: "api_key"
+    in: "header"
+definitions:
+  ApplicationInstanceRegistered:
+    type: "object"
+    properties:
+      InstanceId:
+        type: "string"
+        example: "uuid-of-ApplicationInstance"
+      OtherInformations:
+        type: "string"
+        example: "This response can contain all information that caller of the api would not know"
+
+  ErrorResponse:
+    description: "Bad stuff"
+    type: "object"
+    properties:
+      Code:
+        type: "string"
+        example: "Application Error Code. Keep HTTP code as default"
+      Message:
+        type: "string"
+        example: "Detail explaination of the Error"
+
+  ApplicationInstance:
+    description: "Good stuff"
+    type: "object"
+    properties:
+      Services:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            ServiceType:
+              type: "string"
+            ServiceDetails:
+              type: "object"
+              properties:
+                Name:
+                  type: "string"
+                UUID:
+                  type: "string"
+                Versions:
+                  type: "array"
+                  items:
+                    type: "object"
+                    properties:
+                      uuid:
+                        type: "string"
+                      PublishedOn:
+                        type: "string"
+                      VersionText:
+                        type: "string"
+                      VersionNumber:
+                        type: "string"
+                      RemoteEntities:
+                        type: "array"
+                        items:
+                          type: "object"
+                          properties:
+                            Name:
+                              type: "string"
+                            Tags:
+                              type: "array"
+                              items:
+                                type: "string"
+                            Attributes:
+                              type: "array"
+                              items:
+                                type: "object"
+                                properties:
+                                  Name:
+                                    type: "string"
+                                  Type:
+                                    type: "string"
+                                  Description:
+                                    type: "string"
+                            Associations:
+                              type: "array"
+                              items:
+                                type: "string"
+      EnvironmentName:
+        type: "string"
+      EnvironmentId:
+        type: "string"
+      InstanceURL:
+        type: "string"
+      Consumes:
+        type: "array"
+        items:
+          type: "string"
+          example: "UUID From the Service Version Instance Entity"
+      Company:
+        type: "object"
+        properties:
+          Description:
+            type: "string"
+      App:
+        type: "object"
+        properties:
+          Description:
+            type: "string"
+          AppName:
+            type: "string"
+          Company:
+            type: "object"
+            properties:
+              Description:
+                type: "string"
+externalDocs:
+  description: "Find out more about api"
+  url: "http://redacted.local"

@@ -1,0 +1,30 @@
+:directories:
+  - .git
+  - dist
+  - .pytest_cache
+  - .hypothesis
+  - node_modules
+  - mormo.egg-info
+  - mormo/schema/__pycache__
+  - mormo/__pycache__
+  - tests/__pycache__
+  - tests/data/openapi
+  - tests/data/swagger
+  - data
+  - data/2
+  - data/3
+  - log
+  - log/test_results
+:files:
+  - schema.json
+  - test_postman.json
+  - data.yaml
+  - package.json
+  - package-lock.json
+  - poetry.lock
+  - postman_run_result.json
+  - postman_collection_v2.json
+  - test_collection.json
+  - .code2pdf
+  - ably_io.json
+  - a.json
