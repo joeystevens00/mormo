@@ -1,11 +1,15 @@
 import enum
 from typing import Any, List, Optional, Union, Sequence
 
-from pydantic import Field
-
 from ..model import BaseModel
 
 VERSION = "2.1.0"
+
+EventListen = enum.Enum(
+    'listen',
+    [('test', "test"), ('prerequest', "prerequest")],
+)
+
 
 class Url(BaseModel):
     path: Sequence[str]
@@ -84,8 +88,6 @@ class Script(BaseModel):
         return self
 
 
-EventListen = enum.Enum('listen', [('test', "test"), ('prerequest', "prerequest")])
-
 class Event(BaseModel):
     id: Optional[str]
     listen: str
@@ -124,6 +126,7 @@ class Info(BaseModel):
     postman_id: str
     schema_: str
     description: Description
+
     class Config:
         fields = {'postman_id': '_postman_id', 'schema_': 'schema'}
 

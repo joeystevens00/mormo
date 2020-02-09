@@ -1,6 +1,4 @@
-from collections import Counter, defaultdict
 import json
-from typing import Dict
 
 from pydantic import BaseModel as PyDanticBaseModel
 
@@ -9,8 +7,6 @@ from . import redis_handle
 
 
 class BaseModel(PyDanticBaseModel):
-    #_ref_count: Counter = Counter()
-
     def to_file(self, path):
         with open(path, 'w') as f:
             json.dump(json.loads(self.json()), f)

@@ -2,16 +2,16 @@ import enum
 
 from typing import Any, Dict, List, Optional, Union, Set
 
-from pydantic import AnyHttpUrl, Field
 from ..model import BaseModel
 
 VERSION = "3.0.2"
 
-HeaderType = lambda cls=None: Optional[Dict[str, Union[(Header if not cls else cls), Reference]]]
+HeaderType = lambda: Optional[Dict[str, Union[Header, Reference]]]
 ExampleType = lambda: Optional[Dict[str, Union[Any, Reference]]]
-ContentType = lambda: Optional[Dict[str, MediaType]] # str is mimetype
+ContentType = lambda: Optional[Dict[str, MediaType]]  # str is mimetype
 ResponsesType = lambda: Dict[str, Union[Response, Reference]]
 Style = Optional[str]
+CallBackType = Dict[str, Dict[str, Dict]]
 
 
 class ParameterRequestData(BaseModel):
@@ -41,7 +41,7 @@ class Reference(BaseModel):
 
 class ExternalDocs(BaseModel):
     description: Optional[str]
-    url: str # AnyHttpUrl
+    url: str
 
 
 class ParameterSchema(BaseModel):
@@ -127,9 +127,10 @@ class Properties(BaseModel):
     class Config:
         fields = {'not_': 'not'}
 
+
 class Encoding(BaseModel):
     contentType: Optional[str]
-    headers: Optional[Dict[str, Union[Reference, dict]]] # circular dependencies :-(
+    headers: Optional[Dict[str, Union[Reference, dict]]]
     style: Style
     explode: Optional[bool]
     allowReserved: Optional[bool]
@@ -204,7 +205,6 @@ class RequestBody(BaseModel):
     content: Dict[str, MediaType]
     required: Optional[bool]
 
-CallBackType = Dict[str, Dict[str, Dict]]
 
 class Operation(BaseModel):
     operationId: Optional[str]
@@ -227,8 +227,8 @@ class Operation(BaseModel):
 
 
 class Path(BaseModel):
-    #summary: Optional[str]
-    #description: Optional[str]
+    # summary: Optional[str]
+    # description: Optional[str]
     get: Optional[Operation]
     put: Optional[Operation]
     post: Optional[Operation]
@@ -237,8 +237,8 @@ class Path(BaseModel):
     head: Optional[Operation]
     patch: Optional[Operation]
     trace: Optional[Operation]
-    #servers: Optional[List[Server]]
-    #parameters: Optional[List[Union[Parameter, Reference]]]
+    # servers: Optional[List[Server]]
+    # parameters: Optional[List[Union[Parameter, Reference]]]
 
 
 class OpenAPISchemaV3(BaseModel):
@@ -247,33 +247,10 @@ class OpenAPISchemaV3(BaseModel):
     info: Optional[Info]
     servers: Optional[List[Server]]
     components: Optional[dict]
-    security: Optional[List[Dict[str, List]]] # TODO: Figure out how to validate: The name used for each property MUST correspond to a security scheme declared in the Security Schemes under the Components Object.
+    security: Optional[List[Dict[str, List]]]
     externalDocs: Optional[ExternalDocs]
-
-    #     @staticmethod
-    #     def schema_extra(schema: Dict[str, Any], model: Type['OpenAPISchemaV3']) -> None:
-    #         fields = set(model.fields.keys())
-    #         for field in fields.union(set(kwargs)) - fields:
-    #
-    # def __init__(self, **kwargs):
-    #     # Allow any undefined kwargs to be inserted into the model
-    #     super().__init__(**kwargs)
-    #     fields = set(self.fields.keys())
-    #     # Fields that aren't in model
-    #     for field in fields.union(set(kwargs)) - fields:
-    #         print("Setting ", field)
-    #         object.__setattr__(self, field, kwargs[field])
-
-    # def to_file(self, path):
-    #     with open(path, 'w') as f:
-    #         json.dump(self.json(), f)
-
-#class OASPaths(BaseModel)
 
 
 class SaveDBResult(BaseModel):
     id: str
     object: OpenAPISchemaV3
-    #
-    # class Config:
-    #     fields = {'object_': 'object'}

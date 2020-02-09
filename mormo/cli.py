@@ -1,15 +1,9 @@
 #!/usr/bin/env python3
-from collections import defaultdict
-import os
 import click
 import json
-import tempfile
-import yaml
 
 from mormo.convert import OpenAPIToPostman
-from mormo.schema.postman_collection_v2 import Script, Variable
-from mormo.schema import TestData, OpenAPISchemaToPostmanRequest
-from mormo.util import run_newman, uuidgen
+from mormo.util import run_newman
 
 
 @click.group()
@@ -19,7 +13,7 @@ def cli():
 
 
 def generate_schema(infile, outfile, test_file, **kwargs):
-    oas = OpenAPIToPostman(OpenAPISchemaToPostmanRequest(path=infile, test_data_file=test_file, **kwargs))
+    oas = OpenAPIToPostman(path=infile, test_data_file=test_file, **kwargs)
     postman_collection = oas.to_postman_collection_v2()
     with open(outfile, 'w') as f:
         json.dump(postman_collection.dict(by_alias=True), f)
@@ -45,5 +39,5 @@ def run(in_file, test_file, out_file, test, host, verbose):
         run_newman(out_file, host=host, verbose=verbose)
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     cli()

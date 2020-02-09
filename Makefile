@@ -68,3 +68,7 @@ test_against_local_api: openapi_test_spec
 .PHONY: test_against_local_api_curl
 test_against_local_api_curl:
 	bash scripts/test_api.sh
+
+.PHONY: lint
+lint:
+	flake8 --ignore E731,W503 --exclude tests/

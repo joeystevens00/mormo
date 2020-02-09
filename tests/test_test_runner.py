@@ -1,8 +1,6 @@
-from hypothesis import given, assume
-from hypothesis.strategies import lists, permutations
+from hypothesis import given
 from hypothesis_jsonschema._from_schema import from_schema
 
-from mormo.convert import OpenAPIToPostman
 from mormo.schema import TestData, list_of_test_data_to_params, openapi_v3
 
 
@@ -23,7 +21,9 @@ def test_test_data_to_hash(data):
         test_data = []
         for k, v in d.items():
             for in_ in list(openapi_v3.ParameterIn):
-                test_data.append(TestData(route=route, in_=in_, key=k, value=v))
+                test_data.append(
+                    TestData(route=route, in_=in_, key=k, value=v)
+                )
         v = list_of_test_data_to_params(test_data).dict()
         for td in test_data:
             assert v[td.in_.value][td.key] == d[td.key]

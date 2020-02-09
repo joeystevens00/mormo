@@ -1,10 +1,7 @@
 from collections import ChainMap
 from typing import Any, Callable, Iterable, Union
-import os
-import uuid
 import json
 import importlib
-import logging
 import hashlib
 import random
 import secrets
@@ -27,6 +24,7 @@ HTTP_VERBS = [
     "patch",
     "trace",
 ]
+
 
 def strip_nulls(d: dict):
     nd = {}
@@ -66,7 +64,11 @@ def run_newman(collection_file, host=None, verbose=None, json=False):
     if json:
         json_outfile = tempfile.mktemp()
         cmdargs.extend(["--reporter-json-export", json_outfile])
-    e = subprocess.run(args=['newman', 'run', quote(collection_file), *cmdargs], stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    e = subprocess.run(
+        args=['newman', 'run', quote(collection_file), *cmdargs],
+        stderr=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+    )
     if json_outfile:
         json_content = load_file(json_outfile, content_type='json')
     print('STDOUT', e.stdout.decode('utf-8'))
@@ -82,7 +84,9 @@ def cls_from_str(name):
     # Import the module .
     components = name.split('.')
     mod = __import__(components[0])
-    module = importlib.import_module('.'.join(components[:len(components)-1]))
+    module = importlib.import_module(
+        '.'.join(components[:len(components) - 1]),
+    )
     a = module.__getattribute__(components[-1])
     print(a)
     return a
@@ -112,9 +116,13 @@ class DB:
         else:
             raise ValueError("Model or uid is required")
         self.model = model
-        self.cache_ttl = 60*60*24*7
-        self.klass = type(self.model).__module__ + '.' + type(self.model).__name__
-        self.json = json.dumps({ 'data': self.model.to_dict(), 'class': self.klass })
+        self.cache_ttl = 60 * 60 * 24 * 7
+        self.klass = type(self.model).__module__ + '.'\
+            + type(self.model).__name__
+        self.json = json.dumps({
+            'data': self.model.to_dict(),
+            'class': self.klass,
+        })
         self.r = r
 
     @classmethod
@@ -139,10 +147,10 @@ class DB:
 
 HTTP_REASON_CLASS = {
     1: "Informational - Request received, continuing process",
-    2: "Success - The action was successfully received, understood, and accepted",
-    3: "Redirection - Further action must be taken in order to complete the request",
+    2: "Success - The action was successfully received, understood, and accepted",  # noqa: E501
+    3: "Redirection - Further action must be taken in order to complete the request",  # noqa: E501
     4: "Client Error - The request contains bad syntax or cannot be fulfilled",
-    5: "Server Error - The server failed to fulfill an apparently valid request",
+    5: "Server Error - The server failed to fulfill an apparently valid request",  # noqa: E501
 }
 
 
@@ -169,7 +177,11 @@ HTTP_REASONS = {
 
 
 def get_http_reason(code):
-    if isinstance(code, str) and not code.isdigit() and code[0].isdigit() and len(code) == 3:
+    if (
+        isinstance(code, str)
+        and not code.isdigit() and code[0].isdigit()
+        and len(code) == 3
+    ):
         return HTTP_REASON_CLASS.get(int(code[0]))
     reason = HTTP_REASONS.get(int(code))
     if not reason:
@@ -182,8 +194,7 @@ def render_jinja2(template: str, **kwargs) -> str:
 
 
 def uuidgen(*_, **__):
-    #t = str(uuid.uuid1())
-    t = '-'.join([secrets.token_hex(i//2) for i in [8, 4, 4, 4, 12]])
+    t = '-'.join([secrets.token_hex(i // 2) for i in [8, 4, 4, 4, 12]])
     return t
 
 
@@ -195,9 +206,15 @@ def flatten_iterables_in_dict(d: dict, index=0, no_null=True, min_length=0):
     nd = {}
     for k, v in d.copy().items():
         if isinstance(v, dict):
-            nd[k] = flatten_iterables_in_dict(v, index=index, no_null=no_null, min_length=min_length)
+            nd[k] = flatten_iterables_in_dict(
+                v, index=index, no_null=no_null,
+                min_length=min_length,
+            )
         elif isinstance(v, Iterable):
-            if (no_null and v[index] is None) or (isinstance(v[index], str) and len(v[index]) <= min_length):
+            if (
+                (no_null and v[index] is None)
+                or (isinstance(v[index], str) and len(v[index]) <= min_length)
+            ):
                 for i in v:
                     if (not no_null or i is not None) and len(i) >= min_length:
                         nd[k] = i
