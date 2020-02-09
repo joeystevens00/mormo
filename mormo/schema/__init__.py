@@ -45,6 +45,7 @@ class NewmanResult(BaseModel):
     class Config:
         fields = {'json_': 'json'}
 
+
 class TestResult(BaseModel):
     result: NewmanResult
     code: int

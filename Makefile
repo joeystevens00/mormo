@@ -18,7 +18,7 @@ clean:
 
 .PHONY: test-nobuild
 test-nobuild:
-	poetry run pytest -s
+	poetry run pytest -sq
 
 .PHONY: test
 test: default test-nobuild
@@ -47,6 +47,11 @@ docker_api_image: requirements.txt
 .PHONY: docker_api
 docker_api: docker_api_image
 	docker-compose up -d
+
+.PHONY: docker
+docker: requirements.txt
+	docker build -t mormo .
+	docker run --rm -it mormo bash
 
 .PHONY: api
 api:
