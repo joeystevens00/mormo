@@ -1,0 +1,14 @@
+version: '2'
+
+services:
+  redis:
+    image: redis
+  app:
+    depends_on:
+      - redis
+    image: mormo:api
+    restart: always
+    ports:
+      - 8001:8001
+    environment:
+      - REDIS_HOST=redis

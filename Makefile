@@ -33,6 +33,23 @@ build: bumpversion default test
 .PHONY: build-notest
 build-notest: bumpversion default
 
+.PHONY: requirements.txt
+requirements.txt:
+	poetry export -f requirements.txt > requirements.txt
+
+.PHONY: docker_test
+docker_test: requirements.txt
+	docker build --build-arg target=test -t mormo:test .
+	docker run --rm mormo:test
+
+.PHONY: docker_api_image
+docker_api_image: requirements.txt
+	docker build --build-arg target=api -t mormo:api .
+
+.PHONY: docker_api
+docker_api: docker_api_image
+	docker-compose up -d
+
 .PHONY: api
 api:
 	poetry run uvicorn --port 8001 mormo.api:app
