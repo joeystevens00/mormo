@@ -4,7 +4,7 @@ services:
   - docker
 
 before_install:
-  - docker build -t mormo .
+  - docker build --build-arg target=test -t mormo .
 
 script:
-  - docker run mormo bash -c "pip install pytest && pytest"
+  - docker run --rm mormo pytest

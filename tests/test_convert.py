@@ -48,7 +48,7 @@ def test_to_postman_collection_v2(mormo):
                 param_in_global_vars = param.name in global_vars
                 param_in_request_vars = False
                 request_vars = None
-                for collection_item in postman_collection.item[0].item:
+                for collection_item in postman_collection.item:
                     if parse_url('/'.join(collection_item.request.url.path)) != parse_url(path):
                         continue
                     request_vars = [v.key for v in collection_item.request.url.variable]

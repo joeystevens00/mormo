@@ -38,7 +38,7 @@ requirements.txt:
 .PHONY: docker_test
 docker_test: requirements.txt
 	docker build --build-arg target=test -t mormo:test .
-	docker run --rm mormo:test
+	docker run --rm mormo:test pytest
 
 .PHONY: docker_api_image
 docker_api_image: requirements.txt
@@ -63,7 +63,7 @@ api:
 
 .PHONY: test_against_local_api
 test_against_local_api: openapi_test_spec
-	poetry run python3 cli.py run -i tests/data/openapi/json/openapi.json -o o.json --host http://localhost:8001 --test -t data.yaml --verbose
+	poetry run mormo run -i tests/data/openapi/json/openapi.json -o o.json --host http://localhost:8001 --test -t data.yaml --verbose
 
 .PHONY: test_against_local_api_curl
 test_against_local_api_curl:

@@ -72,3 +72,5 @@ def redis_handle():
 # /run/test/from_schema?host=
 logger = logging.Logger(__name__)
 logging.basicConfig(level='DEBUG')
+
+from . import cli

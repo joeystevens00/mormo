@@ -14,7 +14,7 @@ class Url(BaseModel):
     variable: list
 
 
-class ResponseOriginalRequest(BaseModel):
+class OriginalRequest(BaseModel):
     method: str
     url: Url
     body: dict
@@ -35,7 +35,7 @@ class Parameter(BaseModel):
 class Response(BaseModel):
     id: str
     name: str
-    originalRequest: ResponseOriginalRequest
+    originalRequest: OriginalRequest
     status: str
     code: str
     header: Sequence[Header]
@@ -58,7 +58,7 @@ class RequestBody(BaseModel):
     diabled: Optional[bool] = False
 
 
-class CollectionItemRequest(BaseModel):
+class Request(BaseModel):
     name: str
     description: dict
     method: str
@@ -93,18 +93,18 @@ class Event(BaseModel):
     script: Script
 
 
-class CollectionItem(BaseModel):
+class Item(BaseModel):
     id: str
     name: str
-    request: CollectionItemRequest
+    request: Request
     response: Sequence[Response]
     event: List[Event]
 
 
-class Collection(BaseModel):
+class Folder(BaseModel):
     id: str
     name: str
-    item: Union[Sequence[CollectionItem], CollectionItem]
+    item: Union[Sequence[Item], Item]
     event: list
 
 
@@ -114,7 +114,7 @@ class Variable(BaseModel):
     value: Optional[str]
 
 
-class InfoDescription(BaseModel):
+class Description(BaseModel):
     content: str
     type: str
 
@@ -123,13 +123,13 @@ class Info(BaseModel):
     name: str
     postman_id: str
     schema_: str
-    description: InfoDescription
+    description: Description
     class Config:
         fields = {'postman_id': '_postman_id', 'schema_': 'schema'}
 
 
-class PostmanCollectionV2Schema(BaseModel):
-    item: Sequence[Collection]
+class Collection(BaseModel):
+    item: Sequence[Union[Item, Folder]]
     event: Optional[list]
     variable: Optional[Sequence[Variable]]
     info: Info
@@ -137,4 +137,4 @@ class PostmanCollectionV2Schema(BaseModel):
 
 class SaveDBResult(BaseModel):
     id: str
-    object: PostmanCollectionV2Schema
+    object: Collection

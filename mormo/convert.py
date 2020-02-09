@@ -18,9 +18,9 @@ from .schema.openapi_v3 import (
     Operation, OpenAPISchemaV3, Parameter as OpenAPIParameter, ParameterIn, ParameterRequestData, Reference, Response as OpenAPIResponse, RequestBody as OpenAPIRequestBody,
 )
 from .schema.postman_collection_v2 import (
-    Auth, Event, PostmanCollectionV2Schema, Collection, CollectionItem,
-    CollectionItemRequest, RequestBody, Response, ResponseOriginalRequest, Header,
-    Info, InfoDescription, Parameter, Script, Url, Variable,
+    Auth, Event, Collection, Item,
+    Request, RequestBody, Response, OriginalRequest, Header,
+    Info, Description, Parameter, Script, Url, Variable,
 )
 from .util import fingerprint, flatten_iterables_in_dict, get_http_reason, load_file, uuidgen, TemplateMap, trim, HTTP_VERBS
 from . import logger, Settings
@@ -299,7 +299,6 @@ class OpenAPIToPostman:
             raise ValueError("Could not load schema")
         if request.resolve_references:
             self.schema = resolve_refs(self.schema)
-        #print(self.schema)
         # Validate schema
         self.schema = OpenAPISchemaV3(**self.schema)
 
@@ -342,11 +341,12 @@ class OpenAPIToPostman:
                         name=f'Set response of {route}: JSON_RESPONSE{response_path} to {variable}',
                         #exec=f'pm.environment.set("{variable}", pm.response.json(){response_path});',
                         exec="""
-                            pm.globals.set("{variable}", pm.response.json(){response_path});
+                            pm.test('set {variable}', function() {{
+                                pm.globals.set("{variable}", pm.response.json(){response_path});
+                            }});
                         """.format(variable=variable, response_path=response_path),
                     ))
-
-                #self.postman_global_variables.append(Variable(id=variable, type='string'))
+                #self.postman_global_variables.append(Variable(id=variable, type='string', value='default'))
                 for k, v in (variables or {}).items():
                     test_data.extend([
                         TestData(route=route, in_=in_,key=k, value=v)
@@ -429,13 +429,11 @@ class OpenAPIToPostman:
         request_body = self.resolve_object(operation.requestBody, new_cls=OpenAPIRequestBody)
         if request_body:
             for mimetype, media_type in request_body.content.items():
-                # print(media_type.schema_.allOf)
                 # def parse_all_of(all_of):
                 #     all_of_props = {}
                 #     if all_of:
                 #         for o in all_of:
                 #             if o.get('allOf'):
-                #                 print('o is set to allOf', o)
                 #                 return parse_all_of(o['allOf'])
                 #             if o.get('properties'):
                 #                 all_of_props[o['title']] = o['properties']
@@ -531,9 +529,6 @@ class OpenAPIToPostman:
                 if param_in != 'body':
                     test_data = Parameter(key=param.name, value=mapped_value[param.name])
                 if param_in == 'path':
-                    # print('segment_vars', segment_vars)
-                    # print('path_vars', path_vars)
-                    # print('mapped_value', mapped_value)
                     # If path param not defined in path
                     found_var_location = False
                     for v in segment_vars:
@@ -628,7 +623,7 @@ class OpenAPIToPostman:
             query=[],
             variable=vars or [],
         )
-        collection_items = []
+        items = []
         global_variables = self.postman_global_variables or []
 
         for verb, path, operation in self.order_routes_by_resource(self.routes):
@@ -646,7 +641,6 @@ class OpenAPIToPostman:
                     # Need to provide a way to override
                     if not appended_test_scripts:
                         expect = self.expect.get(route_str)
-                        print(route_str, expect)
                         candidate_route = (expect and expect.code == code and expect.enabled) or (not expect and str(code).startswith('2'))
                         if candidate_route:
                             self.test_scripts[route_str].append(
@@ -671,7 +665,7 @@ class OpenAPIToPostman:
                     responses.append(Response(
                         id=uuidgen(),
                         name=response.description,
-                        originalRequest=ResponseOriginalRequest(
+                        originalRequest=OriginalRequest(
                             url=build_url(path),
                             method=verb.upper(),
                             body={},
@@ -688,56 +682,52 @@ class OpenAPIToPostman:
             global_variables.extend(new_globals)
             logger.debug('GLOBALS', new_globals)
             logger.debug('REQUEST', request_url_variables)
-            # print(self.test_scripts)
-            # print(route_str)
-            collection_items.append(CollectionItem(
-                id=uuidgen(),
-                name=operation.summary or route_str,
-                request=CollectionItemRequest(
-                    auth=Auth(type='noauth'),
-                    url=build_url(path, request_url_variables),
-                    method=verb.upper(),
+            items.append(
+                Item(
+                    id=uuidgen(),
                     name=operation.summary or route_str,
-                    description={},
-                    body=request_body,
-                    header=request_header,
-                ),
-                response=responses,
-                event=[
-                    e for e in [
-                        new_event('test', self.test_scripts.get(route_str, [])),
-                        new_event('prerequest', self.prerequest_scripts.get(route_str, [])),
-                    ] if e
-                ],
-            ))
-        return [
-            global_variables, Collection(
-                id=uuidgen(),
-                name=f'Test {self.title_version}',
-                event=[
-                    e for e in [
-                        new_event('test', self.collection_test_scripts or []),
-                        new_event('prerequest', self.collection_prerequest_scripts or []),
-                    ] if e
-                ],
-                item=collection_items,
+                    request=Request(
+                        auth=Auth(type='noauth'),
+                        url=build_url(path, request_url_variables),
+                        method=verb.upper(),
+                        name=operation.summary or route_str,
+                        description={},
+                        body=request_body,
+                        header=request_header,
+                    ),
+                    response=responses,
+                    event=[
+                        e for e in [
+                            new_event('test', self.test_scripts.get(route_str, [])),
+                            new_event('prerequest', self.prerequest_scripts.get(route_str, [])),
+                        ] if e
+                    ],
+                )
             )
+
+        return [
+            global_variables, items
         ]
 
     def to_postman_collection_v2(self):
-        global_variables, collection = self.generate_postman_collections()
-        return PostmanCollectionV2Schema(
-            event=[],
+        global_variables, items = self.generate_postman_collections()
+        return Collection(
+            event=[
+                e for e in [
+                    new_event('test', self.collection_test_scripts or []),
+                    new_event('prerequest', self.collection_prerequest_scripts or []),
+                ] if e
+            ],
             variable=[
                 Variable(id='baseUrl', type='string', value=self.host or '/'),
                 *global_variables,
             ],
-            item=[collection],
+            item=items,
             info=Info(
                 _postman_id=uuidgen(),
                 name=self.info.title,
                 schema='https://schema.getpostman.com/json/collection/v2.1.0/collection.json',
-                description=InfoDescription(
+                description=Description(
                     content=self.info.get_safe('description') or self.title_version,
                     type='text/plain',
                 ),
