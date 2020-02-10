@@ -6,7 +6,6 @@ from typing import Union
 
 from mormo.convert import OpenAPIToPostman as oapi2pm, parse_url, Route
 from mormo.schema.openapi_v3 import Operation, Reference, Parameter as OpenAPIParameter
-from mormo.util import gen_string, TemplateMap
 
 
 REF_OR_OPERATION = Union[dict, Operation, Reference]
@@ -68,52 +67,6 @@ def test_to_postman_collection_v2(mormo):
     assert col['info']['description']
     assert col['info']['description']['content']
     assert col['info']['description']['type']
-
-
-def test_template_map():
-    mapping = {
-        'var1': '{{ var1 }}',
-        'nest': {
-            'var1': '{{ var1 }}',
-            'var2': '{{ var2 }}',
-            'nest1': {
-                'var1': '{{ var1 }}',
-                'nest2': {
-                    'var2': '{{ var2 }}',
-                },
-                'var3': 'abc',
-            }
-        }
-    }
-    defaults = {
-        'nest': {
-            'var3': '{{ var3 }}',
-            'nest1': {
-                'var3': '{{ var3 }}'
-            }
-        }
-    }
-    template_args = {
-        'var1': gen_string(20),
-        'var2': gen_string(20),
-        'var3': gen_string(20),
-    }
-    tm = TemplateMap(mapping, defaults, template_args)
-
-    def validate_map(d: dict, path=None):
-        for k, v in d.items():
-            if isinstance(v, dict):
-                if path:
-                    path.append(k)
-                else:
-                    path = [k]
-                validate_map(v, path)
-            else:
-                if k == 'var3' and path and path == ['nest', 'nest1', 'nest2']:
-                    assert v == 'abc'
-                elif k in template_args:
-                    assert v == template_args[k]
-    validate_map(tm.res)
 
 
 def test_fake_data_route_schema(mormo):

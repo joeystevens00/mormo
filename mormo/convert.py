@@ -36,6 +36,15 @@ RE_PATH_VARIABLE_SEGMENT = re.compile('(\(\{(.*?)\}\))')  # noqa: W605
 
 Route = namedtuple('Route', ['verb', 'path', 'operation'])
 ReferenceSearch = namedtuple('ReferenceSearch', ['ref', 'schema'])
+PostmanConfig = namedtuple('PostmanConfig', [
+    'expect',
+    'test_data',
+    'test_scripts',
+    'prerequest_scripts',
+    'postman_global_variables',
+    'collection_test_scripts',
+    'collection_prerequest_scripts',
+])
 
 
 # TODO:
@@ -160,9 +169,9 @@ class OpenAPIToPostman:
         self.postman_global_variables = request.postman_global_variables or []
         self.expect = request.expect or defaultdict(lambda: Expect())
         self.test_data = self.load_test_data(
-            request.extra_test_data or [],
+            request.test_data or [],
             request.test_data_file,
-            request.test_data,
+            request.test_config,
         )
         path = request.path
         schema = request.schema_
@@ -189,34 +198,35 @@ class OpenAPIToPostman:
         # Validate schema
         self.schema = OpenAPISchemaV3(**self.schema)
 
-    def load_test_data(
-        self, test_data, test_data_file=None,
-        test_data_file_content=None,
-    ):
-        if not (test_data_file or test_data_file_content):
-            return test_data
-        if test_data_file:
-            test_data_file_content = load_file(test_data_file)
-        for route, td_item in test_data_file_content.items():
+    @classmethod
+    def test_config_to_postman_config(cls, test_config) -> PostmanConfig:
+        test_data = []
+        expect = defaultdict(lambda: [])
+        test_scripts = defaultdict(lambda: [])
+        prerequest_scripts = defaultdict(lambda: [])
+        postman_global_variables = []
+        collection_test_scripts = []
+        collection_prerequest_scripts = []
+        for route, td_item in test_config.items():
             i = TestDataFileItem(**td_item)
             if isinstance(i.variables, str):
                 variables = load_file(i.variables)
             else:
                 variables = i.variables
             if route.lower() == 'collection':
-                self.postman_global_variables.extend([
+                postman_global_variables.extend([
                     Variable(id=k, type='string', value=v)
                     for k, v in (variables or {}).items()
                 ])
                 if i.test:
-                    self.collection_test_scripts.extend([
+                    collection_test_scripts.extend([
                         javascript(
                             exec=t,
                             name=f"{route} cmd({fingerprint(t)})"
                         ) for t in i.test
                     ])
                 if i.prerequest:
-                    self.collection_prerequest_scripts.extend([
+                    collection_prerequest_scripts.extend([
                         javascript(
                             exec=t,
                             name=f"{route} cmd({fingerprint(t)})"
@@ -233,13 +243,13 @@ class OpenAPIToPostman:
                     name=f'[{x}] Debug {variable}',
                     exec=f'console.log("[{x}] GLOBAL({variable}):", pm.globals.get("{variable}"));',  # noqa: E501
                 )
-                self.collection_prerequest_scripts.append(
+                collection_prerequest_scripts.append(
                     debug_global('collection_prerequest'),
                 )
-                self.prerequest_scripts[route].append(
+                prerequest_scripts[route].append(
                     debug_global('prerequest'),
                 )
-                self.test_scripts[route].append(javascript(
+                test_scripts[route].append(javascript(
                     name=f'Set response of {route}: JSON_RESPONSE{response_path} to {variable}',  # noqa: E501
                     exec="""
                         pm.test('set {variable}', function() {{
@@ -255,21 +265,42 @@ class OpenAPIToPostman:
                     for in_ in list(ParameterIn)
                 ])
             if i.expect:
-                self.expect[route] = i.expect
+                expect[route] = i.expect
             if i.test:
-                self.test_scripts[route].extend([
+                test_scripts[route].extend([
                     javascript(
                         exec=t,
                         name=f"{route} cmd({fingerprint(t)})",
                     ) for t in i.test
                 ])
             if i.prerequest:
-                self.prerequest_scripts[route].extend([
+                prerequest_scripts[route].extend([
                     javascript(
                         exec=t,
                         name=f"{route} cmd({fingerprint(t)})",
                     ) for t in i.prerequest
                 ])
+        return PostmanConfig(
+            expect, test_data, test_scripts,
+            prerequest_scripts, postman_global_variables,
+            collection_test_scripts, collection_prerequest_scripts,
+        )
+
+    def load_test_data(
+        self, test_data, test_data_file=None,
+        test_config=None,
+    ):
+        if not (test_data_file or test_config):
+            return test_data
+        if test_data_file:
+            test_config = load_file(test_data_file)
+        postman_config = self.test_config_to_postman_config(test_config)
+        self.test_scripts.update(postman_config.test_scripts)
+        self.prerequest_scripts.update(postman_config.prerequest_scripts)
+        self.postman_global_variables.extend(postman_config.postman_global_variables)
+        self.collection_test_scripts.extend(postman_config.collection_test_scripts)
+        self.collection_prerequest_scripts.extend(postman_config.collection_prerequest_scripts)
+        test_data.extend(postman_config.test_data)
         return test_data
 
     @property

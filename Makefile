@@ -28,7 +28,7 @@ bumpversion:
 	poetry version patch
 
 .PHONY: build
-build: default requirements.txt test bumpversion
+build: default requirements.txt coverage bumpversion
 		git commit requirements.txt -m "Requirements $(poetry version)"
 
 .PHONY: requirements.txt

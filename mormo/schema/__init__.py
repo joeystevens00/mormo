@@ -80,9 +80,9 @@ class OpenAPISchemaToPostmanRequest(BaseModel):
     schema_: Optional[openapi_v3.OpenAPISchemaV3]
     path: Optional[str] = None
     host: Optional[str]
-    test_data: Optional[Dict[str, TestDataFileItem]] = None
+    test_config: Optional[Dict[str, TestDataFileItem]] = None
     test_data_file: Optional[str] = None
-    extra_test_data: Optional[List[TestData]] = None
+    test_data: Optional[List[TestData]] = None
     test_scripts: Optional[Dict[str, postman_collection_v2.Script]] = None
     prerequest_scripts: Optional[Dict[str, postman_collection_v2.Script]] = None  # noqa: E501
     collection_test_scripts: Optional[List[postman_collection_v2.Script]] = None  # noqa: E501

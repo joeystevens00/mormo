@@ -189,8 +189,8 @@ def uuidgen(*_, **__):
     return t
 
 
-def gen_string(length, charset=string.printable):
-    return ''.join([random.choice(charset) for i in range(0, length)])
+def gen_string(length, charset=string.printable, choice_f=random.choice):
+    return ''.join([choice_f(charset) for i in range(0, length)])
 
 
 def flatten_iterables_in_dict(d: dict, index=0, no_null=True, min_length=0):
