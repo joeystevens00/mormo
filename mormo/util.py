@@ -29,7 +29,7 @@ HTTP_VERBS = [
 def strip_nulls(d: dict):
     nd = {}
     for k, v in d.items():
-        if v:
+        if v is not None:
             if isinstance(v, dict):
                 nd[k] = strip_nulls(v)
             else:
@@ -38,7 +38,7 @@ def strip_nulls(d: dict):
 
 
 def load_file(f, content_type=None):
-    if f.endswith('.yaml') or content_type == 'yaml':
+    if f.endswith('.yaml') or f.endswith('.yml') or content_type == 'yaml':
         load_f = yaml.safe_load
     elif f.endswith('.json') or content_type == 'json':
         load_f = json.load
@@ -64,13 +64,15 @@ def run_newman(collection_file, host=None, verbose=None, json=False):
     if json:
         json_outfile = tempfile.mktemp()
         cmdargs.extend(["--reporter-json-export", json_outfile])
+    run_newman_args = ['newman', 'run', quote(collection_file), *cmdargs]
     e = subprocess.run(
-        args=['newman', 'run', quote(collection_file), *cmdargs],
+        args=run_newman_args,
         stderr=subprocess.PIPE,
         stdout=subprocess.PIPE,
     )
     if json_outfile:
         json_content = load_file(json_outfile, content_type='json')
+    print('EXEC', *run_newman_args)
     print('STDOUT', e.stdout.decode('utf-8'))
     print('STDERR', e.stderr.decode('utf-8'))
     return NewmanResult(

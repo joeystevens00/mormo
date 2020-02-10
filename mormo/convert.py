@@ -13,7 +13,7 @@ from hypothesis import given
 from hypothesis_jsonschema._from_schema import from_schema
 
 from .schema import (
-    OpenAPISchemaToPostmanRequest, TestData, TestDataFileItem,
+    Expect, OpenAPISchemaToPostmanRequest, TestData, TestDataFileItem,
     list_of_test_data_to_params,
 )
 from .schema import openapi_v3 as oapi
@@ -276,6 +276,17 @@ def js_test_content_type(route, mimetype):
     )
 
 
+def js_test_response_time(route, max_time_ms):
+    return javascript(
+        name=f"{route} responds in less than {max_time_ms}ms",
+        exec="""
+                pm.test("Response time is less than {max_time_ms}ms", function () {{
+                    pm.expect(pm.response.responseTime).to.be.below({max_time_ms});
+                }});
+            """.format(max_time_ms=max_time_ms),
+    )
+
+
 class OpenAPIToPostman:
     def __init__(
         self,
@@ -294,7 +305,7 @@ class OpenAPIToPostman:
         self.collection_test_scripts = request.collection_test_scripts or []
         self.collection_prerequest_scripts = request.collection_prerequest_scripts or []  # noqa: E501
         self.postman_global_variables = request.postman_global_variables or []
-        self.expect = request.expect or {}
+        self.expect = request.expect or defaultdict(lambda: Expect())
         self.test_data = self.load_test_data(
             request.extra_test_data or [],
             request.test_data_file,
@@ -359,10 +370,7 @@ class OpenAPIToPostman:
                         ) for t in i.prerequest
                     ])
                 continue
-            test_data.extend([
-                TestData(route=route, in_='requestBody', key=k, value=v)
-                for k, v in (variables or {}).items()
-            ])
+
             for variable, response_path in (i.make_global or {}).items():
                 response_path = ''.join([
                     '["' + trim(p) + '"]'
@@ -479,7 +487,7 @@ class OpenAPIToPostman:
                     if isinstance(properties, Reference):
                         properties = properties.resolve_ref(self.schema)
                     for param, param_schema in properties.items():
-                        d['body'][param] = pick_one(
+                        d[in_][param] = pick_one(
                             generate_from_schema(param_schema),
                         )
                 else:
@@ -656,7 +664,7 @@ class OpenAPIToPostman:
                     raise ValueError(f"unhandled param location: {param_in}")
                 elif param_in == 'body':
                     kwargs['mode'] = 'raw'
-                    kwargs['raw'] = json.dumps(mapped_value['body'])
+                    kwargs['raw'] = json.dumps(dict(mapped_value))
                     request_headers.append(
                         Parameter(
                             key='Content-Type',
@@ -733,10 +741,10 @@ class OpenAPIToPostman:
                     # Possible default: First 2XX code encountered
                     # Need to provide a way to override
                     if not appended_test_scripts:
-                        expect = self.expect.get(route_str)
+                        expect = self.expect[route_str]
                         candidate_route = (
-                            (expect and expect.code == code and expect.enabled)
-                            or (not expect and str(code).startswith('2'))
+                            (expect.code == code and expect.enabled)
+                            or str(code).startswith('2')
                         )
                         if candidate_route:
                             self.test_scripts[route_str].append(
@@ -744,6 +752,9 @@ class OpenAPIToPostman:
                             )
                             self.test_scripts[route_str].append(
                                 js_test_content_type(route_str, mimetype),
+                            )
+                            self.test_scripts[route_str].append(
+                                js_test_response_time(route_str, expect.response_time)
                             )
                             appended_test_scripts = True
                     responses.append(Response(

@@ -19,6 +19,8 @@ class TestData(BaseModel):
 class Expect(BaseModel):
     code: Optional[Union[int, str]]
     enabled: Optional[bool] = True
+    response_time: Optional[int] = 200
+    headers: Optional[Dict[str, str]]
 
 
 class TestDataFileItem(BaseModel):
@@ -27,6 +29,7 @@ class TestDataFileItem(BaseModel):
     make_global: Optional[Dict[str, str]]
     test: Optional[List[str]]
     prerequest: Optional[List[str]]
+    headers: Optional[Dict[str, str]]
 
 
 def list_of_test_data_to_params(
