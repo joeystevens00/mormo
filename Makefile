@@ -72,3 +72,7 @@ test_against_local_api_curl:
 .PHONY: lint
 lint:
 	flake8 --ignore E731,W503 --exclude tests/
+
+.PHONY: coverage
+coverage:
+	poetry run pytest --cov=mormo tests/

@@ -2,13 +2,15 @@ from typing import Optional
 import tempfile
 
 from fastapi import FastAPI
+
+from .postman_test import run_newman
 from .schema import OpenAPISchemaToPostmanRequest, TestResult
 from .schema.openapi_v3 import OpenAPISchemaV3, SaveDBResult
 from .schema.postman_collection_v2 import (
     Collection,
     SaveDBResult as PostmanSaveDBResult,
 )
-from .util import DB, run_newman
+from .util import DB
 from . import logger, redis_handle
 
 app = FastAPI()

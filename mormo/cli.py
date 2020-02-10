@@ -3,7 +3,7 @@ import click
 import json
 
 from mormo.convert import OpenAPIToPostman
-from mormo.util import run_newman
+from mormo.postman_test import run_newman
 
 
 @click.group()

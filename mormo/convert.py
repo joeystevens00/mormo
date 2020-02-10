@@ -4,14 +4,11 @@ from typing import Generator, Iterable, List, Optional
 import json
 import re
 import yaml
-from types import GeneratorType
-import random
-import functools
 
-import hypothesis
-from hypothesis import given
-from hypothesis_jsonschema._from_schema import from_schema
-
+from .postman_test import (
+    new_event, javascript, js_test_code,
+    js_test_content_type, js_test_response_time,
+)
 from .schema import (
     Expect, OpenAPISchemaToPostmanRequest, TestData, TestDataFileItem,
     list_of_test_data_to_params,
@@ -22,96 +19,31 @@ from .schema.openapi_v3 import (
     ParameterRequestData, Reference,
 )
 from .schema.postman_collection_v2 import (
-    Auth, Event, Collection, Item,
+    Auth, Collection, Item,
     Request, RequestBody, Response, OriginalRequest, Header,
-    Info, Description, Parameter, Script, Url, Variable,
+    Info, Description, Parameter, Url, Variable,
 )
 from .util import (
-    fingerprint, flatten_iterables_in_dict, get_http_reason,
-    load_file, uuidgen, trim, HTTP_VERBS
+    fingerprint, flatten_iterables_in_dict, generate_from_schema,
+    get_http_reason, hashable_lru, load_file, pick_one,
+    uuidgen, trim, HTTP_VERBS,
 )
-from . import logger, Settings
+from . import logger
 
 RE_PATH_VARIABLE = re.compile('\{(.*?)\}')  # noqa: W605
 RE_PATH_GLOBAL_VARIABLE = re.compile('\{\{(.*?)\}\}')  # noqa: W605
 RE_PATH_VARIABLE_SEGMENT = re.compile('(\(\{(.*?)\}\))')  # noqa: W605
-RE_WORDCHARS = re.compile('^\w+$')  # noqa: W605
 
 Route = namedtuple('Route', ['verb', 'path', 'operation'])
 ReferenceSearch = namedtuple('ReferenceSearch', ['ref', 'schema'])
 
 
-FILTERS = {
-    str: lambda x: len(x) >= Settings().test_data_str_min_length,
-    int: lambda x: x >= Settings().test_data_int_min,
-    'words': lambda x: RE_WORDCHARS.match(x),
-}
-
 # TODO:
 # Generate Postman tests for HTTP status, mimetype, and schema checking
-
-# def filter_min_length(x):
-#     min_len = Settings().test_data_str_min_length
-#     if isinstance(x, str):
-#         logger.warning(f"STR {len(x)}")
-#         return len(x) >= min_len
-#     elif isinstance(x, int):
-#         logger.warning(f"INT {x}")
-#         return x >= min_len
-#     else:
-#         logger.warning(f"Don't know how to check length of type({type(x)})")
-#         return True
 
 
 def get_path_variable_segments(path: str) -> dict:
     return {m[1]: m[0] for m in RE_PATH_VARIABLE_SEGMENT.findall(path)}
-
-
-def generate_from_schema(schema, no_empty=True, retry=5):
-    test_data = []
-    settings = Settings()
-    if (
-        schema.get('type') == 'string'
-        and not schema.get('minLength')
-        and not schema.get('format')
-    ):
-        schema['minLength'] = settings.test_data_str_min_length
-        # schema['pattern'] = '^\w+$'
-        generate_func = from_schema(schema)
-        generate_func = generate_func.filter(FILTERS[str])
-    elif schema.get('type') == 'integer' and not schema.get('minimum'):
-        schema['minimum'] = settings.test_data_int_min
-        generate_func = from_schema(schema)
-        generate_func = generate_func.filter(FILTERS[int])
-    else:
-        generate_func = from_schema(schema)
-
-    @given(generate_func)
-    def f(x):
-        if x or not no_empty:
-            test_data.append(x)
-    passed = False
-    while retry > 0 or not passed:
-        try:
-            f()
-            passed = True
-            retry = 0
-        except hypothesis.errors.Unsatisfiable:
-            retry -= 1
-    if not passed:
-        raise hypothesis.errors.Unsatisfiable("Max retries hit")
-    yield test_data
-
-
-def pick_one(gen: GeneratorType, strategy="random"):
-    """Given a generator which yields an iterable, get an element."""
-    # it seems that the data from generate_from_schema
-    # is better if you pick randomly
-    # often enough the first element is rather boring like 0 or '0'
-    if "rand" in strategy.lower():
-        return random.choice(next(gen))
-    else:
-        return next(gen)[0]
 
 
 def parse_url(urlstr: str) -> list:
@@ -149,32 +81,6 @@ def load_local_refs(schema_path):
     if isinstance(schema_path, str) and os.path.exists(schema_path):
         schema_path = load_file(schema_path)
     return schema_path
-
-
-def hashable_lru(func):
-    cache = functools.lru_cache(maxsize=1024)
-
-    def deserialise(value):
-        try:
-            return json.loads(value)
-        except Exception:
-            return value
-
-    def func_with_serialized_params(*args, **kwargs):
-        _args = tuple([deserialise(arg) for arg in args])
-        _kwargs = {k: deserialise(v) for k, v in kwargs.items()}
-        return func(*_args, **_kwargs)
-
-    cached_function = cache(func_with_serialized_params)
-
-    @functools.wraps(func)
-    def lru_decorator(*args, **kwargs):
-        _args = tuple([json.dumps(arg, sort_keys=True) if type(arg) in (list, dict) else arg for arg in args])  # noqa: E501
-        _kwargs = {k: json.dumps(v, sort_keys=True) if type(v) in (list, dict) else v for k, v in kwargs.items()}  # noqa: E501
-        return cached_function(*_args, **_kwargs)
-    lru_decorator.cache_info = cached_function.cache_info
-    lru_decorator.cache_clear = cached_function.cache_clear
-    return lru_decorator
 
 
 @hashable_lru
@@ -232,59 +138,6 @@ def resolve_refs(schema: dict):
                 traverse(v)
         return d
     return traverse(schema)
-
-
-def new_event(listen, script):
-    if isinstance(script, list):
-        if not len(script):
-            return
-        _script = script[0]
-        for i in script[1:]:
-            _script += i
-        script = _script
-    return Event(id=uuidgen(), listen=listen, script=script, disabled=False)
-
-
-def javascript(name, exec):
-    return Script(
-        id=uuidgen(),
-        name=name,
-        exec=exec,
-        type='text/javascript',
-    )
-
-
-def js_test_code(route, code):
-    return javascript(
-        name=f"{route} Test Code is {code}",
-        exec="""
-                pm.test("Status code is {code}", function () {{
-                    pm.expect(pm.response).to.have.status({code});
-                }});
-            """.format(code=code),
-    )
-
-
-def js_test_content_type(route, mimetype):
-    return javascript(
-        name=f"{route} Mimetype is {mimetype}",
-        exec="""
-                pm.test("Content-Type Header is {mimetype}", function () {{
-                    pm.expect(postman.getResponseHeader("Content-type")).to.be.eql("{mimetype}");
-                }});
-            """.format(mimetype=mimetype),
-    )
-
-
-def js_test_response_time(route, max_time_ms):
-    return javascript(
-        name=f"{route} responds in less than {max_time_ms}ms",
-        exec="""
-                pm.test("Response time is less than {max_time_ms}ms", function () {{
-                    pm.expect(pm.response.responseTime).to.be.below({max_time_ms});
-                }});
-            """.format(max_time_ms=max_time_ms),
-    )
 
 
 class OpenAPIToPostman:
@@ -754,7 +607,10 @@ class OpenAPIToPostman:
                                 js_test_content_type(route_str, mimetype),
                             )
                             self.test_scripts[route_str].append(
-                                js_test_response_time(route_str, expect.response_time)
+                                js_test_response_time(
+                                    route_str,
+                                    expect.response_time,
+                                )
                             )
                             appended_test_scripts = True
                     responses.append(Response(
