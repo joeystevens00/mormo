@@ -168,11 +168,6 @@ class OpenAPIToPostman:
         self.collection_prerequest_scripts = request.collection_prerequest_scripts or []  # noqa: E501
         self.postman_global_variables = request.postman_global_variables or []
         self.expect = request.expect or defaultdict(lambda: Expect())
-        self.test_data = self.load_test_data(
-            request.test_data or [],
-            request.test_data_file,
-            request.test_config,
-        )
         path = request.path
         schema = request.schema_
         if path:
@@ -197,11 +192,15 @@ class OpenAPIToPostman:
             self.schema = resolve_refs(self.schema)
         # Validate schema
         self.schema = OpenAPISchemaV3(**self.schema)
+        self.test_data = self.load_test_data(
+            request.test_data or [],
+            request.test_data_file,
+            request.test_config,
+        )
 
-    @classmethod
-    def test_config_to_postman_config(cls, test_config) -> PostmanConfig:
+    def test_config_to_postman_config(self, test_config) -> PostmanConfig:
         test_data = []
-        expect = defaultdict(lambda: [])
+        expect = defaultdict(lambda: Expect())
         test_scripts = defaultdict(lambda: [])
         prerequest_scripts = defaultdict(lambda: [])
         postman_global_variables = []
@@ -266,6 +265,7 @@ class OpenAPIToPostman:
                 ])
             if i.expect:
                 expect[route] = i.expect
+
             if i.test:
                 test_scripts[route].extend([
                     javascript(
@@ -280,6 +280,33 @@ class OpenAPIToPostman:
                         name=f"{route} cmd({fingerprint(t)})",
                     ) for t in i.prerequest
                 ])
+        for verb, path, operation in self.routes:
+            route_str = f"{verb.upper()} {path}"
+            for code, response in operation.responses.items():
+                if code == 'default':
+                    code = 500
+                appended_test_scripts = False
+                for mimetype, route_definition in (response.content or {}).items():
+                    if appended_test_scripts:
+                        continue
+                    candidate_route = (
+                        (expect[route_str].code == code and expect[route_str].enabled)
+                        or str(code).startswith('2')
+                    )
+                    if candidate_route:
+                        test_scripts[route_str].append(
+                            js_test_code(route_str, code),
+                        )
+                        test_scripts[route_str].append(
+                            js_test_content_type(route_str, mimetype),
+                        )
+                        test_scripts[route_str].append(
+                            js_test_response_time(
+                                route_str,
+                                expect[route_str].response_time,
+                            )
+                        )
+                        appended_test_scripts = True
         return PostmanConfig(
             expect, test_data, test_scripts,
             prerequest_scripts, postman_global_variables,
@@ -617,33 +644,9 @@ class OpenAPIToPostman:
                 response = self.resolve_object(
                     response, new_cls=oapi.Response,
                 )
-                appended_test_scripts = False
                 for mimetype, route_definition in (
                     response.content or {'text/html': {}}
                 ).items():
-                    # Need to pick a response to EXPECT
-                    # Possible default: First 2XX code encountered
-                    # Need to provide a way to override
-                    if not appended_test_scripts:
-                        expect = self.expect[route_str]
-                        candidate_route = (
-                            (expect.code == code and expect.enabled)
-                            or str(code).startswith('2')
-                        )
-                        if candidate_route:
-                            self.test_scripts[route_str].append(
-                                js_test_code(route_str, code),
-                            )
-                            self.test_scripts[route_str].append(
-                                js_test_content_type(route_str, mimetype),
-                            )
-                            self.test_scripts[route_str].append(
-                                js_test_response_time(
-                                    route_str,
-                                    expect.response_time,
-                                )
-                            )
-                            appended_test_scripts = True
                     responses.append(Response(
                         id=uuidgen(),
                         name=response.description,
