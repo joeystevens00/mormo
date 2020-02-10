@@ -4,6 +4,8 @@ import uuid
 import yaml
 
 from mormo.util import (
+    cls_from_str,
+    fingerprint,
     flatten_iterables_in_dict,
     get_http_reason,
     load_file,
@@ -78,3 +80,16 @@ def test_strip_nulls():
             }
         }
     }
+
+
+def test_cls_from_str():
+    assert cls_from_str('mormo.model.BaseModel').__name__ == "BaseModel"
+    assert cls_from_str('mormo.schema.openapi_v3.SaveDBResult').__name__ == "SaveDBResult"
+
+
+def test_fingerprint():
+    d = [fingerprint("abc"), fingerprint(["abc"]), fingerprint({"a": "bc"})]
+    assert d[0] != d[1] != d[2]
+    for i in d:
+        assert isinstance(i, str)
+        assert len(i) == 128
