@@ -6,6 +6,8 @@
   - node_modules
   - mormo.egg-info
   - mormo/schema/__pycache__
+  - __pycache__
+  - scripts/__pycache__
   - mormo/__pycache__
   - tests/__pycache__
   - tests/data/openapi
@@ -16,6 +18,8 @@
   - log
   - log/test_results
 :files:
+  - .gitignore
+  - requirements.txt
   - schema.json
   - test_postman.json
   - data.yaml
@@ -29,3 +33,4 @@
   - ably_io.json
   - a.json
   - .coverage
+  - o.json

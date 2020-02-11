@@ -167,7 +167,8 @@ class OpenAPIToPostman:
         self.collection_test_scripts = request.collection_test_scripts or []
         self.collection_prerequest_scripts = request.collection_prerequest_scripts or []  # noqa: E501
         self.postman_global_variables = request.postman_global_variables or []
-        self.expect = request.expect or defaultdict(lambda: Expect())
+        self.default_expect = Expect()
+        self.expect = request.expect or defaultdict(self.get_default_expect)
         path = request.path
         schema = request.schema_
         if path:
@@ -198,9 +199,12 @@ class OpenAPIToPostman:
             request.test_config,
         )
 
+    def get_default_expect(self):
+        return self.default_expect
+
     def test_config_to_postman_config(self, test_config) -> PostmanConfig:
         test_data = []
-        expect = defaultdict(lambda: Expect())
+        expect = defaultdict(lambda: self.default_expect)
         test_scripts = defaultdict(lambda: [])
         prerequest_scripts = defaultdict(lambda: [])
         postman_global_variables = []
@@ -217,6 +221,8 @@ class OpenAPIToPostman:
                     Variable(id=k, type='string', value=v)
                     for k, v in (variables or {}).items()
                 ])
+                if i.expect:
+                    self.default_expect = i.expect
                 if i.test:
                     collection_test_scripts.extend([
                         javascript(
