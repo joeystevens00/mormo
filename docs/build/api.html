@@ -1,0 +1,163 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Mormo API &#8212; Mormo  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Mormo CLI" href="cli.html" />
+    <link rel="prev" title="Postman Collection V2 Schema" href="postman_collection.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-mormo.api">
+<span id="mormo-api"></span><h1>Mormo API<a class="headerlink" href="#module-mormo.api" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="mormo.api.get_postman">
+<code class="sig-prename descclassname">mormo.api.</code><code class="sig-name descname">get_postman</code><span class="sig-paren">(</span><em class="sig-param">id: str</em><span class="sig-paren">)</span> &#x2192; mormo.schema.postman_collection_v2.Collection<a class="headerlink" href="#mormo.api.get_postman" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get Postman Collection by ID.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mormo.api.get_schema">
+<code class="sig-prename descclassname">mormo.api.</code><code class="sig-name descname">get_schema</code><span class="sig-paren">(</span><em class="sig-param">id: str</em><span class="sig-paren">)</span> &#x2192; mormo.schema.openapi_v3.OpenAPISchemaV3<a class="headerlink" href="#mormo.api.get_schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mormo.api.load_db">
+<code class="sig-prename descclassname">mormo.api.</code><code class="sig-name descname">load_db</code><span class="sig-paren">(</span><em class="sig-param">id</em><span class="sig-paren">)</span><a class="headerlink" href="#mormo.api.load_db" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mormo.api.new_schema">
+<code class="sig-prename descclassname">mormo.api.</code><code class="sig-name descname">new_schema</code><span class="sig-paren">(</span><em class="sig-param">o: mormo.schema.openapi_v3.OpenAPISchemaV3</em><span class="sig-paren">)</span> &#x2192; mormo.schema.openapi_v3.SaveDBResult<a class="headerlink" href="#mormo.api.new_schema" title="Permalink to this definition">¶</a></dt>
+<dd><p>New Schema.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mormo.api.run_postman_collection">
+<code class="sig-prename descclassname">mormo.api.</code><code class="sig-name descname">run_postman_collection</code><span class="sig-paren">(</span><em class="sig-param">collection</em>, <em class="sig-param">host: str</em>, <em class="sig-param">verbose: Optional[bool] = False</em><span class="sig-paren">)</span><a class="headerlink" href="#mormo.api.run_postman_collection" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mormo.api.run_postman_test">
+<code class="sig-prename descclassname">mormo.api.</code><code class="sig-name descname">run_postman_test</code><span class="sig-paren">(</span><em class="sig-param">id: str</em>, <em class="sig-param">host: str</em>, <em class="sig-param">verbose: Optional[bool] = False</em><span class="sig-paren">)</span> &#x2192; mormo.schema.TestResult<a class="headerlink" href="#mormo.api.run_postman_test" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new test run from a postman collection.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mormo.api.run_test_run_from_schema">
+<code class="sig-prename descclassname">mormo.api.</code><code class="sig-name descname">run_test_run_from_schema</code><span class="sig-paren">(</span><em class="sig-param">o: mormo.schema.OpenAPISchemaToPostmanRequest</em><span class="sig-paren">)</span> &#x2192; mormo.schema.TestResult<a class="headerlink" href="#mormo.api.run_test_run_from_schema" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new test run from OpenAPI Schema.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mormo.api.save_db">
+<code class="sig-prename descclassname">mormo.api.</code><code class="sig-name descname">save_db</code><span class="sig-paren">(</span><em class="sig-param">o</em>, <em class="sig-param">response_cls</em><span class="sig-paren">)</span><a class="headerlink" href="#mormo.api.save_db" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mormo.api.schema_to_postman">
+<code class="sig-prename descclassname">mormo.api.</code><code class="sig-name descname">schema_to_postman</code><span class="sig-paren">(</span><em class="sig-param">id: str</em>, <em class="sig-param">o: Optional[mormo.schema.OpenAPISchemaToPostmanRequest] = None</em><span class="sig-paren">)</span> &#x2192; mormo.schema.postman_collection_v2.SaveDBResult<a class="headerlink" href="#mormo.api.schema_to_postman" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert schema to Collection.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Mormo</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="schema.html">Schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="openapi.html">OpenAPI Schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="postman_collection.html">Postman Collection V2 Schema</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Mormo API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Mormo CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="convert.html">OpenAPI To Postman Conversion</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="postman_collection.html" title="previous chapter">Postman Collection V2 Schema</a></li>
+      <li>Next: <a href="cli.html" title="next chapter">Mormo CLI</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Joey Stevens.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/api.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

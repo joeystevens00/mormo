@@ -1,0 +1,555 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Postman Collection V2 Schema &#8212; Mormo  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="OpenAPI Schema" href="openapi.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-mormo.schema.postman_collection_v2">
+<span id="postman-collection-v2-schema"></span><h1>Postman Collection V2 Schema<a class="headerlink" href="#module-mormo.schema.postman_collection_v2" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="mormo.schema.postman_collection_v2.Auth">
+<em class="property">class </em><code class="sig-prename descclassname">mormo.schema.postman_collection_v2.</code><code class="sig-name descname">Auth</code><a class="headerlink" href="#mormo.schema.postman_collection_v2.Auth" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Auth.type">
+<code class="sig-name descname">type</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Auth.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mormo.schema.postman_collection_v2.Collection">
+<em class="property">class </em><code class="sig-prename descclassname">mormo.schema.postman_collection_v2.</code><code class="sig-name descname">Collection</code><a class="headerlink" href="#mormo.schema.postman_collection_v2.Collection" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Collection.event">
+<code class="sig-name descname">event</code><em class="property">: Optional[list]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Collection.event" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Collection.info">
+<code class="sig-name descname">info</code><em class="property">: Info</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Collection.info" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Collection.item">
+<code class="sig-name descname">item</code><em class="property">: Sequence[Union[Item, Folder]]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Collection.item" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Collection.variable">
+<code class="sig-name descname">variable</code><em class="property">: Optional[Sequence[Variable]]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Collection.variable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mormo.schema.postman_collection_v2.Description">
+<em class="property">class </em><code class="sig-prename descclassname">mormo.schema.postman_collection_v2.</code><code class="sig-name descname">Description</code><a class="headerlink" href="#mormo.schema.postman_collection_v2.Description" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Description.content">
+<code class="sig-name descname">content</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Description.content" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Description.type">
+<code class="sig-name descname">type</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Description.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mormo.schema.postman_collection_v2.Event">
+<em class="property">class </em><code class="sig-prename descclassname">mormo.schema.postman_collection_v2.</code><code class="sig-name descname">Event</code><a class="headerlink" href="#mormo.schema.postman_collection_v2.Event" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Event.disabled">
+<code class="sig-name descname">disabled</code><em class="property">: Optional[bool]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Event.disabled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Event.id">
+<code class="sig-name descname">id</code><em class="property">: Optional[str]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Event.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Event.listen">
+<code class="sig-name descname">listen</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Event.listen" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Event.script">
+<code class="sig-name descname">script</code><em class="property">: Script</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Event.script" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.EventListen">
+<code class="sig-prename descclassname">mormo.schema.postman_collection_v2.</code><code class="sig-name descname">EventListen</code><a class="headerlink" href="#mormo.schema.postman_collection_v2.EventListen" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">mormo.schema.postman_collection_v2.listen</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="mormo.schema.postman_collection_v2.Folder">
+<em class="property">class </em><code class="sig-prename descclassname">mormo.schema.postman_collection_v2.</code><code class="sig-name descname">Folder</code><a class="headerlink" href="#mormo.schema.postman_collection_v2.Folder" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Folder.event">
+<code class="sig-name descname">event</code><em class="property">: list</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Folder.event" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Folder.id">
+<code class="sig-name descname">id</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Folder.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Folder.item">
+<code class="sig-name descname">item</code><em class="property">: Union[Sequence[Item], Item]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Folder.item" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Folder.name">
+<code class="sig-name descname">name</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Folder.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mormo.schema.postman_collection_v2.Header">
+<em class="property">class </em><code class="sig-prename descclassname">mormo.schema.postman_collection_v2.</code><code class="sig-name descname">Header</code><a class="headerlink" href="#mormo.schema.postman_collection_v2.Header" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Header.key">
+<code class="sig-name descname">key</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Header.key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Header.value">
+<code class="sig-name descname">value</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Header.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mormo.schema.postman_collection_v2.Info">
+<em class="property">class </em><code class="sig-prename descclassname">mormo.schema.postman_collection_v2.</code><code class="sig-name descname">Info</code><a class="headerlink" href="#mormo.schema.postman_collection_v2.Info" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="class">
+<dt id="mormo.schema.postman_collection_v2.Info.Config">
+<em class="property">class </em><code class="sig-name descname">Config</code><a class="headerlink" href="#mormo.schema.postman_collection_v2.Info.Config" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Info.Config.fields">
+<code class="sig-name descname">fields</code><em class="property"> = {'postman_id': '_postman_id', 'schema_': 'schema'}</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Info.Config.fields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Info.description">
+<code class="sig-name descname">description</code><em class="property">: Description</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Info.description" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Info.name">
+<code class="sig-name descname">name</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Info.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Info.postman_id">
+<code class="sig-name descname">postman_id</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Info.postman_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Info.schema_">
+<code class="sig-name descname">schema_</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Info.schema_" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mormo.schema.postman_collection_v2.Item">
+<em class="property">class </em><code class="sig-prename descclassname">mormo.schema.postman_collection_v2.</code><code class="sig-name descname">Item</code><a class="headerlink" href="#mormo.schema.postman_collection_v2.Item" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Item.event">
+<code class="sig-name descname">event</code><em class="property">: List[Event]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Item.event" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Item.id">
+<code class="sig-name descname">id</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Item.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Item.name">
+<code class="sig-name descname">name</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Item.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Item.request">
+<code class="sig-name descname">request</code><em class="property">: Request</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Item.request" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Item.response">
+<code class="sig-name descname">response</code><em class="property">: Sequence[Response]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Item.response" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mormo.schema.postman_collection_v2.OriginalRequest">
+<em class="property">class </em><code class="sig-prename descclassname">mormo.schema.postman_collection_v2.</code><code class="sig-name descname">OriginalRequest</code><a class="headerlink" href="#mormo.schema.postman_collection_v2.OriginalRequest" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.OriginalRequest.body">
+<code class="sig-name descname">body</code><em class="property">: dict</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.OriginalRequest.body" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.OriginalRequest.method">
+<code class="sig-name descname">method</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.OriginalRequest.method" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.OriginalRequest.url">
+<code class="sig-name descname">url</code><em class="property">: Url</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.OriginalRequest.url" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mormo.schema.postman_collection_v2.Parameter">
+<em class="property">class </em><code class="sig-prename descclassname">mormo.schema.postman_collection_v2.</code><code class="sig-name descname">Parameter</code><a class="headerlink" href="#mormo.schema.postman_collection_v2.Parameter" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Parameter.description">
+<code class="sig-name descname">description</code><em class="property">: Optional[str]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Parameter.description" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Parameter.disabled">
+<code class="sig-name descname">disabled</code><em class="property">: bool</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Parameter.disabled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Parameter.key">
+<code class="sig-name descname">key</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Parameter.key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Parameter.value">
+<code class="sig-name descname">value</code><em class="property">: Any</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Parameter.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mormo.schema.postman_collection_v2.Request">
+<em class="property">class </em><code class="sig-prename descclassname">mormo.schema.postman_collection_v2.</code><code class="sig-name descname">Request</code><a class="headerlink" href="#mormo.schema.postman_collection_v2.Request" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Request.auth">
+<code class="sig-name descname">auth</code><em class="property">: Auth</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Request.auth" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Request.body">
+<code class="sig-name descname">body</code><em class="property">: Optional[RequestBody]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Request.body" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Request.description">
+<code class="sig-name descname">description</code><em class="property">: dict</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Request.description" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Request.header">
+<code class="sig-name descname">header</code><em class="property">: list</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Request.header" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Request.method">
+<code class="sig-name descname">method</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Request.method" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Request.name">
+<code class="sig-name descname">name</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Request.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Request.url">
+<code class="sig-name descname">url</code><em class="property">: Url</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Request.url" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mormo.schema.postman_collection_v2.RequestBody">
+<em class="property">class </em><code class="sig-prename descclassname">mormo.schema.postman_collection_v2.</code><code class="sig-name descname">RequestBody</code><a class="headerlink" href="#mormo.schema.postman_collection_v2.RequestBody" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.RequestBody.diabled">
+<code class="sig-name descname">diabled</code><em class="property">: Optional[bool]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.RequestBody.diabled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.RequestBody.file">
+<code class="sig-name descname">file</code><em class="property">: Optional[dict]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.RequestBody.file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.RequestBody.formdata">
+<code class="sig-name descname">formdata</code><em class="property">: Optional[list]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.RequestBody.formdata" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.RequestBody.graphql">
+<code class="sig-name descname">graphql</code><em class="property">: Optional[dict]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.RequestBody.graphql" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.RequestBody.mode">
+<code class="sig-name descname">mode</code><em class="property">: Optional[str]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.RequestBody.mode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.RequestBody.raw">
+<code class="sig-name descname">raw</code><em class="property">: Optional[str]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.RequestBody.raw" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.RequestBody.urlencoded">
+<code class="sig-name descname">urlencoded</code><em class="property">: Optional[list]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.RequestBody.urlencoded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mormo.schema.postman_collection_v2.Response">
+<em class="property">class </em><code class="sig-prename descclassname">mormo.schema.postman_collection_v2.</code><code class="sig-name descname">Response</code><a class="headerlink" href="#mormo.schema.postman_collection_v2.Response" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Response.body">
+<code class="sig-name descname">body</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Response.body" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Response.code">
+<code class="sig-name descname">code</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Response.code" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Response.cookie">
+<code class="sig-name descname">cookie</code><em class="property">: list</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Response.cookie" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Response.header">
+<code class="sig-name descname">header</code><em class="property">: Sequence[Header]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Response.header" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Response.id">
+<code class="sig-name descname">id</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Response.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Response.name">
+<code class="sig-name descname">name</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Response.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Response.originalRequest">
+<code class="sig-name descname">originalRequest</code><em class="property">: OriginalRequest</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Response.originalRequest" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Response.status">
+<code class="sig-name descname">status</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Response.status" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mormo.schema.postman_collection_v2.SaveDBResult">
+<em class="property">class </em><code class="sig-prename descclassname">mormo.schema.postman_collection_v2.</code><code class="sig-name descname">SaveDBResult</code><a class="headerlink" href="#mormo.schema.postman_collection_v2.SaveDBResult" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.SaveDBResult.id">
+<code class="sig-name descname">id</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.SaveDBResult.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.SaveDBResult.object">
+<code class="sig-name descname">object</code><em class="property">: Collection</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.SaveDBResult.object" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mormo.schema.postman_collection_v2.Script">
+<em class="property">class </em><code class="sig-prename descclassname">mormo.schema.postman_collection_v2.</code><code class="sig-name descname">Script</code><a class="headerlink" href="#mormo.schema.postman_collection_v2.Script" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Script.exec">
+<code class="sig-name descname">exec</code><em class="property">: Union[str, list]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Script.exec" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Script.id">
+<code class="sig-name descname">id</code><em class="property">: Optional[str]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Script.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Script.name">
+<code class="sig-name descname">name</code><em class="property">: Optional[str]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Script.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Script.src">
+<code class="sig-name descname">src</code><em class="property">: Optional[Union[str, Url]]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Script.src" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Script.type">
+<code class="sig-name descname">type</code><em class="property">: Optional[str]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Script.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mormo.schema.postman_collection_v2.Url">
+<em class="property">class </em><code class="sig-prename descclassname">mormo.schema.postman_collection_v2.</code><code class="sig-name descname">Url</code><a class="headerlink" href="#mormo.schema.postman_collection_v2.Url" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Url.host">
+<code class="sig-name descname">host</code><em class="property">: Sequence[str]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Url.host" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Url.path">
+<code class="sig-name descname">path</code><em class="property">: Sequence[str]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Url.path" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Url.query">
+<code class="sig-name descname">query</code><em class="property">: list</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Url.query" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Url.variable">
+<code class="sig-name descname">variable</code><em class="property">: list</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Url.variable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mormo.schema.postman_collection_v2.Variable">
+<em class="property">class </em><code class="sig-prename descclassname">mormo.schema.postman_collection_v2.</code><code class="sig-name descname">Variable</code><a class="headerlink" href="#mormo.schema.postman_collection_v2.Variable" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Variable.id">
+<code class="sig-name descname">id</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Variable.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Variable.type">
+<code class="sig-name descname">type</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Variable.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Variable.value">
+<code class="sig-name descname">value</code><em class="property">: Optional[str]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Variable.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Mormo</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="openapi.html">OpenAPI Schema</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Postman Collection V2 Schema</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="schema.html">&lt;no title&gt;</a><ul>
+      <li>Previous: <a href="openapi.html" title="previous chapter">OpenAPI Schema</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Joey Stevens.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/postman_collection.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

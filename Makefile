@@ -71,8 +71,16 @@ test_against_local_api_curl:
 
 .PHONY: lint
 lint:
-	flake8 --ignore E731,W503 --exclude tests/
+	poetry run flake8 --ignore E731,W503 --exclude tests/
 
 .PHONY: coverage
 coverage:
 	poetry run pytest --cov=mormo tests/
+
+.PHONY: docs
+docs:
+	poetry run sphinx-build -b html docs/src docs/build/
+
+.PHONY: view-docs
+view-docs:
+	xdg-open docs/build/index.html
