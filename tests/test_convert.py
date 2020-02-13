@@ -4,11 +4,16 @@ import pytest
 from types import GeneratorType
 from typing import Union
 
-from mormo.convert import load_remote_refs, OpenAPIToPostman as oapi2pm, parse_url, Route
+from mormo.convert import load_remote_refs, OpenAPIToPostman as oapi2pm, Route, url_parts
 from mormo.schema.openapi_v3 import Operation, OpenAPISchemaV3, Reference, Parameter as OpenAPIParameter
 
 
 REF_OR_OPERATION = Union[dict, Operation, Reference]
+
+
+def test_url_parts():
+    assert url_parts('/abc/{id}') == ['abc', ':id']
+    assert url_parts('/project({project_id})') == ['project{{project_id}}']
 
 
 @pytest.mark.parametrize("url", [
@@ -60,11 +65,11 @@ def test_to_postman_collection_v2(mormo):
                 param_in_request_vars = False
                 request_vars = None
                 for collection_item in postman_collection.item:
-                    if parse_url('/'.join(collection_item.request.url.path)) != parse_url(path):
+                    if url_parts('/'.join(collection_item.request.url.path)) != url_parts(path):
                         continue
                     request_vars = [v.key for v in collection_item.request.url.variable]
                     print(param.name, request_vars, global_vars, collection_item.request)
-                    #if collection_item.request.url.path == parse_url(path):
+                    #if collection_item.request.url.path == url_parts(path):
                     param_in_request_vars = param.name in request_vars
                     param_in_vars = param_in_global_vars or param_in_request_vars
                     assert param_in_vars, f"{param.name} in request_vars({request_vars}) or global_vars({global_vars}) for path({path})"

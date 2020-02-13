@@ -64,7 +64,7 @@ def strip_nulls(d: dict):
 def blind_load(content):
     load_map = {
         'json': json.loads,
-        'yaml': yaml.load,
+        'yaml': yaml.safe_load,
     }
     if content.lstrip().startswith('{'):
         content_type = "json"

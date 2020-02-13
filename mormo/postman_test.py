@@ -28,11 +28,12 @@ def run_newman(collection_file, host=None, verbose=None, json=False):
         stderr=subprocess.PIPE,
         stdout=subprocess.PIPE,
     )
-    if json_outfile:
-        json_content = load_file(json_outfile, content_type='json')
     print('EXEC', *run_newman_args)
     print('STDOUT', e.stdout.decode('utf-8'))
-    print('STDERR', e.stderr.decode('utf-8'))
+    print('STDERR', e.stderr.decode('utf-8'))    
+    if json_outfile:
+        json_content = load_file(json_outfile, content_type='json')
+
     return NewmanResult(
         stderr=e.stderr.decode('utf-8'),
         stdout=e.stdout.decode('utf-8'),

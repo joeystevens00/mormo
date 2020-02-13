@@ -34,6 +34,7 @@ from . import logger
 RE_PATH_VARIABLE = re.compile('\{(.*?)\}')  # noqa: W605
 RE_PATH_GLOBAL_VARIABLE = re.compile('\{\{(.*?)\}\}')  # noqa: W605
 RE_PATH_VARIABLE_SEGMENT = re.compile('(\(\{(.*?)\}\))')  # noqa: W605
+RE_PATH_CONVERTED_VARIABLE_SEGMENT = re.compile('(\{\{(.*?)\}\})')  # noqa: W605
 
 Route = namedtuple('Route', ['verb', 'path', 'operation'])
 ReferenceSearch = namedtuple('ReferenceSearch', ['ref', 'schema'])
@@ -56,16 +57,19 @@ def get_path_variable_segments(path: str) -> dict:
     return {m[1]: m[0] for m in RE_PATH_VARIABLE_SEGMENT.findall(path)}
 
 
-def parse_url(urlstr: str) -> list:
+def url_parts(urlstr: str) -> list:
     url = []
     for part in urlstr.split('/')[1:]:
         is_path_variable = re.match('^{(\w+)}$', part)  # noqa: W605
         is_path_segment = RE_PATH_VARIABLE.findall(part)
+        queries = RE_PATH_VARIABLE_SEGMENT.findall(part)
         if is_path_variable:
             part = f':{is_path_variable.group(1)}'
         elif is_path_segment:
             for group in is_path_segment:
                 part = part.replace(f"{{{group}}}", f"{{{{{group}}}}}")
+        if '(' in part and ')' in part:
+            part = part.replace('(', '').replace(')', '')
         url.append(part)
     return url
 
@@ -352,13 +356,13 @@ class OpenAPIToPostman:
 
     @classmethod
     def guess_resource(cls, path: str):
-        parts = parse_url(path)
+        parts = url_parts(path)
         last_part = None
         for i, part in enumerate(parts):
             is_variable = RE_PATH_GLOBAL_VARIABLE.match(part)\
                 or part.startswith(':')
-            segments = get_path_variable_segments(part)
-            for var, segment in segments.items():
+            segments = RE_PATH_CONVERTED_VARIABLE_SEGMENT.findall(part)
+            for segment, var in segments:
                 part = part.replace(segment, '')
             # If this segment is a variable, return the last one
             if is_variable and len(parts) - i == 1:
@@ -496,7 +500,7 @@ class OpenAPIToPostman:
         global_variables = []
         kwargs = {}
         params = self.resolve_object(operation.parameters or [])
-        path_vars = [p[1:] for p in parse_url(path) if p.startswith(':')]
+        path_vars = [p[1:] for p in url_parts(path) if p.startswith(':')]
         segment_vars = set(RE_PATH_VARIABLE.findall(path))\
             .difference(path_vars)
         for param in params:
@@ -634,7 +638,7 @@ class OpenAPIToPostman:
     def generate_postman_collections(self):
         build_url = lambda path, vars=None: Url(
             host=["{{baseUrl}}"],
-            path=parse_url(path),
+            path=url_parts(path),
             query=[],
             variable=vars or [],
         )
