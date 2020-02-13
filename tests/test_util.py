@@ -7,6 +7,7 @@ import yaml
 import pytest
 
 from mormo.util import (
+    blind_load,
     cls_from_str,
     fingerprint,
     flatten_iterables_in_dict,
@@ -19,7 +20,19 @@ from mormo.util import (
     TemplateMap,
     trim,
 )
+from .conftest import generate_dict_expected
 
+
+
+@pytest.mark.parametrize(
+    "content,expected",
+    [
+        *generate_dict_expected(5, json.dumps),
+        *generate_dict_expected(5, yaml.dump),
+    ]
+)
+def test_blind_load(content, expected):
+    assert blind_load(content) == expected
 
 
 def test_strip_nulls():

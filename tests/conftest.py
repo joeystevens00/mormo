@@ -55,6 +55,16 @@ def generate_dicts(num):
     ]
 
 
+def generate_dict_expected(num, f):
+    x = []
+    for _ in range(num):
+        d = {gen_string(2): gen_string(5), gen_string(2): gen_string(2)}
+        x.append(
+            (f(d), d)
+        )
+    return x
+
+
 @pytest.fixture
 def random_dict():
     for d in generate_dicts(1):

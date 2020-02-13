@@ -61,6 +61,23 @@ def strip_nulls(d: dict):
     return nd
 
 
+def blind_load(content):
+    load_map = {
+        'json': json.loads,
+        'yaml': yaml.load,
+    }
+    if content.lstrip().startswith('{'):
+        content_type = "json"
+    else:
+        content_type = "yaml"
+    try:
+        parsed_content = load_map[content_type](content)
+    except (yaml.scanner.ScannerError, json.decoder.JSONDecodeError) as e:
+        logger.warn(e)
+        parsed_content = load_map[("yaml" if content_type == "json" else "json")](content)
+    return parsed_content
+
+
 def load_file(f, content_type=None):
     if f.endswith('.yaml') or f.endswith('.yml') or content_type == 'yaml':
         load_f = yaml.safe_load

@@ -24,6 +24,7 @@ from .schema.postman_collection_v2 import (
     Info, Description, Parameter, Url, Variable,
 )
 from .util import (
+    blind_load,
     fingerprint, flatten_iterables_in_dict, generate_from_schema,
     get_http_reason, hashable_lru, load_file, pick_one,
     uuidgen, trim, HTTP_VERBS,
@@ -77,7 +78,7 @@ def load_remote_refs(schema_path):
             ref_path = schema_path.split('#')[-1]
         try:
             logger.debug(f"Fetching remote reference: {schema_path}")
-            schema_path = requests.get(schema_path).json()
+            schema_path = blind_load(requests.get(schema_path).content.decode('utf-8'))
             if ref_path:
                 schema_path = find_ref(ref_path, schema_path)
         except Exception as e:

@@ -17,6 +17,7 @@
   - data/3
   - log
   - log/test_results
+  - docs/build
 :files:
   - .gitignore
   - requirements.txt

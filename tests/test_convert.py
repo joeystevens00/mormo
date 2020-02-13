@@ -4,11 +4,20 @@ import pytest
 from types import GeneratorType
 from typing import Union
 
-from mormo.convert import OpenAPIToPostman as oapi2pm, parse_url, Route
-from mormo.schema.openapi_v3 import Operation, Reference, Parameter as OpenAPIParameter
+from mormo.convert import load_remote_refs, OpenAPIToPostman as oapi2pm, parse_url, Route
+from mormo.schema.openapi_v3 import Operation, OpenAPISchemaV3, Reference, Parameter as OpenAPIParameter
 
 
 REF_OR_OPERATION = Union[dict, Operation, Reference]
+
+
+@pytest.mark.parametrize("url", [
+    "https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v3.0/petstore-expanded.yaml",
+    "https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v3.0/link-example.yaml",
+])
+def test_load_remote_refs(url):
+    schema = load_remote_refs(url)
+    assert OpenAPISchemaV3(**schema).openapi
 
 
 def validate_http_verb(verb):
