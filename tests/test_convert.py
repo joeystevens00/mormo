@@ -4,16 +4,19 @@ import pytest
 from types import GeneratorType
 from typing import Union
 
-from mormo.convert import load_remote_refs, OpenAPIToPostman as oapi2pm, Route, url_parts
+from mormo.convert import OpenAPIToPostman as oapi2pm, Route
 from mormo.schema.openapi_v3 import Operation, OpenAPISchemaV3, Reference, Parameter as OpenAPIParameter
 
 
 REF_OR_OPERATION = Union[dict, Operation, Reference]
 
+def test_find_ref():
+    assert oapi2pm.find_ref('#/abc/~1b~1/~0/a', {'abc': {'/b/': {'~': {'a': 1}}}}) == 1
 
-def test_url_parts():
-    assert url_parts('/abc/{id}') == ['abc', ':id']
-    assert url_parts('/project({project_id})') == ['project{{project_id}}']
+
+def test_path_parts():
+    assert oapi2pm.path_parts('/abc/{id}') == ['abc', ':id']
+    assert oapi2pm.path_parts('/project({project_id})') == ['project{{project_id}}']
 
 
 @pytest.mark.parametrize("url", [
@@ -21,7 +24,7 @@ def test_url_parts():
     "https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v3.0/link-example.yaml",
 ])
 def test_load_remote_refs(url):
-    schema = load_remote_refs(url)
+    schema = oapi2pm.load_remote_refs(url)
     assert OpenAPISchemaV3(**schema).openapi
 
 
@@ -56,8 +59,8 @@ def test_to_postman_collection_v2(mormo):
         assert mormo.host == postman_collection.variable[0].value
     global_vars = [v.id for v in postman_collection.variable]
     for verb, path, operation in mormo.routes:
-        for param in mormo.resolve_object(operation.parameters or []):
-            param = mormo.resolve_object(param, new_cls=OpenAPIParameter)
+        for param in mormo._resolve_object(operation.parameters or []):
+            param = mormo._resolve_object(param, new_cls=OpenAPIParameter)
             if not param.required:
                 continue
             if param.in_.value == 'path':
@@ -65,11 +68,11 @@ def test_to_postman_collection_v2(mormo):
                 param_in_request_vars = False
                 request_vars = None
                 for collection_item in postman_collection.item:
-                    if url_parts('/'.join(collection_item.request.url.path)) != url_parts(path):
+                    if mormo.path_parts('/'.join(collection_item.request.url.path)) != mormo.path_parts(path):
                         continue
                     request_vars = [v.key for v in collection_item.request.url.variable]
-                    print(param.name, request_vars, global_vars, collection_item.request)
-                    #if collection_item.request.url.path == url_parts(path):
+                    #print(param.name, request_vars, global_vars, collection_item.request)
+                    #if collection_item.request.url.path == mormo.path_parts(path):
                     param_in_request_vars = param.name in request_vars
                     param_in_vars = param_in_global_vars or param_in_request_vars
                     assert param_in_vars, f"{param.name} in request_vars({request_vars}) or global_vars({global_vars}) for path({path})"
@@ -86,8 +89,8 @@ def test_to_postman_collection_v2(mormo):
 def test_fake_data_route_schema(mormo):
     for verb, path, operation in mormo.routes:
         fake_data = mormo.fake_data_from_route_schema(path, operation).dict()
-        for param in mormo.resolve_object(operation.parameters or []):
-            param = mormo.resolve_object(param, new_cls=OpenAPIParameter)
+        for param in mormo._resolve_object(operation.parameters or []):
+            param = mormo._resolve_object(param, new_cls=OpenAPIParameter)
             assert param.name in fake_data[param.in_.value]
 
 
@@ -105,8 +108,8 @@ def test_convert_parameters(mormo):
             'header': {v.key: v for v in request_header},
         }
         by_name['path'] = ChainMap(by_name['request'], by_name['global'])
-        for param in mormo.resolve_object(operation.parameters or []):
-            param = mormo.resolve_object(param, new_cls=OpenAPIParameter)
+        for param in mormo._resolve_object(operation.parameters or []):
+            param = mormo._resolve_object(param, new_cls=OpenAPIParameter)
             in_ = param.in_.value
             if not param.required:
                 continue
