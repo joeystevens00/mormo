@@ -10,7 +10,7 @@ from .postman_test import (
     js_test_content_type, js_test_response_time,
 )
 from .schema import (
-    Expect, OpenAPISchemaToPostmanRequest, TestData, TestDataFileItem,
+    Expect, OpenAPISchemaToPostmanRequest, TestData, TestConfig,
     list_of_test_data_to_params,
 )
 from .schema import openapi_v3 as oapi
@@ -47,111 +47,6 @@ PostmanConfig = namedtuple('PostmanConfig', [
     'collection_test_scripts',
     'collection_prerequest_scripts',
 ])
-
-
-# TODO:
-# Generate Postman tests for HTTP status, mimetype, and schema checking
-
-
-def get_path_variable_segments(path: str) -> dict:
-    return {m[1]: m[0] for m in RE_PATH_VARIABLE_SEGMENT.findall(path)}
-
-
-def url_parts(urlstr: str) -> list:
-    url = []
-    for part in urlstr.split('/')[1:]:
-        is_path_variable = re.match('^{(\w+)}$', part)  # noqa: W605
-        is_path_segment = RE_PATH_VARIABLE.findall(part)
-        queries = RE_PATH_VARIABLE_SEGMENT.findall(part)
-        if is_path_variable:
-            part = f':{is_path_variable.group(1)}'
-        elif is_path_segment:
-            for group in is_path_segment:
-                part = part.replace(f"{{{group}}}", f"{{{{{group}}}}}")
-        if '(' in part and ')' in part:
-            part = part.replace('(', '').replace(')', '')
-        url.append(part)
-    return url
-
-
-def load_remote_refs(schema_path):
-    if isinstance(schema_path, str) and schema_path.startswith('http'):
-        import requests
-        ref_path = None
-        if '#' in schema_path:
-            ref_path = schema_path.split('#')[-1]
-        try:
-            logger.debug(f"Fetching remote reference: {schema_path}")
-            schema_path = blind_load(requests.get(schema_path).content.decode('utf-8'))
-            if ref_path:
-                schema_path = find_ref(ref_path, schema_path)
-        except Exception as e:
-            logger.error(f"Exception: {type(e)}: {e}")
-            raise e
-    return schema_path
-
-
-def load_local_refs(schema_path):
-    if isinstance(schema_path, str) and os.path.exists(schema_path):
-        schema_path = load_file(schema_path)
-    return schema_path
-
-
-@hashable_lru
-def find_ref(ref: str, schema_path):
-    ref_path = ref.split('/')[1:]
-    while len(ref_path):
-        seek = ref_path.pop(0).replace('~1', '/').replace('~0', '~')
-        if seek:
-            if isinstance(schema_path, list) and seek.isdigit():
-                schema_path = schema_path[int(seek)]
-            else:
-                schema_path = schema_path[seek]
-    schema_path = load_remote_refs(schema_path)
-    schema_path = load_local_refs(schema_path)
-
-    return schema_path
-
-
-def resolve_refs(schema: dict):
-    """Replace OpenAPI references in schema with Python references.
-
-    Leaves the '$ref' key but points the value to the path in the schema."""
-    logger.debug("Resolving references in schema")
-    if isinstance(schema, OpenAPISchemaV3):
-        schema = schema.to_dict()
-
-    def traverse(d: dict):
-        for k, v in d.copy().items():
-            if isinstance(v, dict):
-                schema_ref = None
-                found_parent = None
-                # TODO: Support escape chars '~0' escapes '~' '~1' escapes '/'
-                # #/paths/~1cases~1/post/responses/200/content/application~1json/schema/properties/createdBy/oneOf/1
-                #
-                # TODO: Support array indexing (see above example)
-                for p in v.keys():
-                    if isinstance(v[p], list):
-                        for i, e in enumerate(v[p]):
-                            if isinstance(e, dict):
-                                schema_ref = e.get('$ref')
-                                if schema_ref:
-                                    v[p][i] = find_ref(schema_ref, schema)
-                                else:
-                                    logger.debug(
-                                        f"No $ref found in List[dict]: {e}",
-                                    )
-                    if not isinstance(v[p], dict):
-                        continue
-                    if not schema_ref:
-                        schema_ref = v.get(p, {}).get('$ref')
-                        if schema_ref:
-                            found_parent = p
-                if schema_ref and schema_ref.startswith('#/') and found_parent:
-                    v[found_parent] = find_ref(schema_ref, schema)
-                traverse(v)
-        return d
-    return traverse(schema)
 
 
 class OpenAPIToPostman:
@@ -195,7 +90,7 @@ class OpenAPIToPostman:
         if not isinstance(self.schema, dict):
             raise ValueError("Could not load schema")
         if request.resolve_references:
-            self.schema = resolve_refs(self.schema)
+            self.schema = self.resolve_refs(self.schema)
         # Validate schema
         self.schema = OpenAPISchemaV3(**self.schema)
         self.test_data = self.load_test_data(
@@ -203,6 +98,104 @@ class OpenAPIToPostman:
             request.test_data_file,
             request.test_config,
         )
+
+    @classmethod
+    def load_remote_refs(cls, schema_path):
+        if isinstance(schema_path, str) and schema_path.startswith('http'):
+            import requests
+            ref_path = None
+            if '#' in schema_path:
+                ref_path = schema_path.split('#')[-1]
+            try:
+                logger.debug(f"Fetching remote reference: {schema_path}")
+                schema_path = blind_load(requests.get(schema_path).content.decode('utf-8'))
+                if ref_path:
+                    schema_path = cls.find_ref(ref_path, schema_path)
+            except Exception as e:
+                logger.error(f"Exception: {type(e)}: {e}")
+                raise e
+        return schema_path
+
+    @classmethod
+    def load_local_refs(cls, schema_path):
+        if isinstance(schema_path, str) and os.path.exists(schema_path):
+            schema_path = load_file(schema_path)
+        return schema_path
+
+    @classmethod
+    @hashable_lru
+    def find_ref(cls, ref: str, schema_path):
+        ref_path = ref.split('/')[1:]
+        while len(ref_path):
+            seek = ref_path.pop(0).replace('~1', '/').replace('~0', '~')
+            if seek:
+                if isinstance(schema_path, list) and seek.isdigit():
+                    schema_path = schema_path[int(seek)]
+                else:
+                    schema_path = schema_path[seek]
+        schema_path = cls.load_remote_refs(schema_path)
+        schema_path = cls.load_local_refs(schema_path)
+
+        return schema_path
+
+    @classmethod
+    def resolve_refs(cls, schema: dict):
+        """Replace OpenAPI references in schema with Python references.
+
+        Leaves the '$ref' key but points the value to the path in the schema."""
+        logger.debug("Resolving references in schema")
+        if isinstance(schema, OpenAPISchemaV3):
+            schema = schema.to_dict()
+
+        def traverse(d: dict):
+            for k, v in d.copy().items():
+                if isinstance(v, dict):
+                    schema_ref = None
+                    found_parent = None
+                    # TODO: Support escape chars '~0' escapes '~' '~1' escapes '/'
+                    # #/paths/~1cases~1/post/responses/200/content/application~1json/schema/properties/createdBy/oneOf/1
+                    #
+                    # TODO: Support array indexing (see above example)
+                    for p in v.keys():
+                        if isinstance(v[p], list):
+                            for i, e in enumerate(v[p]):
+                                if isinstance(e, dict):
+                                    schema_ref = e.get('$ref')
+                                    if schema_ref:
+                                        v[p][i] = cls.find_ref(schema_ref, schema)
+                                    else:
+                                        logger.debug(
+                                            f"No $ref found in List[dict]: {e}",
+                                        )
+                        if not isinstance(v[p], dict):
+                            continue
+                        if not schema_ref:
+                            schema_ref = v.get(p, {}).get('$ref')
+                            if schema_ref:
+                                found_parent = p
+                    if schema_ref and schema_ref.startswith('#/') and found_parent:
+                        v[found_parent] = cls.find_ref(schema_ref, schema)
+                    traverse(v)
+            return d
+        return traverse(schema)
+
+
+    @classmethod
+    def path_parts(cls, path: str) -> list:
+        url = []
+        for part in path.split('/')[1:]:
+            is_path_variable = re.match('^{(\w+)}$', part)  # noqa: W605
+            is_path_segment = RE_PATH_VARIABLE.findall(part)
+            queries = RE_PATH_VARIABLE_SEGMENT.findall(part)
+            if is_path_variable:
+                part = f':{is_path_variable.group(1)}'
+            elif is_path_segment:
+                for group in is_path_segment:
+                    part = part.replace(f"{{{group}}}", f"{{{{{group}}}}}")
+            if '(' in part and ')' in part:
+                part = part.replace('(', '').replace(')', '')
+            url.append(part)
+        return url
 
     def get_default_expect(self):
         return self.default_expect
@@ -216,7 +209,7 @@ class OpenAPIToPostman:
         collection_test_scripts = []
         collection_prerequest_scripts = []
         for route, td_item in test_config.items():
-            i = TestDataFileItem(**td_item)
+            i = TestConfig(**td_item)
             if isinstance(i.variables, str):
                 variables = load_file(i.variables)
             else:
@@ -356,7 +349,7 @@ class OpenAPIToPostman:
 
     @classmethod
     def guess_resource(cls, path: str):
-        parts = url_parts(path)
+        parts = cls.path_parts(path)
         last_part = None
         for i, part in enumerate(parts):
             is_variable = RE_PATH_GLOBAL_VARIABLE.match(part)\
@@ -394,11 +387,11 @@ class OpenAPIToPostman:
     ) -> ParameterRequestData:
         d = defaultdict(lambda: {})
         all_path_vars = RE_PATH_VARIABLE.findall(path)
-        parameters = self.resolve_object(operation.parameters)
+        parameters = self._resolve_object(operation.parameters)
 
         if parameters:
             for parameter in operation.parameters:
-                parameter = self.resolve_object(
+                parameter = self._resolve_object(
                     parameter,
                     new_cls=oapi.Parameter,
                 )
@@ -416,17 +409,17 @@ class OpenAPIToPostman:
                     d[in_][parameter.name] = pick_one(
                         generate_from_schema(param_schema.to_dict()),
                     )
-        request_body = self.resolve_object(
+        request_body = self._resolve_object(
             operation.requestBody,
             new_cls=oapi.RequestBody,
         )
         if request_body:
             for mimetype, media_type in request_body.content.items():
-                mt_props = self.resolve_object(
+                mt_props = self._resolve_object(
                     media_type.schema_.properties or {},
                 )
                 for name, prop in mt_props.items():
-                    prop = self.resolve_object(prop)
+                    prop = self._resolve_object(prop)
                     if not isinstance(prop, dict):
                         prop = prop.to_dict()
                     if prop.get('ref') or prop.get('$ref'):
@@ -464,15 +457,15 @@ class OpenAPIToPostman:
 
     def operation_param_examples(self, operation: Operation):
         examples = defaultdict(lambda: defaultdict(lambda: []))
-        for param in self.resolve_object(operation.parameters or []):
-            param = self.resolve_object(param, new_cls=oapi.Parameter)
+        for param in self._resolve_object(operation.parameters or []):
+            param = self._resolve_object(param, new_cls=oapi.Parameter)
             if param.example:
                 examples[param.in_.value][param.name].extend([param.example])
             if param.examples:
                 examples[param.in_.value][param.name].extend(param.examples)
         return examples
 
-    def resolve_object(self, o, new_cls=None):
+    def _resolve_object(self, o, new_cls=None):
         if isinstance(o, Reference):
             logger.debug(f"Resolving reference {o.ref} Try #{self.ref_depth[o.ref]}")  # noqa; E501
             if self.ref_depth[o.ref] > self.max_ref_depth:
@@ -499,12 +492,12 @@ class OpenAPIToPostman:
         request_url_variables = []
         global_variables = []
         kwargs = {}
-        params = self.resolve_object(operation.parameters or [])
-        path_vars = [p[1:] for p in url_parts(path) if p.startswith(':')]
+        params = self._resolve_object(operation.parameters or [])
+        path_vars = [p[1:] for p in self.path_parts(path) if p.startswith(':')]
         segment_vars = set(RE_PATH_VARIABLE.findall(path))\
             .difference(path_vars)
         for param in params:
-            param = self.resolve_object(param, new_cls=oapi.Parameter)
+            param = self._resolve_object(param, new_cls=oapi.Parameter)
             param_in = param.in_.value
             # Parameter precedence:
             # Test Data,
@@ -595,7 +588,7 @@ class OpenAPIToPostman:
                     )
                 else:
                     raise ValueError(f"unknown param location: {param_in}")
-        request_body = self.resolve_object(
+        request_body = self._resolve_object(
             operation.requestBody,
             new_cls=oapi.RequestBody,
         )
@@ -635,10 +628,10 @@ class OpenAPIToPostman:
             ),
         )
 
-    def generate_postman_collections(self):
+    def _generate_postman_collections(self):
         build_url = lambda path, vars=None: Url(
             host=["{{baseUrl}}"],
-            path=url_parts(path),
+            path=self.path_parts(path),
             query=[],
             variable=vars or [],
         )
@@ -652,7 +645,7 @@ class OpenAPIToPostman:
                 if code == 'default':
                     code = 500
                 http_reason = get_http_reason(code)
-                response = self.resolve_object(
+                response = self._resolve_object(
                     response, new_cls=oapi.Response,
                 )
                 for mimetype, route_definition in (
@@ -715,7 +708,7 @@ class OpenAPIToPostman:
         ]
 
     def to_postman_collection_v2(self):
-        global_variables, items = self.generate_postman_collections()
+        global_variables, items = self._generate_postman_collections()
         return Collection(
             event=[
                 e for e in [
