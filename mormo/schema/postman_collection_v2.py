@@ -1,4 +1,5 @@
 import enum
+import tempfile
 from typing import Any, List, Optional, Union, Sequence
 
 from ..model import BaseModel
@@ -103,17 +104,18 @@ class Item(BaseModel):
     event: List[Event]
 
 
+class Variable(BaseModel):
+    id: str
+    type: str
+    value: Optional[str]
+
+
 class Folder(BaseModel):
     id: str
     name: str
     item: Union[Sequence[Item], Item]
     event: list
-
-
-class Variable(BaseModel):
-    id: str
-    type: str
-    value: Optional[str]
+    variable: Optional[Sequence[Variable]]
 
 
 class Description(BaseModel):
@@ -136,6 +138,12 @@ class Collection(BaseModel):
     event: Optional[list]
     variable: Optional[Sequence[Variable]]
     info: Info
+
+    def run(**kwargs):
+        from ..postman_test import run_newman
+        t = tempfile.mktemp()
+        self.to_file(t)
+        return run_newman(t, **kwargs)
 
 
 class SaveDBResult(BaseModel):
