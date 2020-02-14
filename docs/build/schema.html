@@ -149,7 +149,7 @@
 
 <dl class="attribute">
 <dt id="mormo.schema.OpenAPISchemaToPostmanRequest.test_config">
-<code class="sig-name descname">test_config</code><em class="property">: Optional[Dict[str, TestDataFileItem]]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.OpenAPISchemaToPostmanRequest.test_config" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">test_config</code><em class="property">: Optional[Dict[str, TestConfig]]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.OpenAPISchemaToPostmanRequest.test_config" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -170,6 +170,41 @@
 <dl class="attribute">
 <dt id="mormo.schema.OpenAPISchemaToPostmanRequest.verbose">
 <code class="sig-name descname">verbose</code><em class="property">: Optional[bool]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.OpenAPISchemaToPostmanRequest.verbose" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mormo.schema.TestConfig">
+<em class="property">class </em><code class="sig-prename descclassname">mormo.schema.</code><code class="sig-name descname">TestConfig</code><a class="headerlink" href="#mormo.schema.TestConfig" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="mormo.schema.TestConfig.expect">
+<code class="sig-name descname">expect</code><em class="property">: Optional[Expect]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.TestConfig.expect" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.TestConfig.headers">
+<code class="sig-name descname">headers</code><em class="property">: Optional[Dict[str, str]]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.TestConfig.headers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.TestConfig.make_global">
+<code class="sig-name descname">make_global</code><em class="property">: Optional[Dict[str, str]]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.TestConfig.make_global" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.TestConfig.prerequest">
+<code class="sig-name descname">prerequest</code><em class="property">: Optional[List[str]]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.TestConfig.prerequest" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.TestConfig.test">
+<code class="sig-name descname">test</code><em class="property">: Optional[List[str]]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.TestConfig.test" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.TestConfig.variables">
+<code class="sig-name descname">variables</code><em class="property">: Optional[Union[Dict[str, str], str]]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.TestConfig.variables" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -200,41 +235,6 @@
 </dd></dl>
 
 <dl class="class">
-<dt id="mormo.schema.TestDataFileItem">
-<em class="property">class </em><code class="sig-prename descclassname">mormo.schema.</code><code class="sig-name descname">TestDataFileItem</code><a class="headerlink" href="#mormo.schema.TestDataFileItem" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="attribute">
-<dt id="mormo.schema.TestDataFileItem.expect">
-<code class="sig-name descname">expect</code><em class="property">: Optional[Expect]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.TestDataFileItem.expect" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="mormo.schema.TestDataFileItem.headers">
-<code class="sig-name descname">headers</code><em class="property">: Optional[Dict[str, str]]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.TestDataFileItem.headers" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="mormo.schema.TestDataFileItem.make_global">
-<code class="sig-name descname">make_global</code><em class="property">: Optional[Dict[str, str]]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.TestDataFileItem.make_global" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="mormo.schema.TestDataFileItem.prerequest">
-<code class="sig-name descname">prerequest</code><em class="property">: Optional[List[str]]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.TestDataFileItem.prerequest" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="mormo.schema.TestDataFileItem.test">
-<code class="sig-name descname">test</code><em class="property">: Optional[List[str]]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.TestDataFileItem.test" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="mormo.schema.TestDataFileItem.variables">
-<code class="sig-name descname">variables</code><em class="property">: Optional[Union[Dict[str, str], str]]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.TestDataFileItem.variables" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
 <dt id="mormo.schema.TestResult">
 <em class="property">class </em><code class="sig-prename descclassname">mormo.schema.</code><code class="sig-name descname">TestResult</code><a class="headerlink" href="#mormo.schema.TestResult" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="attribute">
@@ -250,41 +250,6 @@
 <dl class="attribute">
 <dt id="mormo.schema.TestResult.result">
 <code class="sig-name descname">result</code><em class="property">: NewmanResult</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.TestResult.result" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="mormo.schema.TestRun">
-<em class="property">class </em><code class="sig-prename descclassname">mormo.schema.</code><code class="sig-name descname">TestRun</code><a class="headerlink" href="#mormo.schema.TestRun" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="class">
-<dt id="mormo.schema.TestRun.Config">
-<em class="property">class </em><code class="sig-name descname">Config</code><a class="headerlink" href="#mormo.schema.TestRun.Config" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="attribute">
-<dt id="mormo.schema.TestRun.Config.fields">
-<code class="sig-name descname">fields</code><em class="property"> = {'schema_': 'schema'}</em><a class="headerlink" href="#mormo.schema.TestRun.Config.fields" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="method">
-<dt id="mormo.schema.TestRun.run">
-<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; mormo.schema.TestResult<a class="headerlink" href="#mormo.schema.TestRun.run" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="mormo.schema.TestRun.schema_">
-<code class="sig-name descname">schema_</code><em class="property">: openapi_v3.OpenAPISchemaV3</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.TestRun.schema_" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="mormo.schema.TestRun.test_data">
-<code class="sig-name descname">test_data</code><em class="property">: List[TestData]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.TestRun.test_data" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="mormo.schema.TestRun.url">
-<code class="sig-name descname">url</code><em class="property">: AnyHttpUrl</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.TestRun.url" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>

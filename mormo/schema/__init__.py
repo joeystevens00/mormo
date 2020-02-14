@@ -23,7 +23,7 @@ class Expect(BaseModel):
     headers: Optional[Dict[str, str]]
 
 
-class TestDataFileItem(BaseModel):
+class TestConfig(BaseModel):
     variables: Optional[Union[Dict[str, str], str]]
     expect: Optional[Expect]
     make_global: Optional[Dict[str, str]]
@@ -56,31 +56,31 @@ class TestResult(BaseModel):
     message: str
 
 
-class TestRun(BaseModel):
-    schema_: openapi_v3.OpenAPISchemaV3
-    test_data: List[TestData]
-    url: AnyHttpUrl
-
-    class Config:
-        fields = {'schema_': 'schema'}
-
-    def run(self, **kwargs) -> TestResult:
-        from ..util import run_newman
-        tmp_file = tempfile.mkfile()
-        self.schema_.to_file(tmp_file)
-        run_newman(tmp_file, **kwargs)
-        return TestResult(
-            result={'todo': 1},
-            code=1,
-            message="not implemented"
-        )
+# class TestRun(BaseModel):
+#     schema_: openapi_v3.OpenAPISchemaV3
+#     test_data: List[TestData]
+#     url: AnyHttpUrl
+#
+#     class Config:
+#         fields = {'schema_': 'schema'}
+#
+#     def run(self, **kwargs) -> TestResult:
+#         from ..util import run_newman
+#         tmp_file = tempfile.mkfile()
+#         self.schema_.to_file(tmp_file)
+#         run_newman(tmp_file, **kwargs)
+#         return TestResult(
+#             result={'todo': 1},
+#             code=1,
+#             message="not implemented"
+#         )
 
 
 class OpenAPISchemaToPostmanRequest(BaseModel):
     schema_: Optional[openapi_v3.OpenAPISchemaV3]
     path: Optional[str] = None
     host: Optional[str]
-    test_config: Optional[Dict[str, TestDataFileItem]] = None
+    test_config: Optional[Dict[str, TestConfig]] = None
     test_data_file: Optional[str] = None
     test_data: Optional[List[TestData]] = None
     test_scripts: Optional[Dict[str, postman_collection_v2.Script]] = None

@@ -30,7 +30,7 @@ def run_newman(collection_file, host=None, verbose=None, json=False):
     )
     print('EXEC', *run_newman_args)
     print('STDOUT', e.stdout.decode('utf-8'))
-    print('STDERR', e.stderr.decode('utf-8'))    
+    print('STDERR', e.stderr.decode('utf-8'))
     if json_outfile:
         json_content = load_file(json_outfile, content_type='json')
 
@@ -66,7 +66,7 @@ def js_test_code(route, code):
         name=f"{route} Test Code is {code}",
         exec="""
                 pm.test("Status code is {code}", function () {{
-                    pm.expect(pm.response).to.have.status({code});
+                    return pm.response.to.have.status({code});
                 }});
             """.format(code=code),
     )
@@ -77,7 +77,7 @@ def js_test_content_type(route, mimetype):
         name=f"{route} Mimetype is {mimetype}",
         exec="""
                 pm.test("Content-Type Header is {mimetype}", function () {{
-                    pm.expect(postman.getResponseHeader("Content-type")).to.be.eql("{mimetype}");
+                    return pm.expect(postman.getResponseHeader("Content-type")).to.be.eql("{mimetype}");
                 }});
             """.format(mimetype=mimetype),
     )
@@ -88,7 +88,7 @@ def js_test_response_time(route, max_time_ms):
         name=f"{route} responds in less than {max_time_ms}ms",
         exec="""
                 pm.test("Response time is less than {max_time_ms}ms", function () {{
-                    pm.expect(pm.response.responseTime).to.be.below({max_time_ms});
+                    return pm.expect(pm.response.responseTime).to.be.below({max_time_ms});
                 }});
             """.format(max_time_ms=max_time_ms),
     )

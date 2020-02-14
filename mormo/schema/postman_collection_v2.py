@@ -139,7 +139,7 @@ class Collection(BaseModel):
     variable: Optional[Sequence[Variable]]
     info: Info
 
-    def run(**kwargs):
+    def run(self, **kwargs):
         from ..postman_test import run_newman
         t = tempfile.mktemp()
         self.to_file(t)
