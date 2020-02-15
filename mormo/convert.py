@@ -480,17 +480,17 @@ class OpenAPIToPostman:
                 o = new_cls(**o)
         return o
 
-    def convert_parameters(self, path, operation: Operation):
+    def convert_parameters(self, verb, path, operation: Operation):
         params = defaultdict(lambda: {})
         config_test_data = list_of_test_data_to_params(self.test_data).dict()
         fake_data = self.fake_data_from_route_schema(path, operation).dict()
         examples = flatten_iterables_in_dict(
             self.operation_param_examples(operation),
         )
-        urlencoded = []
         request_headers = []
         request_url_variables = []
         global_variables = []
+        query = []
         kwargs = {}
         params = self._resolve_object(operation.parameters or [])
         path_vars = [p[1:] for p in self.path_parts(path) if p.startswith(':')]
@@ -572,20 +572,24 @@ class OpenAPIToPostman:
                     else:
                         request_url_variables.append(test_data)
                 elif param_in == 'query':
-                    urlencoded.append(test_data)
+                    query.append(test_data)
                 elif param_in == 'header':
                     request_headers.append(test_data)
                 elif param_in == 'cookie':
                     raise ValueError(f"unhandled param location: {param_in}")
                 elif param_in == 'body':
-                    kwargs['mode'] = 'raw'
-                    kwargs['raw'] = json.dumps(dict(mapped_value))
-                    request_headers.append(
-                        Parameter(
-                            key='Content-Type',
-                            value='application/json',
-                        ),
-                    )
+                    if mapped_value:
+                        kwargs['mode'] = 'raw'
+                        kwargs['raw'] = json.dumps(dict(mapped_value))
+                        print(kwargs)
+                        request_headers.append(
+                            Parameter(
+                                key='Content-Type',
+                                value='application/json',
+                            ),
+                        )
+                    else:
+                        logger.warning(f"Missing content for body parameter: {param.name}")
                 else:
                     raise ValueError(f"unknown param location: {param_in}")
         request_body = self._resolve_object(
@@ -620,19 +624,23 @@ class OpenAPIToPostman:
                 )
             else:
                 logger.warning(f"Path variable {path_var} missing variable and no mapped value!")  # noqa: E501
-        return (
-            global_variables, request_url_variables, request_headers,
-            RequestBody(
-                urlencoded=urlencoded,
+
+        if kwargs:
+            request_body = RequestBody(
                 **kwargs,
-            ),
+            )
+        else:
+            request_body = None
+        return (
+            global_variables, query, request_url_variables, request_headers,
+            request_body,
         )
 
     def _generate_postman_collections(self):
-        build_url = lambda path, vars=None: Url(
+        build_url = lambda path, vars=None, query=[]: Url(
             host=["{{baseUrl}}"],
             path=self.path_parts(path),
-            query=[],
+            query=query,
             variable=vars or [],
         )
         items = []
@@ -644,6 +652,8 @@ class OpenAPIToPostman:
             for code, response in operation.responses.items():
                 if code == 'default':
                     code = 500
+                if isinstance(code, str) and 'x' in code.lower():
+                    code = code.lower().replace('x', '0')
                 http_reason = get_http_reason(code)
                 response = self._resolve_object(
                     response, new_cls=oapi.Response,
@@ -659,7 +669,7 @@ class OpenAPIToPostman:
                             method=verb.upper(),
                             body={},
                         ),
-                        code=code,
+                        code=int(code),
                         status=http_reason,
                         header=[
                             Header(key='Content-Type', value=mimetype),
@@ -668,9 +678,9 @@ class OpenAPIToPostman:
                         body=response.description,
                     ))
             (
-                new_globals, request_url_variables,
+                new_globals, query, request_url_variables,
                 request_header, request_body
-            ) = self.convert_parameters(path, operation)
+            ) = self.convert_parameters(verb, path, operation)
             global_variables.extend(new_globals)
             logger.debug('GLOBALS', new_globals)
             logger.debug('REQUEST', request_url_variables)
@@ -680,7 +690,7 @@ class OpenAPIToPostman:
                     name=operation.summary or route_str,
                     request=Request(
                         auth=Auth(type='noauth'),
-                        url=build_url(path, request_url_variables),
+                        url=build_url(path, vars=request_url_variables, query=query),
                         method=verb.upper(),
                         name=operation.summary or route_str,
                         description={},

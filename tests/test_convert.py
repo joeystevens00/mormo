@@ -97,14 +97,14 @@ def test_fake_data_route_schema(mormo):
 def test_convert_parameters(mormo):
     for verb, path, operation in mormo.routes:
         (
-            global_variables, request_url_variables,
+            global_variables, query, request_url_variables,
             request_header, request_body
-        ) = mormo.convert_parameters(path, operation)
+        ) = mormo.convert_parameters(verb, path, operation)
         by_name = {
             'global': {v.id: v for v in global_variables},
             'request': {v.key: v for v in request_url_variables},
-            'body': {k: v for k, v in (request_body.raw or {}).items()},
-            'query': {v.key: v for v in request_body.urlencoded or []},
+            'body': {k: v for k, v in ((request_body and request_body.raw) or {}).items()},
+            'query': {v.key: v for v in query},
             'header': {v.key: v for v in request_header},
         }
         by_name['path'] = ChainMap(by_name['request'], by_name['global'])

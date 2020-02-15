@@ -90,7 +90,7 @@ def load_file(f, content_type=None):
 
 
 def trim(s):
-    return s.rstrip(' ').lstrip(' ')
+    return s.rstrip().lstrip()
 
 
 def cls_from_str(name):

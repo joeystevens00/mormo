@@ -3,7 +3,6 @@ import tempfile
 
 from fastapi import FastAPI
 
-from .postman_test import run_newman
 from .schema import OpenAPISchemaToPostmanRequest, TestResult
 from .schema.openapi_v3 import OpenAPISchemaV3, SaveDBResult
 from .schema.postman_collection_v2 import (
@@ -64,17 +63,18 @@ def get_postman(id: str) -> Collection:
 def run_postman_collection(
     collection, host: str, verbose: Optional[bool] = False,
 ):
-    tmp_file = tempfile.mktemp()
-    collection.to_file(tmp_file)
-    e = run_newman(tmp_file, host=host, verbose=verbose, json=True)
     return TestResult(
-        result=e,
+        result=collection.run(host=host, verbose=verbose, json=True),
         code=0,
         message="Newman executed"
     )
 
-
 @app.post("/postman/{id}/test", response_model=TestResult)
+def run_postman_test_from_args(o: OpenAPISchemaToPostmanRequest) -> TestResult:
+    """Create a new test run from a postman collection."""
+    return run_postman_collection(OpenAPIToPostman(o), host=host, verbose=verbose)
+
+@app.get("/postman/{id}/test", response_model=TestResult)
 def run_postman_test(
     id: str, host: str, verbose: Optional[bool] = False,
 ) -> TestResult:

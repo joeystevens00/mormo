@@ -11,6 +11,14 @@ EventListen = enum.Enum(
     [('test', "test"), ('prerequest', "prerequest")],
 )
 
+Mode = enum.Enum('mode', [
+    ('raw','raw'),
+    ('urlencoded','urlencoded'),
+    ('formdata', 'formdata'),
+    ('file', 'file'),
+    ('graphql', 'graphql'),
+])
+
 
 class Url(BaseModel):
     path: Sequence[str]
@@ -32,9 +40,9 @@ class Header(BaseModel):
 
 class Parameter(BaseModel):
     key: str
-    value: Any
+    value: str
     disabled: bool = False
-    description: Optional[str]
+    description: Optional[Union[str, dict]]
 
 
 class Response(BaseModel):
@@ -42,7 +50,7 @@ class Response(BaseModel):
     name: str
     originalRequest: OriginalRequest
     status: str
-    code: str
+    code: int
     header: Sequence[Header]
     body: str
     cookie: list
@@ -53,9 +61,13 @@ class Auth(BaseModel):
     type: str
 
 
+class QueryParam(Parameter):
+    pass
+
+
 class RequestBody(BaseModel):
-    mode: Optional[str]
-    raw: Optional[str]
+    mode: Mode
+    raw: str
     urlencoded: Optional[list]
     formdata: Optional[list]
     file: Optional[dict]

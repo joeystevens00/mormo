@@ -230,6 +230,12 @@
 
 </dd></dl>
 
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.Mode">
+<code class="sig-prename descclassname">mormo.schema.postman_collection_v2.</code><code class="sig-name descname">Mode</code><a class="headerlink" href="#mormo.schema.postman_collection_v2.Mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">mormo.schema.postman_collection_v2.mode</span></code></p>
+</dd></dl>
+
 <dl class="class">
 <dt id="mormo.schema.postman_collection_v2.OriginalRequest">
 <em class="property">class </em><code class="sig-prename descclassname">mormo.schema.postman_collection_v2.</code><code class="sig-name descname">OriginalRequest</code><a class="headerlink" href="#mormo.schema.postman_collection_v2.OriginalRequest" title="Permalink to this definition">¶</a></dt>
@@ -255,7 +261,7 @@
 <em class="property">class </em><code class="sig-prename descclassname">mormo.schema.postman_collection_v2.</code><code class="sig-name descname">Parameter</code><a class="headerlink" href="#mormo.schema.postman_collection_v2.Parameter" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="attribute">
 <dt id="mormo.schema.postman_collection_v2.Parameter.description">
-<code class="sig-name descname">description</code><em class="property">: Optional[str]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Parameter.description" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">description</code><em class="property">: Optional[Union[str, dict]]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Parameter.description" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -270,7 +276,32 @@
 
 <dl class="attribute">
 <dt id="mormo.schema.postman_collection_v2.Parameter.value">
-<code class="sig-name descname">value</code><em class="property">: Any</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Parameter.value" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">value</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Parameter.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mormo.schema.postman_collection_v2.QueryParam">
+<em class="property">class </em><code class="sig-prename descclassname">mormo.schema.postman_collection_v2.</code><code class="sig-name descname">QueryParam</code><a class="headerlink" href="#mormo.schema.postman_collection_v2.QueryParam" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.QueryParam.description">
+<code class="sig-name descname">description</code><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.QueryParam.description" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.QueryParam.disabled">
+<code class="sig-name descname">disabled</code><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.QueryParam.disabled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.QueryParam.key">
+<code class="sig-name descname">key</code><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.QueryParam.key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.postman_collection_v2.QueryParam.value">
+<code class="sig-name descname">value</code><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.QueryParam.value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -340,12 +371,12 @@
 
 <dl class="attribute">
 <dt id="mormo.schema.postman_collection_v2.RequestBody.mode">
-<code class="sig-name descname">mode</code><em class="property">: Optional[str]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.RequestBody.mode" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">mode</code><em class="property">: Mode</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.RequestBody.mode" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="mormo.schema.postman_collection_v2.RequestBody.raw">
-<code class="sig-name descname">raw</code><em class="property">: Optional[str]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.RequestBody.raw" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">raw</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.RequestBody.raw" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -365,7 +396,7 @@
 
 <dl class="attribute">
 <dt id="mormo.schema.postman_collection_v2.Response.code">
-<code class="sig-name descname">code</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Response.code" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">code</code><em class="property">: int</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.postman_collection_v2.Response.code" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">

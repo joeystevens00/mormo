@@ -7,7 +7,7 @@ from .schema.postman_collection_v2 import (
     Event, Script, Variable,
 )
 from .util import (
-    load_file, uuidgen,
+    load_file, trim, uuidgen,
 )
 
 
@@ -56,7 +56,7 @@ def javascript(name, exec):
     return Script(
         id=uuidgen(),
         name=name,
-        exec=exec,
+        exec=trim(exec),
         type='text/javascript',
     )
 

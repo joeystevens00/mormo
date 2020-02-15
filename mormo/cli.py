@@ -16,7 +16,7 @@ def generate_schema(infile, outfile, test_file, **kwargs):
     oas = OpenAPIToPostman(path=infile, test_data_file=test_file, **kwargs)
     postman_collection = oas.to_postman_collection_v2()
     with open(outfile, 'w') as f:
-        json.dump(postman_collection.dict(by_alias=True), f)
+        json.dump(postman_collection.to_dict(), f)
 
 
 @cli.command()

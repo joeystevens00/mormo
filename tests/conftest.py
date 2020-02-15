@@ -27,39 +27,37 @@ def pytest_addoption(parser):
         help="Execute tests against OpenAPI Schema at path",
     )
 
+def test_data(paths, collection=False):
+    for path in paths:
+        o =  OpenAPIToPostman(path=path)
+        if collection:
+            o = o.to_postman_collection_v2()
+        yield o
 
 def pytest_generate_tests(metafunc):
     files = [*get_test_data('yaml'), *get_test_data('json')]
     if "mormo" in metafunc.fixturenames:
         if metafunc.config.getoption("test_file"):
-            def test_data():
-                for _ in range(1):
-                    yield OpenAPIToPostman(path=metafunc.config.getoption("test_file"))
+            kwargs = {'paths': [metafunc.config.getoption("test_file")]}
         else:
-            def test_data():
-                for f in files:
-                    yield OpenAPIToPostman(path=f)
-        metafunc.parametrize("mormo", test_data())
+            kwargs = {'paths': files}
+        metafunc.parametrize("mormo", test_data(**kwargs))
 
     if "postman_collection" in metafunc.fixturenames:
         if metafunc.config.getoption("test_file"):
-            def test_data():
-                for _ in range(1):
-                    yield OpenAPIToPostman(path=metafunc.config.getoption("test_file")).to_postman_collection_v2()
+            kwargs = {'paths': [metafunc.config.getoption("test_file")], 'collection': True}
         else:
-            def test_data():
-                for f in files:
-                    yield OpenAPIToPostman(path=f).to_postman_collection_v2()
-        metafunc.parametrize("postman_collection", test_data())
+            kwargs = {'paths': files, 'collection': True}
+        metafunc.parametrize("postman_collection", test_data(**kwargs))
 
     if "openapi_schema_file" in metafunc.fixturenames:
         if metafunc.config.getoption("test_file"):
-            test_data = [
+            td = [
                 metafunc.config.getoption("test_file"),
             ]
         else:
-            test_data = files
-        metafunc.parametrize("openapi_schema_file", test_data)
+            td = files
+        metafunc.parametrize("openapi_schema_file", td)
 
 
 
