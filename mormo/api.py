@@ -3,6 +3,7 @@ import tempfile
 
 from fastapi import FastAPI
 
+from .convert import OpenAPIToPostman
 from .schema import OpenAPISchemaToPostmanRequest, TestResult
 from .schema.openapi_v3 import OpenAPISchemaV3, SaveDBResult
 from .schema.postman_collection_v2 import (
@@ -69,10 +70,10 @@ def run_postman_collection(
         message="Newman executed"
     )
 
-@app.post("/postman/{id}/test", response_model=TestResult)
-def run_postman_test_from_args(o: OpenAPISchemaToPostmanRequest) -> TestResult:
-    """Create a new test run from a postman collection."""
-    return run_postman_collection(OpenAPIToPostman(o), host=host, verbose=verbose)
+# @app.post("/postman/{id}/test", response_model=TestResult)
+# def run_postman_test_from_args(id: str, o: OpenAPISchemaToPostmanRequest) -> TestResult:
+#     """Create a new test run from a postman collection."""
+#     return run_postman_collection(OpenAPIToPostman(o), host=host, verbose=verbose)
 
 @app.get("/postman/{id}/test", response_model=TestResult)
 def run_postman_test(
@@ -88,13 +89,13 @@ def run_postman_test(
 #     return save_db(o)
 
 
-@app.post('/run/test/from_schema', response_model=TestResult)
-def run_test_run_from_schema(o: OpenAPISchemaToPostmanRequest) -> TestResult:
-    """Create a new test run from OpenAPI Schema."""
-    from .convert import OpenAPIToPostman
-    return run_postman_collection(
-        OpenAPIToPostman(o).to_postman_collection_v2(),
-    )
+# @app.post('/run/test/from_schema', response_model=TestResult)
+# def run_test_run_from_schema(o: OpenAPISchemaToPostmanRequest) -> TestResult:
+#     """Create a new test run from OpenAPI Schema."""
+#     from .convert import OpenAPIToPostman
+#     return run_postman_collection(
+#         OpenAPIToPostman(o).to_postman_collection_v2(),
+#     )
 
 # @app.get('/test/run/{id}/fire', response_model=TestResult)
 # def run_test_run(id):

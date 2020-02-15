@@ -24,6 +24,6 @@ def test_test_data_to_hash(data):
                 test_data.append(
                     TestData(route=route, in_=in_, key=k, value=v)
                 )
-        v = list_of_test_data_to_params(test_data).dict()
+        v = list_of_test_data_to_params(route, test_data).dict()
         for td in test_data:
             assert v[td.in_.value][td.key] == d[td.key]

@@ -17,6 +17,7 @@ class TestData(BaseModel):
 
 
 class Expect(BaseModel):
+    comment: Optional[str]
     code: Optional[Union[int, str]]
     enabled: Optional[bool] = True
     response_time: Optional[int] = 200
@@ -33,11 +34,12 @@ class TestConfig(BaseModel):
 
 
 def list_of_test_data_to_params(
-    test_data: List[TestData]
+    route, test_data: List[TestData]
 ) -> openapi_v3.ParameterRequestData:
     d = defaultdict(lambda: {})
     for t in test_data:
-        d[t.in_.value][t.key] = t.value
+        if t.route.lower() == route.lower():
+            d[t.in_.value][t.key] = t.value
     return openapi_v3.ParameterRequestData(**dict(d))
 
 

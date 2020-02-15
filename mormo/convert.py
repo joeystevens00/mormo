@@ -482,7 +482,7 @@ class OpenAPIToPostman:
 
     def convert_parameters(self, verb, path, operation: Operation):
         params = defaultdict(lambda: {})
-        config_test_data = list_of_test_data_to_params(self.test_data).dict()
+        config_test_data = list_of_test_data_to_params(f"{verb} {path}", self.test_data).dict()
         fake_data = self.fake_data_from_route_schema(path, operation).dict()
         examples = flatten_iterables_in_dict(
             self.operation_param_examples(operation),
@@ -581,7 +581,6 @@ class OpenAPIToPostman:
                     if mapped_value:
                         kwargs['mode'] = 'raw'
                         kwargs['raw'] = json.dumps(dict(mapped_value))
-                        print(kwargs)
                         request_headers.append(
                             Parameter(
                                 key='Content-Type',

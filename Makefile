@@ -58,12 +58,12 @@ api:
 	poetry run uvicorn --port 8001 mormo.api:app
 
 .PHONY: openapi_test_spec
-.openapi_test_spec:
+openapi_test_spec:
 	curl localhost:8001/openapi.json > tests/data/openapi/json/openapi.json
 
 .PHONY: test_against_local_api
 test_against_local_api: openapi_test_spec
-	poetry run mormo run -i tests/data/openapi/json/openapi.json -o o.json --host http://localhost:8001 --test -t data.yaml --verbose
+	poetry run mormo run -i tests/data/openapi/json/openapi.json -o o.json --host http://localhost:8001 --test -t mormo.yaml --verbose
 
 .PHONY: test_against_local_api_curl
 test_against_local_api_curl:
