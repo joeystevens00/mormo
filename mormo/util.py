@@ -50,15 +50,14 @@ FILTERS = {
 #         return True
 
 
-def strip_nulls(d: dict):
-    nd = {}
-    for k, v in d.items():
-        if v is not None:
-            if isinstance(v, dict):
-                nd[k] = strip_nulls(v)
-            else:
-                nd[k] = v
-    return nd
+def strip_nulls(obj):
+  if isinstance(obj, (list, tuple, set)):
+    return type(obj)(strip_nulls(x) for x in obj if x is not None)
+  elif isinstance(obj, dict):
+    return type(obj)((strip_nulls(k), strip_nulls(v))
+      for k, v in obj.items() if k is not None and v is not None)
+  else:
+    return obj
 
 
 def blind_load(content):
