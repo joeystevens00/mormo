@@ -115,9 +115,9 @@ def test_convert_parameters(mormo):
                 continue
             assert param.name in by_name[in_]
             if param.example:
-                assert param.example == by_name[in_][param.name].value
+                assert str(param.example) == by_name[in_][param.name].value
             if param.examples:
-                assert param.examples[0] == by_name[in_][param.name].value
+                assert str(param.examples[0]) == by_name[in_][param.name].value
 
 
 def test_guess_resource():

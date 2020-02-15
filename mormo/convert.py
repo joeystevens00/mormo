@@ -513,7 +513,7 @@ class OpenAPIToPostman:
                 if param_in != 'body':
                     test_data = Parameter(
                         key=param.name,
-                        value=mapped_value[param.name],
+                        value=str(mapped_value[param.name]),
                     )
                 if param_in == 'path':
                     # If path param not defined in path
@@ -548,7 +548,7 @@ class OpenAPIToPostman:
                                 request_url_variables.append(
                                     Parameter(
                                         key=first_var,
-                                        value=mapped_value[first_var]
+                                        value=str(mapped_value[first_var]),
                                     )
                                 )
                             else:
@@ -562,7 +562,7 @@ class OpenAPIToPostman:
                                     request_url_variables.append(
                                         Parameter(
                                             key=path_vars[0],
-                                            value=mapped_value[param.name],
+                                            value=str(mapped_value[param.name]),
                                         )
                                     )
                                 else:
@@ -619,7 +619,7 @@ class OpenAPIToPostman:
                 request_url_variables.append(
                     Parameter(
                         key=path_var,
-                        value=mapped_value[path_var]
+                        value=str(mapped_value[path_var]),
                     )
                 )
             else:
