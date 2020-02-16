@@ -6,6 +6,11 @@ provider "docker" {}
 
 # create docker network resource
 
+# Configure the Docker provider
+provider "docker" {
+  host = "tcp://127.0.0.1:2376/"
+}
+
 resource "docker_container" "app" {
   depends_on = [docker_container.redis]
   name  = "app"
