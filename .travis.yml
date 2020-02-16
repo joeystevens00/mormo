@@ -4,8 +4,11 @@ services:
   - docker
 
 before_install:
-  - docker build --build-arg target=test -t mormo .
+  - docker build -t mormo:api .
 
 script:
-  - docker run --rm mormo pytest
-  - docker run --rm mormo mormo run -i openapi.json --host http://127.0.0.1:8001 --test_mormo_api -t mormo.yaml --verbose
+  - docker-compose up -d
+  - docker-compose exec app pip install pytest
+  - docker-compose exec app pytest
+  - docker-compose exec app bash -c 'curl 127.0.0.1:8001/openapi.json > openapi.json'
+  - docker-compose exec app mormo run -i openapi.json --test --host http://127.0.0.1:8001 -t mormo.yaml --verbose

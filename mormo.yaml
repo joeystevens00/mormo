@@ -16,7 +16,7 @@ POST /schema/{id}/to_postman:
   make_global:
     postman_id: .id
   expect:
-    response_time: 2000
+    response_time: 2500
 GET /postman/{id}:
   variables:
     id: "{{postman_id}}"
