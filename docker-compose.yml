@@ -1,4 +1,4 @@
-version: '2'
+version: '3.7'
 
 services:
   redis:
@@ -6,8 +6,10 @@ services:
   app:
     depends_on:
       - redis
-    image: mormo:api
-    restart: always
+    image: joeystevens00/mormo:api
+    deploy:
+      restart_policy:
+        condition: on-failure
     ports:
       - 8001:8001
     environment:

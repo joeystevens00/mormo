@@ -4,7 +4,9 @@ services:
   - docker
 
 before_install:
-  - docker build -t mormo:api .
+  - docker build -t joeystevens00/mormo:api .
+  - docker login --username joeystevens00 --password $DOCKER_HUB_TOKEN
+  - docker image push joeystevens00/mormo:api
 
 script:
   - docker-compose up -d
