@@ -65,6 +65,10 @@ docker: requirements.txt
 api:
 	poetry run uvicorn --port 8001 mormo.api:app
 
+.PHONY: install_git_hooks
+install_git_hooks:
+	ln -s -t .git/hooks/ scripts/git/*
+
 .PHONY: openapi_test_spec
 openapi_test_spec:
 	curl localhost:8001/openapi.json > tests/data/openapi/json/openapi.json
