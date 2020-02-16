@@ -49,27 +49,26 @@ def generate_schema(infile, outfile, test_file, **kwargs):
               help='Verbose option in newman.')
 def run(in_file, test_file, out_file, test, test_mormo_api, host, verbose):
     """Generate Postman Collections."""
+    if test_mormo_api:
+        test = True
+        addr, port = host.split('/')[-1].split(':')
+        port = port or 80
+        proc = Process(
+            target=uvicorn.run,
+            args=(app,),
+            kwargs={
+                "host": addr,
+                "port": int(port),
+                "log_level": "info",
+            },
+            daemon=True,
+        )
+        proc.start()
+        time.sleep(1)
+        with open (in_file, 'w') as f:
+            json.dump(requests.get(f'{host}/openapi.json').json(), f)
     generate_schema(in_file, out_file, test_file, host=host)
     if test:
-        if test_mormo_api:
-            addr, port = host.split('/')[-1].split(':')
-            port = port or 80
-            print(addr, port)
-            proc = Process(
-                target=uvicorn.run,
-                args=(app,),
-                kwargs={
-                    "host": addr,
-                    "port": int(port),
-                    "log_level": "info",
-                },
-                daemon=True,
-            )
-            proc.start()
-            time.sleep(1)
-            openapi_schema = pkg_resources.resource_filename('mormo', '../tests/data/openapi/json/openapi.json')
-            with open (openapi_schema, 'w') as f:
-                json.dump(requests.get(f'{host}/openapi.json').json(), f)
         res = run_newman(out_file, host=host, verbose=verbose)
         if test_mormo_api:
             proc.terminate()
