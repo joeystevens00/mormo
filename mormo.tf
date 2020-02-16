@@ -1,5 +1,3 @@
-provider "docker" {}
-
 # declare any input variables
 
 # create docker volume resource
