@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 import json
 from multiprocessing import Process
+import pkg_resources
 import sys
+import time
 
 import click
+import requests
 import uvicorn
 
 from mormo.api import app
@@ -63,6 +66,9 @@ def run(in_file, test_file, out_file, test, test_mormo_api, host, verbose):
                 daemon=True,
             )
             proc.start()
+            time.sleep(1)
+            with open (pkg_resources.resource_filename('mormo', '../tests/data/openapi/json/openapi.json'), 'w') as f:
+                json.dump(requests.get(f'{host}/openapi.json').json(), f)
         res = run_newman(out_file, host=host, verbose=verbose)
         if test_mormo_api:
             proc.terminate()
