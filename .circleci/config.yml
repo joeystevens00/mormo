@@ -5,6 +5,6 @@ jobs:
       - image: themattrix/tox
     steps:
       - checkout
-      - apt-get install npm -y
-      - npm install -g newman
+      - run: apt-get install npm -y
+      - run: npm install -g newman
       - run: tox
