@@ -8,6 +8,10 @@ branch_name=$(git branch | grep "*" | sed "s/\* //")
 reflog_message=$(git reflog -1)
 merged_branch_name=$(echo $reflog_message | cut -d" " -f 4 | sed "s/://")
 
+if [[ "$branch_name" == "master" ]]; then
+  make coverage coveralls
+fi
+
 make update_badge_branches
 git commit README.md -m "Update badge branch targets to target branch $branch_name"
 git push
