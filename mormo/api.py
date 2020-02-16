@@ -1,25 +1,26 @@
-import os
-from typing import Any, Dict, Optional, Union, Sequence, Iterable
+from typing import Optional
 import tempfile
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
-from starlette.requests import Request
-from starlette.staticfiles import StaticFiles
-from .schema import OpenAPISchemaToPostmanRequest, TestRun, TestResult, TestDataFileItem
+from fastapi import FastAPI
+
+from .convert import OpenAPIToPostman
+from .schema import OpenAPISchemaToPostmanRequest, TestResult
 from .schema.openapi_v3 import OpenAPISchemaV3, SaveDBResult
-from .schema.postman_collection_v2 import PostmanCollectionV2Schema, SaveDBResult as PostmanSaveDBResult
-from .util import DB, fingerprint, run_newman
+from .schema.postman_collection_v2 import (
+    Collection,
+    SaveDBResult as PostmanSaveDBResult,
+)
+from .util import DB
 from . import logger, redis_handle
 
 app = FastAPI()
+
 
 def save_db(o, response_cls):
     odb = DB(redis_handle(), model=o)
     if not odb.save():
         raise ValueError(f"Unable to save {o}(uid: {odb.uid}) to the DB.")
     logger.debug(f"New {type(o)}: {odb.uid}")
-    #print(o['paths']['/schema/{id}'])
     return response_cls(id=odb.uid, object=o)
 
 
@@ -40,10 +41,10 @@ def get_schema(id: str) -> OpenAPISchemaV3:
 
 
 @app.post("/schema/{id}/to_postman", response_model=PostmanSaveDBResult)
-def schema_to_postman(id: str, o: Optional[OpenAPISchemaToPostmanRequest] = None) -> PostmanSaveDBResult:
-    """Convert schema to PostmanCollectionV2Schema."""
-    #tmp_file = tempfile.mktemp()
-    #load_db(id).to_file(tmp_file)
+def schema_to_postman(
+    id: str, o: Optional[OpenAPISchemaToPostmanRequest] = None,
+) -> PostmanSaveDBResult:
+    """Convert schema to Collection."""
     from .convert import OpenAPIToPostman
     if o:
         kwargs = o.to_dict()
@@ -54,25 +55,30 @@ def schema_to_postman(id: str, o: Optional[OpenAPISchemaToPostmanRequest] = None
     return save_db(o, PostmanSaveDBResult).to_dict()
 
 
-@app.get("/postman/{id}", response_model=PostmanCollectionV2Schema)
-def get_postman(id: str) -> PostmanCollectionV2Schema:
+@app.get("/postman/{id}", response_model=Collection)
+def get_postman(id: str) -> Collection:
     """Get Postman Collection by ID."""
     return load_db(id)
 
 
-def run_postman_collection(collection, host: str, verbose: Optional[bool] = False):
-    tmp_file = tempfile.mktemp()
-    collection.to_file(tmp_file)
-    e = run_newman(tmp_file, host=host, verbose=verbose, json=True)
+def run_postman_collection(
+    collection, host: str, verbose: Optional[bool] = False,
+):
     return TestResult(
-        result=e,
+        result=collection.run(host=host, verbose=verbose, json=True),
         code=0,
         message="Newman executed"
     )
 
+# @app.post("/postman/{id}/test", response_model=TestResult)
+# def run_postman_test_from_args(id: str, o: OpenAPISchemaToPostmanRequest) -> TestResult:
+#     """Create a new test run from a postman collection."""
+#     return run_postman_collection(OpenAPIToPostman(o), host=host, verbose=verbose)
 
-@app.post("/postman/{id}/test", response_model=TestResult)
-def get_postman(id: str, host: str, verbose: Optional[bool] = False) -> TestResult:
+@app.get("/postman/{id}/test", response_model=TestResult)
+def run_postman_test(
+    id: str, host: str, verbose: Optional[bool] = False,
+) -> TestResult:
     """Create a new test run from a postman collection."""
     return run_postman_collection(load_db(id), host=host, verbose=verbose)
 
@@ -83,15 +89,13 @@ def get_postman(id: str, host: str, verbose: Optional[bool] = False) -> TestResu
 #     return save_db(o)
 
 
-@app.post('/run/test/from_schema', response_model=TestResult)
-def run_test_run_from_schema(o: OpenAPISchemaToPostmanRequest) -> TestResult:
-    """Create a new test run from OpenAPI Schema."""
-    #odb = save_db(o)
-    from .convert import OpenAPIToPostman
-    return run_postman_collection(
-        OpenAPIToPostman(o).to_postman_collection_v2(),
-        host=host, verbose=verbose,
-    )
+# @app.post('/run/test/from_schema', response_model=TestResult)
+# def run_test_run_from_schema(o: OpenAPISchemaToPostmanRequest) -> TestResult:
+#     """Create a new test run from OpenAPI Schema."""
+#     from .convert import OpenAPIToPostman
+#     return run_postman_collection(
+#         OpenAPIToPostman(o).to_postman_collection_v2(),
+#     )
 
 # @app.get('/test/run/{id}/fire', response_model=TestResult)
 # def run_test_run(id):

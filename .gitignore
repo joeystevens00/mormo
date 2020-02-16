@@ -19,3 +19,4 @@ schema.json
 data/2/*.json
 data/3/*.json
 data/*.json
+.coverage

@@ -1,6 +1,4 @@
-from collections import Counter, defaultdict
 import json
-from typing import Dict
 
 from pydantic import BaseModel as PyDanticBaseModel
 
@@ -9,8 +7,6 @@ from . import redis_handle
 
 
 class BaseModel(PyDanticBaseModel):
-    #_ref_count: Counter = Counter()
-
     def to_file(self, path):
         with open(path, 'w') as f:
             json.dump(json.loads(self.json()), f)
@@ -26,14 +22,10 @@ class BaseModel(PyDanticBaseModel):
         return d
 
     def resolve_ref(self, schema):
-        from .convert import find_ref
+        from .convert import OpenAPIToPostman
         if issubclass(schema.__class__, BaseModel):
             schema = schema.to_dict()
-        # self._ref_count[self.ref] += 1
-        # print(f'resolve_ref {self.ref} #{self._ref_count[self.ref]}')
-        # if isinstance(schema, type(self)):
-        #     schema = schema.to_dict()
-        return find_ref(self.ref, schema)
+        return OpenAPIToPostman.find_ref(self.ref, schema)
 
     def get_safe(self, v):
         try:

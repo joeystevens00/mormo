@@ -1,11 +1,24 @@
 import enum
+import tempfile
 from typing import Any, List, Optional, Union, Sequence
-
-from pydantic import Field
 
 from ..model import BaseModel
 
 VERSION = "2.1.0"
+
+EventListen = enum.Enum(
+    'listen',
+    [('test', "test"), ('prerequest', "prerequest")],
+)
+
+Mode = enum.Enum('mode', [
+    ('raw','raw'),
+    ('urlencoded','urlencoded'),
+    ('formdata', 'formdata'),
+    ('file', 'file'),
+    ('graphql', 'graphql'),
+])
+
 
 class Url(BaseModel):
     path: Sequence[str]
@@ -14,7 +27,7 @@ class Url(BaseModel):
     variable: list
 
 
-class ResponseOriginalRequest(BaseModel):
+class OriginalRequest(BaseModel):
     method: str
     url: Url
     body: dict
@@ -27,17 +40,17 @@ class Header(BaseModel):
 
 class Parameter(BaseModel):
     key: str
-    value: Any
+    value: str
     disabled: bool = False
-    description: Optional[str]
+    description: Optional[Union[str, dict]]
 
 
 class Response(BaseModel):
     id: str
     name: str
-    originalRequest: ResponseOriginalRequest
+    originalRequest: OriginalRequest
     status: str
-    code: str
+    code: int
     header: Sequence[Header]
     body: str
     cookie: list
@@ -48,9 +61,13 @@ class Auth(BaseModel):
     type: str
 
 
+class QueryParam(Parameter):
+    pass
+
+
 class RequestBody(BaseModel):
-    mode: Optional[str]
-    raw: Optional[str]
+    mode: Mode
+    raw: str
     urlencoded: Optional[list]
     formdata: Optional[list]
     file: Optional[dict]
@@ -58,7 +75,7 @@ class RequestBody(BaseModel):
     diabled: Optional[bool] = False
 
 
-class CollectionItemRequest(BaseModel):
+class Request(BaseModel):
     name: str
     description: dict
     method: str
@@ -84,8 +101,6 @@ class Script(BaseModel):
         return self
 
 
-EventListen = enum.Enum('listen', [('test', "test"), ('prerequest', "prerequest")])
-
 class Event(BaseModel):
     id: Optional[str]
     listen: str
@@ -93,19 +108,12 @@ class Event(BaseModel):
     script: Script
 
 
-class CollectionItem(BaseModel):
+class Item(BaseModel):
     id: str
     name: str
-    request: CollectionItemRequest
+    request: Request
     response: Sequence[Response]
     event: List[Event]
-
-
-class Collection(BaseModel):
-    id: str
-    name: str
-    item: Union[Sequence[CollectionItem], CollectionItem]
-    event: list
 
 
 class Variable(BaseModel):
@@ -114,7 +122,15 @@ class Variable(BaseModel):
     value: Optional[str]
 
 
-class InfoDescription(BaseModel):
+class Folder(BaseModel):
+    id: str
+    name: str
+    item: Union[Sequence[Item], Item]
+    event: list
+    variable: Optional[Sequence[Variable]]
+
+
+class Description(BaseModel):
     content: str
     type: str
 
@@ -123,18 +139,25 @@ class Info(BaseModel):
     name: str
     postman_id: str
     schema_: str
-    description: InfoDescription
+    description: Description
+
     class Config:
         fields = {'postman_id': '_postman_id', 'schema_': 'schema'}
 
 
-class PostmanCollectionV2Schema(BaseModel):
-    item: Sequence[Collection]
+class Collection(BaseModel):
+    item: Sequence[Union[Item, Folder]]
     event: Optional[list]
     variable: Optional[Sequence[Variable]]
     info: Info
 
+    def run(self, **kwargs):
+        from ..postman_test import run_newman
+        t = tempfile.mktemp()
+        self.to_file(t)
+        return run_newman(t, **kwargs)
+
 
 class SaveDBResult(BaseModel):
     id: str
-    object: PostmanCollectionV2Schema
+    object: Collection
