@@ -96,3 +96,7 @@ docs:
 .PHONY: view-docs
 view-docs:
 	xdg-open docs/build/index.html
+
+.PHONY: terraform
+terraform:
+	terraform apply -auto-approve
