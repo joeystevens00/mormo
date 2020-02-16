@@ -27,9 +27,17 @@ test: default test-nobuild
 bumpversion:
 	poetry version patch
 
+.PHONY: coveralls
+coveralls:
+	poetry run coveralls
+
+.PHONY: update_badge_branches
+update_badge_branches:
+	sed -Ei "s/(\?|\&)branch\=(\w|\.)+/\1branch\=`git branch | grep '*' | cut -d ' ' -f2`/g" README.md
+
 .PHONY: build
-build: default requirements.txt coverage docs bumpversion
-		git commit requirements.txt -m "Requirements $(poetry version)"
+build: update_badge_branches default requirements.txt coverage coveralls docs bumpversion
+	git commit requirements.txt -m "Requirements $(poetry version)"
 
 .PHONY: requirements.txt
 requirements.txt:
