@@ -8,7 +8,10 @@ before_install:
 
 script:
   - docker-compose up -d
-  - docker-compose exec app pip install pytest
-  - docker-compose exec app pytest
+  - docker-compose exec app pip install pytest pytest-cov python-coveralls
+  - docker-compose exec app pytest --cov=mormo
   - docker-compose exec app bash -c 'curl 127.0.0.1:8001/openapi.json > openapi.json'
   - docker-compose exec app mormo run -i openapi.json --test --host http://127.0.0.1:8001 -t mormo.yaml --verbose
+
+after_success:
+  - coveralls
