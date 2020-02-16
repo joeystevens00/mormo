@@ -47,6 +47,7 @@ class NewmanResult(BaseModel):
     stderr: Optional[str]
     stdout: str
     json_: Optional[dict]
+    code: int
 
     class Config:
         fields = {'json_': 'json'}

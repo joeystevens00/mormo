@@ -8,4 +8,4 @@ before_install:
 
 script:
   - docker run --rm mormo pytest
-  - docker run --rm mormo mormo run -i tests/data/openapi/json/openapi.json -o o.json --host http://localhost:8001 --test -t mormo.yaml --verbose
+  - docker run --rm mormo mormo run -i tests/data/openapi/json/openapi.json -o o.json --host http://localhost:8001 --test --test_mormo_api -t mormo.yaml --verbose

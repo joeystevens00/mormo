@@ -37,7 +37,8 @@ def run_newman(collection_file, host=None, verbose=None, json=False):
     return NewmanResult(
         stderr=e.stderr.decode('utf-8'),
         stdout=e.stdout.decode('utf-8'),
-        json_=json_content
+        json_=json_content,
+        code=e.returncode,
     )
 
 
