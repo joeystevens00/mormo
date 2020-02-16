@@ -67,7 +67,7 @@ api:
 
 .PHONY: install_git_hooks
 install_git_hooks:
-	ln -s -t .git/hooks/ scripts/git/*
+	bash -c 'cd .git/hooks; ls -d `pwd`/../../scripts/git/* | xargs ln -s -f'
 
 .PHONY: openapi_test_spec
 openapi_test_spec:
