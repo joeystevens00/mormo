@@ -25,7 +25,7 @@ GET /postman/{id}/test:
     id: "{{postman_id}}"
     host: localhost:8001
   expect:
-    response_time: 2500
+    response_time: 3000
 POST /postman/{id}/test:
   comment: Disabled in API
   variables:
