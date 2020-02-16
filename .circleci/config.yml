@@ -1,0 +1,12 @@
+version: 2
+jobs:
+ build:
+   machine: true
+   steps:
+     - checkout
+     - run: docker build -t mormo:api .
+     - run: docker-compose up -d
+     - run: docker-compose exec app pip install pytest
+     - run: docker-compose exec app pytest
+     - run: docker-compose exec app bash -c 'curl 127.0.0.1:8001/openapi.json > openapi.json'
+     - run: docker-compose exec app mormo run -i openapi.json --test --host http://127.0.0.1:8001 -t mormo.yaml --verbose
