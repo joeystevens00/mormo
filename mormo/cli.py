@@ -67,7 +67,8 @@ def run(in_file, test_file, out_file, test, test_mormo_api, host, verbose):
             )
             proc.start()
             time.sleep(1)
-            with open (pkg_resources.resource_filename('mormo', '../tests/data/openapi/json/openapi.json'), 'w') as f:
+            openapi_schema = pkg_resources.resource_filename('mormo', '../tests/data/openapi/json/openapi.json')
+            with open (openapi_schema, 'w') as f:
                 json.dump(requests.get(f'{host}/openapi.json').json(), f)
         res = run_newman(out_file, host=host, verbose=verbose)
         if test_mormo_api:
