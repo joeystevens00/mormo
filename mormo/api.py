@@ -1,5 +1,4 @@
 from typing import Optional
-import tempfile
 
 from fastapi import FastAPI
 
@@ -45,7 +44,6 @@ def schema_to_postman(
     id: str, o: Optional[OpenAPISchemaToPostmanRequest] = None,
 ) -> PostmanSaveDBResult:
     """Convert schema to Collection."""
-    from .convert import OpenAPIToPostman
     if o:
         kwargs = o.to_dict()
     else:

@@ -1,9 +1,6 @@
 from typing import Any, Dict, Optional, Union
-import tempfile
 from collections import defaultdict
 from typing import List
-
-from pydantic import AnyHttpUrl
 
 from . import openapi_v3, postman_collection_v2
 from ..model import BaseModel

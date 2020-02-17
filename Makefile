@@ -83,7 +83,7 @@ test_against_local_api_curl:
 
 .PHONY: lint
 lint:
-	poetry run flake8 --ignore E731,W503 --exclude tests/
+	poetry run flake8 --ignore E731,W503 --exclude tests/,.tox/
 
 .PHONY: coverage
 coverage:

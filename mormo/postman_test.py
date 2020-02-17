@@ -4,7 +4,7 @@ import tempfile
 
 from .schema import NewmanResult
 from .schema.postman_collection_v2 import (
-    Event, Script, Variable,
+    Event, Script,
 )
 from .util import (
     load_file, trim, uuidgen,

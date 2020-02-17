@@ -45,12 +45,15 @@ class ExternalDocs(BaseModel):
 
 
 class ParameterSchema(BaseModel):
-    type: Optional[str]
+    type_: Optional[str]
     format: Optional[str]
     title: Optional[str]
     maximum: Optional[int]
     minimum: Optional[int]
     nullable: Optional[bool]
+
+    class Config:
+        fields = {'type_': 'type'}
 
 
 class ServerVariable(BaseModel):

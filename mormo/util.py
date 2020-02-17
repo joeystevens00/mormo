@@ -51,13 +51,16 @@ FILTERS = {
 
 
 def strip_nulls(obj):
-  if isinstance(obj, (list, tuple, set)):
-    return type(obj)(strip_nulls(x) for x in obj if x is not None)
-  elif isinstance(obj, dict):
-    return type(obj)((strip_nulls(k), strip_nulls(v))
-      for k, v in obj.items() if k is not None and v is not None)
-  else:
-    return obj
+    if isinstance(obj, (list, tuple, set)):
+        return type(obj)(strip_nulls(x) for x in obj if x is not None)
+    elif isinstance(obj, dict):
+        return type(obj)(
+            (strip_nulls(k), strip_nulls(v))
+            for k, v in obj.items()
+            if k is not None and v is not None
+        )
+    else:
+        return obj
 
 
 def blind_load(content):
@@ -73,7 +76,8 @@ def blind_load(content):
         parsed_content = load_map[content_type](content)
     except (yaml.scanner.ScannerError, json.decoder.JSONDecodeError) as e:
         logger.warn(e)
-        parsed_content = load_map[("yaml" if content_type == "json" else "json")](content)
+        map_type = "yaml" if content_type == "json" else "json"
+        parsed_content = load_map[map_type](content)
     return parsed_content
 
 

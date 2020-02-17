@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import json
 from multiprocessing import Process
-import pkg_resources
 import sys
 import time
 
@@ -65,7 +64,7 @@ def run(in_file, test_file, out_file, test, test_mormo_api, host, verbose):
         )
         proc.start()
         time.sleep(1)
-        with open (in_file, 'w') as f:
+        with open(in_file, 'w') as f:
             json.dump(requests.get(f'{host}/openapi.json').json(), f)
     generate_schema(in_file, out_file, test_file, host=host)
     if test:

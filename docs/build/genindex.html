@@ -115,6 +115,14 @@
 </li>
       </ul></li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="convert.html#mormo.convert.PostmanVariables.body">body() (mormo.convert.PostmanVariables property)</a>
+</li>
+      <li><a href="convert.html#mormo.convert.ParameterBuilder.build">build() (mormo.convert.ParameterBuilder method)</a>
+</li>
+      <li><a href="convert.html#mormo.convert.ParameterBuilder.build_test_data_from_param">build_test_data_from_param() (mormo.convert.ParameterBuilder method)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="C">C</h2>
@@ -353,6 +361,8 @@
 </li>
         <li><a href="openapi.html#mormo.schema.openapi_v3.Parameter.Config.fields">(mormo.schema.openapi_v3.Parameter.Config attribute)</a>
 </li>
+        <li><a href="openapi.html#mormo.schema.openapi_v3.ParameterSchema.Config.fields">(mormo.schema.openapi_v3.ParameterSchema.Config attribute)</a>
+</li>
         <li><a href="openapi.html#mormo.schema.openapi_v3.Properties.Config.fields">(mormo.schema.openapi_v3.Properties.Config attribute)</a>
 </li>
         <li><a href="openapi.html#mormo.schema.openapi_v3.Reference.Config.fields">(mormo.schema.openapi_v3.Reference.Config attribute)</a>
@@ -394,11 +404,21 @@
 </li>
       <li><a href="convert.html#mormo.convert.OpenAPIToPostman.get_default_expect">get_default_expect() (mormo.convert.OpenAPIToPostman method)</a>
 </li>
+      <li><a href="convert.html#mormo.convert.ParameterBuilder.get_mapped_value">get_mapped_value() (mormo.convert.ParameterBuilder method)</a>
+</li>
+      <li><a href="convert.html#mormo.convert.ParameterBuilder.get_missing_path_variables">get_missing_path_variables() (mormo.convert.ParameterBuilder method)</a>
+</li>
+      <li><a href="convert.html#mormo.convert.ParameterBuilder.get_path_param_variables">get_path_param_variables() (mormo.convert.ParameterBuilder method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api.html#mormo.api.get_postman">get_postman() (in module mormo.api)</a>
 </li>
+      <li><a href="convert.html#mormo.convert.ParameterBuilder.get_request_body">get_request_body() (mormo.convert.ParameterBuilder method)</a>
+</li>
       <li><a href="api.html#mormo.api.get_schema">get_schema() (in module mormo.api)</a>
+</li>
+      <li><a href="convert.html#mormo.convert.PostmanVariables.global_">global_() (mormo.convert.PostmanVariables property)</a>
 </li>
       <li><a href="postman_collection.html#mormo.schema.postman_collection_v2.RequestBody.graphql">graphql (mormo.schema.postman_collection_v2.RequestBody attribute)</a>
 </li>
@@ -428,6 +448,8 @@
         <li><a href="postman_collection.html#mormo.schema.postman_collection_v2.Response.header">(mormo.schema.postman_collection_v2.Response attribute)</a>
 </li>
       </ul></li>
+      <li><a href="convert.html#mormo.convert.PostmanVariables.header">header() (mormo.convert.PostmanVariables property)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="openapi.html#mormo.schema.openapi_v3.Header.Config">Header.Config (class in mormo.schema.openapi_v3)</a>
@@ -720,6 +742,8 @@
       </ul></li>
       <li><a href="openapi.html#mormo.schema.openapi_v3.Parameter.Config">Parameter.Config (class in mormo.schema.openapi_v3)</a>
 </li>
+      <li><a href="convert.html#mormo.convert.ParameterBuilder">ParameterBuilder (class in mormo.convert)</a>
+</li>
       <li><a href="openapi.html#mormo.schema.openapi_v3.ParameterIn">ParameterIn (class in mormo.schema.openapi_v3)</a>
 </li>
       <li><a href="openapi.html#mormo.schema.openapi_v3.ParameterRequestData">ParameterRequestData (class in mormo.schema.openapi_v3)</a>
@@ -727,6 +751,8 @@
       <li><a href="openapi.html#mormo.schema.openapi_v3.Operation.parameters">parameters (mormo.schema.openapi_v3.Operation attribute)</a>
 </li>
       <li><a href="openapi.html#mormo.schema.openapi_v3.ParameterSchema">ParameterSchema (class in mormo.schema.openapi_v3)</a>
+</li>
+      <li><a href="openapi.html#mormo.schema.openapi_v3.ParameterSchema.Config">ParameterSchema.Config (class in mormo.schema.openapi_v3)</a>
 </li>
       <li><a href="openapi.html#mormo.schema.openapi_v3.Path.patch">patch (mormo.schema.openapi_v3.Path attribute)</a>
 </li>
@@ -764,6 +790,8 @@
 </li>
       <li><a href="convert.html#mormo.convert.PostmanConfig">PostmanConfig (class in mormo.convert)</a>
 </li>
+      <li><a href="convert.html#mormo.convert.PostmanVariables">PostmanVariables (class in mormo.convert)</a>
+</li>
       <li><a href="schema.html#mormo.schema.TestConfig.prerequest">prerequest (mormo.schema.TestConfig attribute)</a>
 </li>
       <li><a href="schema.html#mormo.schema.OpenAPISchemaToPostmanRequest.prerequest_scripts">prerequest_scripts (mormo.schema.OpenAPISchemaToPostmanRequest attribute)</a>
@@ -798,6 +826,8 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="convert.html#mormo.convert.PostmanVariables.query">query() (mormo.convert.PostmanVariables property)</a>
+</li>
       <li><a href="postman_collection.html#mormo.schema.postman_collection_v2.QueryParam">QueryParam (class in mormo.schema.postman_collection_v2)</a>
 </li>
   </ul></td>
@@ -1010,11 +1040,9 @@
 </li>
       <li><a href="openapi.html#mormo.schema.openapi_v3.Path.trace">trace (mormo.schema.openapi_v3.Path attribute)</a>
 </li>
-      <li><a href="openapi.html#mormo.schema.openapi_v3.ParameterSchema.type">type (mormo.schema.openapi_v3.ParameterSchema attribute)</a>
+      <li><a href="openapi.html#mormo.schema.openapi_v3.Properties.type">type (mormo.schema.openapi_v3.Properties attribute)</a>
 
       <ul>
-        <li><a href="openapi.html#mormo.schema.openapi_v3.Properties.type">(mormo.schema.openapi_v3.Properties attribute)</a>
-</li>
         <li><a href="openapi.html#mormo.schema.openapi_v3.SchemaObject.type">(mormo.schema.openapi_v3.SchemaObject attribute)</a>
 </li>
         <li><a href="postman_collection.html#mormo.schema.postman_collection_v2.Auth.type">(mormo.schema.postman_collection_v2.Auth attribute)</a>
@@ -1026,6 +1054,8 @@
         <li><a href="postman_collection.html#mormo.schema.postman_collection_v2.Variable.type">(mormo.schema.postman_collection_v2.Variable attribute)</a>
 </li>
       </ul></li>
+      <li><a href="openapi.html#mormo.schema.openapi_v3.ParameterSchema.type_">type_ (mormo.schema.openapi_v3.ParameterSchema attribute)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -1052,6 +1082,8 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="convert.html#mormo.convert.PostmanVariables.url">url() (mormo.convert.PostmanVariables property)</a>
+</li>
       <li><a href="postman_collection.html#mormo.schema.postman_collection_v2.RequestBody.urlencoded">urlencoded (mormo.schema.postman_collection_v2.RequestBody attribute)</a>
 </li>
   </ul></td>

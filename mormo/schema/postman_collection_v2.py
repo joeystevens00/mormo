@@ -1,6 +1,6 @@
 import enum
 import tempfile
-from typing import Any, List, Optional, Union, Sequence
+from typing import List, Optional, Union, Sequence
 
 from ..model import BaseModel
 
@@ -12,8 +12,8 @@ EventListen = enum.Enum(
 )
 
 Mode = enum.Enum('mode', [
-    ('raw','raw'),
-    ('urlencoded','urlencoded'),
+    ('raw', 'raw'),
+    ('urlencoded', 'urlencoded'),
     ('formdata', 'formdata'),
     ('file', 'file'),
     ('graphql', 'graphql'),
