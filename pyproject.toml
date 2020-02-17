@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mormo"
-version = "0.7.31"
+version = "0.7.32"
 description = "Automated API Testing Framework for OpenAPI Schema."
 authors = ["Joey Stevens <joey.stevens00@gmail.com>"]
 

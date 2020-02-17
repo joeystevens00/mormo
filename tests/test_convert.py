@@ -1,4 +1,5 @@
 from collections import ChainMap
+import tempfile
 import json
 import pytest
 from types import GeneratorType
@@ -11,6 +12,26 @@ from mormo.schema.openapi_v3 import Operation, OpenAPISchemaV3, Reference, Param
 
 
 REF_OR_OPERATION = Union[dict, Operation, Reference]
+
+def test_invalid_schema():
+    f = tempfile.mktemp(suffix='.json')
+    with open(f, 'w') as fp:
+        json.dump(['a'], fp)
+    with pytest.raises(ValueError) as excinfo:
+        oapi2pm(path=f)
+    assert "expected dict not list" in str(excinfo)
+
+
+def test_no_args():
+    with pytest.raises(ValueError) as excinfo:
+        oapi2pm()
+    assert "required field" in str(excinfo)
+
+
+def test_load_schema_invalid_file_type():
+    with pytest.raises(ValueError) as excinfo:
+        oapi2pm(path='schema.tf')
+    assert "Unknown file type" in str(excinfo)
 
 
 def test_parameter_builder_mapped_value(mormo):

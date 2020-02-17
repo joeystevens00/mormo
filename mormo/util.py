@@ -74,7 +74,7 @@ def blind_load(content):
         content_type = "yaml"
     try:
         parsed_content = load_map[content_type](content)
-    except (yaml.scanner.ScannerError, json.decoder.JSONDecodeError) as e:
+    except (yaml.scanner.ScannerError, yaml.parser.ParserError, json.decoder.JSONDecodeError) as e:
         logger.warn(e)
         map_type = "yaml" if content_type == "json" else "json"
         parsed_content = load_map[map_type](content)
@@ -109,10 +109,7 @@ def cls_from_str(name):
 def fingerprint(payload: Any):
     if isinstance(payload, Iterable) and not isinstance(payload, dict):
         payload = [p for p in payload]
-    if isinstance(payload, (dict, list)):
-        payload = repr(payload)
-    else:
-        payload = repr(payload)
+    payload = repr(payload)
     return hashlib.sha512(payload.encode('utf-8')).hexdigest()
 
 

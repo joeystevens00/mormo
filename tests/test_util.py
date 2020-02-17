@@ -35,6 +35,18 @@ def test_blind_load(content, expected):
     assert blind_load(content) == expected
 
 
+@pytest.mark.parametrize(
+    "content,exc",
+    [
+        ('a : : b', json.decoder.JSONDecodeError),
+        ('{', yaml.parser.ParserError),
+    ]
+)
+def test_blind_load_invalid_json(content, exc):
+    with pytest.raises(exc):
+        blind_load(content)
+
+
 def test_strip_nulls():
     assert strip_nulls({'a': None, 'b': 1}) == {'b': 1}
     assert strip_nulls({'a': 0}) == {'a': 0}
@@ -75,6 +87,12 @@ def test_load_file(random_dict):
     with open(x, 'w') as f:
         f.write(json.dumps(random_dict))
     assert load_file(x, content_type='json') == random_dict, "File loaded by specified content type"
+
+
+def test_load_file_invalid_type():
+    with pytest.raises(ValueError) as exc:
+        load_file("schema.tf")
+    assert "Unknown file type" in str(exc)
 
 
 def test_trim():

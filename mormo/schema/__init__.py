@@ -90,7 +90,6 @@ class OpenAPISchemaToPostmanRequest(BaseModel):
     postman_global_variables: Optional[List[postman_collection_v2.Variable]] = None  # noqa: E501
     expect: Optional[Dict[str, Expect]] = None
     verbose: Optional[bool] = False
-    resolve_references: Optional[bool] = False
 
     class Config:
         fields = {'schema_': 'schema'}

@@ -94,10 +94,6 @@ class OpenAPIToPostman:
             )
         if isinstance(self.schema, OpenAPISchemaV3):
             self.schema = self.schema.to_dict(no_empty=False)
-        if not isinstance(self.schema, dict):
-            raise ValueError("Could not load schema")
-        if request.resolve_references:
-            self.schema = self.resolve_refs(self.schema)
         # Validate schema
         self.schema = OpenAPISchemaV3(**self.schema)
         self.test_data = self.load_test_data(
