@@ -726,6 +726,7 @@ class ParameterBuilder:
         header = []
         body_args = {}
         for param in self.params:
+            param = self.mormo._resolve_object(param, new_cls=oapi.Parameter)
             if param.in_.value != "body":
                 continue
             mapped_value = self.get_mapped_value('body')
