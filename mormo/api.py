@@ -9,29 +9,17 @@ from .schema.postman_collection_v2 import (
     Collection,
     SaveDBResult as PostmanSaveDBResult,
 )
-from .util import DB
+from .util import DB, load_db, save_db
 from . import logger, redis_handle
 
 app = FastAPI()
-
-
-def save_db(o, response_cls):
-    odb = DB(redis_handle(), model=o)
-    if not odb.save():
-        raise ValueError(f"Unable to save {o}(uid: {odb.uid}) to the DB.")
-    logger.debug(f"New {type(o)}: {odb.uid}")
-    return response_cls(id=odb.uid, object=o)
-
-
-def load_db(id):
-    return DB.load_model_from_uid(redis_handle(), id)
 
 
 @app.post("/schema", response_model=SaveDBResult)
 def new_schema(o: OpenAPISchemaV3) -> SaveDBResult:
     """New Schema."""
     logger.debug("NEW SCHEMA")
-    return save_db(o, SaveDBResult).to_dict()
+    return save_db(o).to_dict()
 
 
 @app.get('/schema/{id}', response_model=OpenAPISchemaV3)
@@ -50,7 +38,7 @@ def schema_to_postman(
         kwargs = {}
     kwargs['schema_'] = load_db(id)
     o = OpenAPIToPostman(**kwargs).to_postman_collection_v2()
-    return save_db(o, PostmanSaveDBResult).to_dict()
+    return save_db(o).to_dict()
 
 
 @app.get("/postman/{id}", response_model=Collection)

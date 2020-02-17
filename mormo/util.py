@@ -16,7 +16,7 @@ import hypothesis
 from hypothesis import given
 from hypothesis_jsonschema._from_schema import from_schema
 
-from . import logger, Settings
+from . import logger, redis_handle, Settings
 
 RE_WORDCHARS = re.compile('^\w+$')  # noqa: W605
 
@@ -151,6 +151,18 @@ class DB:
             self.uid, self.cache_ttl,
             self.json.encode('utf-8'),
         )
+
+
+def save_db(o):
+    odb = DB(redis_handle(), model=o)
+    if not odb.save():
+        raise ValueError(f"Unable to save {o}(uid: {odb.uid}) to the DB.")
+    logger.debug(f"New {type(o)}: {odb.uid}")
+    return o.construct(**{'id': odb.uid, 'object': o.to_dict()})
+
+
+def load_db(id):
+    return DB.load_model_from_uid(redis_handle(), id)
 
 
 HTTP_REASON_CLASS = {

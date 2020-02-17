@@ -44,9 +44,9 @@ def test_parameter_builder_mapped_value(mormo):
             mapped_value = pb.get_mapped_value(param.in_.value)
             assert mapped_value[param.name]
             if param.example:
-                assert str(param.example) == mapped_value[param.name]
+                assert param.example == mapped_value[param.name]
             if param.examples:
-                assert str(param.examples[0]) == mapped_value[param.name]
+                assert param.examples[0] == mapped_value[param.name]
             assert pb.build_test_data_from_param(param, mapped_value).value == str(mapped_value[param.name])
 
 
@@ -152,27 +152,6 @@ def test_load_remote_refs(url):
 
 def validate_http_verb(verb):
     assert verb.lower() in ['post', 'get', 'delete', 'put', 'patch']
-
-
-def validate_no_ref(operation: REF_OR_OPERATION):
-    assert not isinstance(operation, Reference)
-    if isinstance(operation, Operation):
-        operation = operation.to_dict()
-    assert isinstance(operation, dict)
-    for k, v in operation.items():
-        if isinstance(v, REF_OR_OPERATION.__args__):
-            validate_no_ref(v)
-        elif isinstance(v, list):
-            for i in v:
-                if isinstance(i, REF_OR_OPERATION.__args__):
-                    validate_no_ref(i)
-        assert k != '$ref'
-        assert k != 'ref', 'Unaliased reference key should not exist'
-
-
-# def test_unresovled_refs(mormo):
-#     for _, __, operation in mormo.routes:
-#         validate_no_ref(operation)
 
 
 def test_to_postman_collection_v2(mormo):

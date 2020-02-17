@@ -143,42 +143,6 @@ class OpenAPIToPostman:
 
         return schema_path
 
-    @classmethod
-    def resolve_refs(cls, schema: dict):
-        """Replace OpenAPI references in schema with Python references."""
-        logger.debug("Resolving references in schema")
-        if isinstance(schema, OpenAPISchemaV3):
-            schema = schema.to_dict()
-
-        def traverse(d: dict):
-            for k, v in d.copy().items():
-                if isinstance(v, dict):
-                    schema_ref = None
-                    found_parent = None
-                    for p in v.keys():
-                        if isinstance(v[p], list):
-                            for i, e in enumerate(v[p]):
-                                if isinstance(e, dict):
-                                    schema_ref = e.get('$ref')
-                                    if schema_ref:
-                                        v[p][i] = cls.find_ref(
-                                            schema_ref, schema,
-                                        )
-                                    else:
-                                        logger.debug(
-                                            f"No $ref found in List[dict]: {e}",
-                                        )
-                        if not isinstance(v[p], dict):
-                            continue
-                        if not schema_ref:
-                            schema_ref = v.get(p, {}).get('$ref')
-                            if schema_ref:
-                                found_parent = p
-                    if schema_ref and schema_ref.startswith('#/') and found_parent:
-                        v[found_parent] = cls.find_ref(schema_ref, schema)
-                    traverse(v)
-            return d
-        return traverse(schema)
 
     @classmethod
     def path_parts(cls, path: str) -> list:
@@ -345,13 +309,6 @@ class OpenAPIToPostman:
         for path in self.schema.paths:
             yield (path, self.schema.paths[path])
 
-    @property
-    def tags(self):
-        tags = set()
-        for path in self.paths:
-            for _, definition in path[1].items():
-                tags = tags.union(set(definition.get_safe('tags', [])))
-        return tags
 
     @classmethod
     def guess_resource(cls, path: str):
