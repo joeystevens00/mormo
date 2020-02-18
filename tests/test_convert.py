@@ -107,6 +107,14 @@ def test_parameter_builder_mapped_value(mormo):
         PostmanVariables(global_=[], query=[], url=[pm.Parameter(key='id', value='1')], header=[], body=None),
     ),
     (
+        ['POST', '/test/{id}', Operation(
+            parameters=[],
+            responses={},
+        ),
+        [TestData(route='POST /test/{id}', in_='path', key='id', value='1')]],
+        PostmanVariables(global_=[], query=[], url=[pm.Parameter(key='id', value='1')], header=[], body=None),
+    ),
+    (
         ['POST', '/test/route', Operation(
             parameters=[Parameter(**{
                 'in': 'header',
@@ -119,6 +127,33 @@ def test_parameter_builder_mapped_value(mormo):
         ),
         []],
         PostmanVariables(global_=[], query=[], url=[], header=[pm.Parameter(key='id', value='1')], body=None),
+    ),
+    (
+        ['POST', '/test/route/{id}', Operation(
+            parameters=[
+                Parameter(**{
+                    'in': 'path',
+                    'required': True,
+                    'name': 'id',
+                    'schema': {'type':'string'},
+                    'example': '1',
+                }),
+                Parameter(**{
+                    'in': 'body',
+                    'required': True,
+                    'name': 'new object',
+                    'schema': {'type':'object', 'properties': {'a': {'type': 'integer'}}},
+                    'example': {'a': 1},
+                }),
+            ],
+            responses={},
+        ),
+        []],
+        PostmanVariables(
+            global_=[], query=[], url=[pm.Parameter(key='id', value='1')],
+            header=[pm.Parameter(key='Content-Type', value='application/json')],
+            body=pm.RequestBody(mode='raw', raw='{"a": 1}'),
+        ),
     ),
 ])
 def test_parameter_builder_build(build_params, postman_variables):
@@ -139,6 +174,13 @@ def test_find_ref():
 def test_path_parts():
     assert oapi2pm.path_parts('/abc/{id}') == ['abc', ':id']
     assert oapi2pm.path_parts('/project({project_id})') == ['project{{project_id}}']
+
+
+def test_load_remote_refs_with_ref():
+    url = "https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v3.0/petstore-expanded.yaml#components/schemas/Error"
+    schema = oapi2pm.load_remote_refs(url)
+    assert schema['type'] == 'object'
+    assert schema['properties']['code']['type']
 
 
 @pytest.mark.parametrize("url", [

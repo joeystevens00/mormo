@@ -115,7 +115,7 @@ class OpenAPIToPostman:
                     requests.get(schema_path).content.decode('utf-8'),
                 )
                 if ref_path:
-                    schema_path = cls.find_ref(ref_path, schema_path)
+                    schema_path = cls.find_ref(f'#/{ref_path}', schema_path)
             except Exception as e:
                 logger.error(f"Exception: {type(e)}: {e}")
                 raise e
@@ -422,10 +422,16 @@ class OpenAPIToPostman:
         examples = defaultdict(lambda: defaultdict(lambda: []))
         for param in self._resolve_object(operation.parameters or []):
             param = self._resolve_object(param, new_cls=oapi.Parameter)
+            param_in = param.in_.value
+            if param_in == 'body':
+                examples['body'] = []
+                target = examples['body']
+            else:
+                target = examples[param_in][param.name]
             if param.example:
-                examples[param.in_.value][param.name].extend([param.example])
+                target.extend([param.example])
             if param.examples:
-                examples[param.in_.value][param.name].extend(param.examples)
+                target.extend(param.examples)
         return examples
 
     def _resolve_object(self, o, new_cls=None):

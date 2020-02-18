@@ -231,6 +231,8 @@ def flatten_iterables_in_dict(d: dict, index=0, no_null=True, min_length=0):
                 min_length=min_length,
             )
         elif isinstance(v, Iterable):
+            if not len(v):
+                continue
             if (
                 (no_null and v[index] is None)
                 or (isinstance(v[index], str) and len(v[index]) <= min_length)
