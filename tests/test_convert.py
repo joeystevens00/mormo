@@ -51,6 +51,7 @@ def test_parameter_builder_mapped_value(mormo):
 
 
 @pytest.mark.parametrize("build_params, postman_variables", [
+    # Path Segment Variable
     (
         ['POST', '/test/route({id})', Operation(
             parameters=[Parameter(**{
@@ -65,6 +66,7 @@ def test_parameter_builder_mapped_value(mormo):
         []],
         PostmanVariables(global_=[pm.Variable(**{'id':'id', 'value':'1', 'type':'string'})], query=[], url=[], header=[], body=None),
     ),
+    # Query
     (
         ['POST', '/test/route', Operation(
             parameters=[Parameter(**{
@@ -79,6 +81,7 @@ def test_parameter_builder_mapped_value(mormo):
         []],
         PostmanVariables(global_=[], query=[pm.Parameter(key='id', value='1')], url=[], header=[], body=None),
     ),
+    # Path from example
     (
         ['POST', '/test/{id}', Operation(
             parameters=[Parameter(**{
@@ -93,6 +96,7 @@ def test_parameter_builder_mapped_value(mormo):
         []],
         PostmanVariables(global_=[], query=[], url=[pm.Parameter(key='id', value='1')], header=[], body=None),
     ),
+    # Path from test data
     (
         ['POST', '/test/{id}', Operation(
             parameters=[Parameter(**{
@@ -106,6 +110,7 @@ def test_parameter_builder_mapped_value(mormo):
         [TestData(route='POST /test/{id}', in_='path', key='id', value='1')]],
         PostmanVariables(global_=[], query=[], url=[pm.Parameter(key='id', value='1')], header=[], body=None),
     ),
+    # Path from test data with missing parameter
     (
         ['POST', '/test/{id}', Operation(
             parameters=[],
@@ -114,6 +119,7 @@ def test_parameter_builder_mapped_value(mormo):
         [TestData(route='POST /test/{id}', in_='path', key='id', value='1')]],
         PostmanVariables(global_=[], query=[], url=[pm.Parameter(key='id', value='1')], header=[], body=None),
     ),
+    # Header
     (
         ['POST', '/test/route', Operation(
             parameters=[Parameter(**{
@@ -128,6 +134,7 @@ def test_parameter_builder_mapped_value(mormo):
         []],
         PostmanVariables(global_=[], query=[], url=[], header=[pm.Parameter(key='id', value='1')], body=None),
     ),
+    # Body
     (
         ['POST', '/test/route/{id}', Operation(
             parameters=[
@@ -165,6 +172,37 @@ def test_parameter_builder_build(build_params, postman_variables):
     ))
     pb = ParameterBuilder(mormo, *build_params)
     assert pb.build() == postman_variables
+
+
+@pytest.mark.parametrize("build_params, exc, substr_match", [
+    (
+        ['POST', '/test/{id}/route/{routeid}', Operation(
+            parameters=[Parameter(**{
+                'in': 'path',
+                'required': True,
+                'name': 'other_id',
+                'schema': {'type':'string'},
+                'example': '1',
+            })],
+            responses={},
+        ),
+        []],
+        ValueError,
+        "not in path and multiple path variables",
+    ),
+])
+def test_parameter_builder_build_exc(build_params, exc, substr_match):
+    mormo = oapi2pm(
+        schema_=OpenAPISchemaV3(
+            openapi='3',
+            paths={build_params[1]: {
+                build_params[0].lower(): build_params[2]
+            }}),
+    )
+    with pytest.raises(exc) as excinfo:
+        pb = ParameterBuilder(mormo, *build_params)
+        print(pb.build())
+    assert substr_match in str(excinfo)
 
 
 def test_find_ref():

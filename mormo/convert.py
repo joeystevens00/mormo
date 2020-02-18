@@ -598,8 +598,8 @@ class ParameterBuilder:
             value=str(mapped_value[param.name]),
         )
 
-    def get_path_param_variables(self, param):
-        global_, url = [], []
+    def get_path_param_variables(self, url, param):
+        global_ = []
         segment_vars = set(RE_PATH_VARIABLE.findall(self.path))\
             .difference(self.path_vars)
         found_var_location = False
@@ -625,9 +625,9 @@ class ParameterBuilder:
             if len(not_processed_path_vars) > 1:
                 err = f"Path variable ({param.name}) not in path and multiple path variables ({not_processed_path_vars}) to choose from."  # noqa; E501
                 if self.mormo.strict:
-                    logger.warning(err)
-                else:
                     raise ValueError(err)
+                else:
+                    logger.warning(err)
             elif len(not_processed_path_vars) == 1:
                 first_var = not_processed_path_vars.pop()
                 if first_var in mapped_value:
@@ -668,6 +668,7 @@ class ParameterBuilder:
                 *[p.id for p in global_ if p],
             ]),
         )
+
         for path_var in missing_variable:
             mapped_value = self.get_mapped_value('path')
             if mapped_value.get(path_var):
@@ -738,9 +739,11 @@ class ParameterBuilder:
                 value=str(mapped_value[param.name]),
             )
             if param_in == 'path':
-                n_global, n_url = self.get_path_param_variables(param)
-                global_.extend(n_global)
-                url.extend(n_url)
+                n_global, n_url = self.get_path_param_variables(url, param)
+                if global_ != n_global:
+                    global_.extend(n_global)
+                if url != n_url:
+                    url.extend(n_url)
             elif param_in == 'query':
                 query.append(test_data)
             elif param_in == 'header':
@@ -751,7 +754,8 @@ class ParameterBuilder:
                 raise ValueError(f"unknown param location: {param_in}")
 
         n_header, body = self.get_request_body()
-        header.extend(n_header)
+        if header != n_header:
+            header.extend(n_header)
 
         n_global, n_url = self.get_missing_path_variables(global_, url)
         if global_ != n_global:
