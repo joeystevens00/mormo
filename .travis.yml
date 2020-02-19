@@ -6,8 +6,8 @@ services:
 jobs:
   include:
     - stage: "Docker Image"
+    - install: docker build -t joeystevens00/mormo:api .
     - script:
-      - docker build -t joeystevens00/mormo:api .
       - docker login --username joeystevens00 --password $DOCKER_HUB_TOKEN
       - docker image push joeystevens00/mormo:api
       name: "Build and Upload"
