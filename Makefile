@@ -18,7 +18,7 @@ clean:
 
 .PHONY: test-nobuild
 test-nobuild:
-	poetry run pytest -s --full-trace -vv --new-first --maxfail=1 --concmode=mproc
+	poetry run pytest -s --full-trace -vv --new-first --maxfail=1 --workers auto
 
 .PHONY: test
 test: default test-nobuild

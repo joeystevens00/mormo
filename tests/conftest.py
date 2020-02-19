@@ -28,7 +28,7 @@ def pytest_addoption(parser):
     )
 
 
-#@hashable_lru
+@hashable_lru
 def test_data(paths, collection=False):
     for path in paths:
         o =  OpenAPIToPostman(path=path)
