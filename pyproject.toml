@@ -27,6 +27,7 @@ pytest-cov = "^2.8.1"
 sphinx = "^2.4.1"
 coveralls = "^1.11.1"
 tox = "^3.14.4"
+pytest-concurrent = "^0.2.2"
 
 [tool.poetry.scripts]
 mormo = "mormo:cli.cli"
