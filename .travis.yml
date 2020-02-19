@@ -14,7 +14,7 @@ jobs:
       script:
           - docker-compose up -d
           - docker-compose exec app pip install pytest pytest-cov coveralls pytest-parallel
-          - docker-compose exec app pytest --cov=mormo --workers auto --new-first -vv
+          - docker-compose exec app pytest --cov=mormo --workers 2 --new-first -vv
       name: unit test
       after_success: docker-compose exec app bash -c "export COVERALLS_REPO_TOKEN=$REPO_TOKEN; coveralls"
     - script:
