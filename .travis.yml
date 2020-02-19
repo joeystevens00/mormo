@@ -3,11 +3,14 @@ python: 3.7
 services:
   - docker
 
+
+install:
+  - docker build -t joeystevens00/mormo:api .
+  
 jobs:
   include:
     - stage: "Docker Image"
     - script:
-      - docker build -t joeystevens00/mormo:api .
       - docker login --username joeystevens00 --password $DOCKER_HUB_TOKEN
       - docker image push joeystevens00/mormo:api
       name: "Build and Upload"
