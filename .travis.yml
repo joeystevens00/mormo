@@ -17,8 +17,8 @@ jobs:
           - docker-compose exec app pytest --cov=mormo
       name: unit test
       after_success: docker-compose exec app bash -c "export COVERALLS_REPO_TOKEN=$REPO_TOKEN; coveralls"
-    - script:
-          - docker-compose up -d
+    - script: docker-compose up -d
+      after_script:
           - docker-compose exec app bash -c 'curl 127.0.0.1:8001/openapi.json > openapi.json'
           - docker-compose exec app mormo run -i openapi.json --test --host http://127.0.0.1:8001 -t mormo.yaml --verbose
       name: integration test
