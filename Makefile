@@ -16,12 +16,9 @@ clean:
 	test "`ls .hypothesis`" && rm -rf .hypothesis/ || return 0
 	test "`ls newman`" && rm -rf newman/ || return 0
 
-.PHONY: test-nobuild
-test-nobuild:
-	poetry run pytest -s --full-trace -vv --new-first --maxfail=1 --workers auto
-
 .PHONY: test
-test: default test-nobuild
+test:
+	poetry run pytest -s --full-trace -vv --new-first --maxfail=1
 
 .PHONY: bumpversion
 bumpversion:

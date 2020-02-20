@@ -87,7 +87,7 @@ class OpenAPISchemaToPostmanRequest(BaseModel):
     prerequest_scripts: Optional[Dict[str, postman_collection_v2.Script]] = None  # noqa: E501
     collection_test_scripts: Optional[List[postman_collection_v2.Script]] = None  # noqa: E501
     collection_prerequest_scripts: Optional[List[postman_collection_v2.Script]] = None  # noqa: E501
-    postman_global_variables: Optional[List[postman_collection_v2.Variable]] = None  # noqa: E501
+    collection_global_variables: Optional[List[postman_collection_v2.Variable]] = None  # noqa: E501
     expect: Optional[Dict[str, Expect]] = None
     verbose: Optional[bool] = False
 

@@ -1,14 +1,14 @@
-from collections import ChainMap
+from collections import defaultdict, ChainMap
 import tempfile
 import json
 import pytest
 from types import GeneratorType
 from typing import Union
 
-from mormo.convert import OpenAPIToPostman as oapi2pm, ParameterBuilder, PostmanVariables, Route
-from mormo.schema import TestData
+from mormo.convert import OpenAPIToPostman as oapi2pm, ParameterBuilder, PostmanConfig, PostmanVariables, Route
+from mormo.schema import Expect, TestData
 from mormo.schema import postman_collection_v2 as pm
-from mormo.schema.openapi_v3 import Operation, OpenAPISchemaV3, Reference, Parameter, ParameterSchema
+from mormo.schema.openapi_v3 import Operation, OpenAPISchemaV3, Reference, Parameter, ParameterIn, ParameterSchema
 
 
 REF_OR_OPERATION = Union[dict, Operation, Reference]
@@ -32,6 +32,49 @@ def test_load_schema_invalid_file_type():
     with pytest.raises(ValueError) as excinfo:
         oapi2pm(path='schema.tf')
     assert "Unknown file type" in str(excinfo)
+
+
+def in_all_params(**kwargs):
+    for in_ in list(ParameterIn):
+        yield TestData(**kwargs, in_=in_)
+
+@pytest.mark.parametrize("build_params, test_config, postman_config", [
+    # Path Segment Variable
+    (
+        ['POST', '/test/route({id})', Operation(
+            parameters=[Parameter(**{
+                'in': 'path',
+                'required': True,
+                'name': 'id',
+                'schema': {'type':'string'},
+                'example': '1',
+            })],
+            responses={},
+        ),
+        []],
+        {'POST /test/route({id})': {
+            'variables': {'id': '77'}
+        }}, # Test Config,
+        PostmanConfig(
+            expect=defaultdict(lambda: Expect()),
+            test_data=list(in_all_params(route='POST /test/route({id})', key='id', value='77')),
+            test_scripts=defaultdict(lambda: []),
+            prerequest_scripts=defaultdict(lambda: []),
+            collection_global_variables=[],
+            collection_test_scripts=[],
+            collection_prerequest_scripts=[],
+        ),
+    ),
+])
+def test_test_config_to_postman_config(build_params, test_config, postman_config):
+    mormo = oapi2pm(schema_=OpenAPISchemaV3(
+        openapi='3',
+        paths={build_params[1]: {
+            build_params[0].lower(): build_params[2]
+        }},
+        test_data=build_params[3],
+    ))
+    assert mormo.test_config_to_postman_config(test_config) == postman_config
 
 
 def test_parameter_builder_mapped_value(mormo):

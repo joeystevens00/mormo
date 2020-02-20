@@ -43,7 +43,7 @@ PostmanConfig = namedtuple('PostmanConfig', [
     'test_data',
     'test_scripts',
     'prerequest_scripts',
-    'postman_global_variables',
+    'collection_global_variables',
     'collection_test_scripts',
     'collection_prerequest_scripts',
 ])
@@ -73,7 +73,7 @@ class OpenAPIToPostman:
         self.prerequest_scripts = defaultdict(lambda: [], request.prerequest_scripts or [])  # noqa: E501
         self.collection_test_scripts = request.collection_test_scripts or []
         self.collection_prerequest_scripts = request.collection_prerequest_scripts or []  # noqa: E501
-        self.postman_global_variables = request.postman_global_variables or []
+        self.collection_global_variables = request.collection_global_variables or []
         self.default_expect = Expect()
         self.expect = request.expect or defaultdict(self.get_default_expect)
         path = request.path
@@ -169,7 +169,7 @@ class OpenAPIToPostman:
         expect = defaultdict(lambda: self.default_expect)
         test_scripts = defaultdict(lambda: [])
         prerequest_scripts = defaultdict(lambda: [])
-        postman_global_variables = []
+        collection_global_variables = []
         collection_test_scripts = []
         collection_prerequest_scripts = []
         for route, td_item in test_config.items():
@@ -179,7 +179,7 @@ class OpenAPIToPostman:
             else:
                 variables = i.variables
             if route.lower() == 'collection':
-                postman_global_variables.extend([
+                collection_global_variables.extend([
                     Variable(id=k, type='string', value=v)
                     for k, v in (variables or {}).items()
                 ])
@@ -224,7 +224,7 @@ class OpenAPIToPostman:
                         }});
                     """.format(variable=variable, response_path=response_path),  # noqa: E501
                 ))
-            # self.postman_global_variables.append(
+            # self.collection_global_variables.append(
             # Variable(id=variable, type='string', value='default'))
             for k, v in (variables or {}).items():
                 test_data.extend([
@@ -277,7 +277,7 @@ class OpenAPIToPostman:
                         appended_test_scripts = True
         return PostmanConfig(
             expect, test_data, test_scripts,
-            prerequest_scripts, postman_global_variables,
+            prerequest_scripts, collection_global_variables,
             collection_test_scripts, collection_prerequest_scripts,
         )
 
@@ -292,8 +292,8 @@ class OpenAPIToPostman:
         postman_config = self.test_config_to_postman_config(test_config)
         self.test_scripts.update(postman_config.test_scripts)
         self.prerequest_scripts.update(postman_config.prerequest_scripts)
-        self.postman_global_variables.extend(
-            postman_config.postman_global_variables,
+        self.collection_global_variables.extend(
+            postman_config.collection_global_variables,
         )
         self.collection_test_scripts.extend(
             postman_config.collection_test_scripts,
@@ -308,7 +308,6 @@ class OpenAPIToPostman:
     def paths(self):
         for path in self.schema.paths:
             yield (path, self.schema.paths[path])
-
 
     @classmethod
     def guess_resource(cls, path: str):
@@ -462,7 +461,7 @@ class OpenAPIToPostman:
             variable=vars or [],
         )
         items = []
-        global_variables = self.postman_global_variables or []
+        global_variables = self.collection_global_variables or []
         ordered_routes = self.order_routes_by_resource(self.routes)
         for verb, path, operation in ordered_routes:
             responses = []

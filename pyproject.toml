@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mormo"
-version = "0.7.36"
+version = "0.7.37"
 description = "Automated API Testing Framework for OpenAPI Schema."
 authors = ["Joey Stevens <joey.stevens00@gmail.com>"]
 
@@ -27,7 +27,6 @@ pytest-cov = "^2.8.1"
 sphinx = "^2.4.1"
 coveralls = "^1.11.1"
 tox = "^3.14.4"
-pytest-parallel = "^0.0.10"
 
 [tool.poetry.scripts]
 mormo = "mormo:cli.cli"
