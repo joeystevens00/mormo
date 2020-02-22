@@ -12,12 +12,15 @@
   - tests/__pycache__
   - tests/data/openapi
   - tests/data/swagger
+  - tests/schema/__pycache__
   - data
   - data/2
   - data/3
   - log
   - log/test_results
   - docs/build
+  - .terraform
+  - .tox
 :files:
   - .gitignore
   - requirements.txt
@@ -35,3 +38,9 @@
   - a.json
   - .coverage
   - o.json
+  - terraform.tfstate
+  - terraform.tfstate.backup
+  - openapi.json
+  - collection_2_1_0.json
+  - openapi_3.json
+  - json_to_yaml.py

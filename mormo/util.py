@@ -5,6 +5,7 @@ import importlib
 import hashlib
 import jinja2
 import json
+import os
 import random
 import re
 import secrets
@@ -16,7 +17,7 @@ import hypothesis
 from hypothesis import given
 from hypothesis_jsonschema._from_schema import from_schema
 
-from . import logger, Settings
+from . import logger, redis_handle, Settings
 
 RE_WORDCHARS = re.compile('^\w+$')  # noqa: W605
 
@@ -51,13 +52,16 @@ FILTERS = {
 
 
 def strip_nulls(obj):
-  if isinstance(obj, (list, tuple, set)):
-    return type(obj)(strip_nulls(x) for x in obj if x is not None)
-  elif isinstance(obj, dict):
-    return type(obj)((strip_nulls(k), strip_nulls(v))
-      for k, v in obj.items() if k is not None and v is not None)
-  else:
-    return obj
+    if isinstance(obj, (list, tuple, set)):
+        return type(obj)(strip_nulls(x) for x in obj if x is not None)
+    elif isinstance(obj, dict):
+        return type(obj)(
+            (strip_nulls(k), strip_nulls(v))
+            for k, v in obj.items()
+            if k is not None and v is not None
+        )
+    else:
+        return obj
 
 
 def blind_load(content):
@@ -71,10 +75,21 @@ def blind_load(content):
         content_type = "yaml"
     try:
         parsed_content = load_map[content_type](content)
-    except (yaml.scanner.ScannerError, json.decoder.JSONDecodeError) as e:
+    except (yaml.scanner.ScannerError, yaml.parser.ParserError, json.decoder.JSONDecodeError) as e:
         logger.warn(e)
-        parsed_content = load_map[("yaml" if content_type == "json" else "json")](content)
+        map_type = "yaml" if content_type == "json" else "json"
+        parsed_content = load_map[map_type](content)
     return parsed_content
+
+
+def is_local_path(s):
+    """Does not consider paths above cwd to be valid."""
+    if (
+        isinstance(s, str)
+        and os.path.exists(s)
+        and os.path.abspath(s).startswith(os.getcwd())
+    ):
+        return True
 
 
 def load_file(f, content_type=None):
@@ -105,10 +120,7 @@ def cls_from_str(name):
 def fingerprint(payload: Any):
     if isinstance(payload, Iterable) and not isinstance(payload, dict):
         payload = [p for p in payload]
-    if isinstance(payload, (dict, list)):
-        payload = repr(payload)
-    else:
-        payload = repr(payload)
+    payload = repr(payload)
     return hashlib.sha512(payload.encode('utf-8')).hexdigest()
 
 
@@ -150,6 +162,18 @@ class DB:
             self.uid, self.cache_ttl,
             self.json.encode('utf-8'),
         )
+
+
+def save_db(o):
+    odb = DB(redis_handle(), model=o)
+    if not odb.save():
+        raise ValueError(f"Unable to save {o}(uid: {odb.uid}) to the DB.")
+    logger.debug(f"New {type(o)}: {odb.uid}")
+    return o.construct(**{'id': odb.uid, 'object': o.to_dict()})
+
+
+def load_db(id):
+    return DB.load_model_from_uid(redis_handle(), id)
 
 
 HTTP_REASON_CLASS = {
@@ -218,6 +242,8 @@ def flatten_iterables_in_dict(d: dict, index=0, no_null=True, min_length=0):
                 min_length=min_length,
             )
         elif isinstance(v, Iterable):
+            if not len(v):
+                continue
             if (
                 (no_null and v[index] is None)
                 or (isinstance(v[index], str) and len(v[index]) <= min_length)
@@ -276,6 +302,7 @@ def generate_from_schema(schema, no_empty=True, retry=5):
     if (
         schema.get('type') == 'string'
         and not schema.get('minLength')
+        and not schema.get('maxLength')
         and not schema.get('format')
     ):
         schema['minLength'] = settings.test_data_str_min_length
@@ -299,7 +326,7 @@ def generate_from_schema(schema, no_empty=True, retry=5):
             f()
             passed = True
             retry = 0
-        except hypothesis.errors.Unsatisfiable:
+        except (hypothesis.errors.Unsatisfiable, hypothesis.errors.FailedHealthCheck):
             retry -= 1
     if not passed:
         raise hypothesis.errors.Unsatisfiable("Max retries hit")

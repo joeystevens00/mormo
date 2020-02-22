@@ -43,7 +43,7 @@
 
 <dl class="method">
 <dt id="mormo.convert.OpenAPIToPostman.fake_data_from_route_schema">
-<code class="sig-name descname">fake_data_from_route_schema</code><span class="sig-paren">(</span><em class="sig-param">path: str</em>, <em class="sig-param">operation: mormo.schema.openapi_v3.Operation</em><span class="sig-paren">)</span> &#x2192; mormo.schema.openapi_v3.ParameterRequestData<a class="headerlink" href="#mormo.convert.OpenAPIToPostman.fake_data_from_route_schema" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">fake_data_from_route_schema</code><span class="sig-paren">(</span><em class="sig-param">verb: str</em>, <em class="sig-param">path: str</em>, <em class="sig-param">operation: mormo.schema.openapi_v3.Operation</em><span class="sig-paren">)</span> &#x2192; mormo.schema.openapi_v3.ParameterRequestData<a class="headerlink" href="#mormo.convert.OpenAPIToPostman.fake_data_from_route_schema" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -88,7 +88,7 @@
 
 <dl class="method">
 <dt id="mormo.convert.OpenAPIToPostman.order_routes_by_resource">
-<em class="property">classmethod </em><code class="sig-name descname">order_routes_by_resource</code><span class="sig-paren">(</span><em class="sig-param">routes: Iterable[mormo.convert.Route], verb_ordering: Optional[List] = None</em><span class="sig-paren">)</span> &#x2192; List[mormo.convert.Route]<a class="headerlink" href="#mormo.convert.OpenAPIToPostman.order_routes_by_resource" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">order_routes_by_resource</code><span class="sig-paren">(</span><em class="sig-param">routes: Iterable[mormo.convert.Route], verb_ordering: List = ['post', 'put', 'get', 'patch', 'delete']</em><span class="sig-paren">)</span> &#x2192; List[mormo.convert.Route]<a class="headerlink" href="#mormo.convert.OpenAPIToPostman.order_routes_by_resource" title="Permalink to this definition">¶</a></dt>
 <dd><p>Identify REST resources and order CRUD operations safely.</p>
 </dd></dl>
 
@@ -103,20 +103,8 @@
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="mormo.convert.OpenAPIToPostman.resolve_refs">
-<em class="property">classmethod </em><code class="sig-name descname">resolve_refs</code><span class="sig-paren">(</span><em class="sig-param">schema: dict</em><span class="sig-paren">)</span><a class="headerlink" href="#mormo.convert.OpenAPIToPostman.resolve_refs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Replace OpenAPI references in schema with Python references.</p>
-<p>Leaves the ‘$ref’ key but points the value to the path in the schema.</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="mormo.convert.OpenAPIToPostman.routes">
 <em class="property">property </em><code class="sig-name descname">routes</code><a class="headerlink" href="#mormo.convert.OpenAPIToPostman.routes" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="mormo.convert.OpenAPIToPostman.tags">
-<em class="property">property </em><code class="sig-name descname">tags</code><a class="headerlink" href="#mormo.convert.OpenAPIToPostman.tags" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -137,9 +125,50 @@
 </dd></dl>
 
 <dl class="class">
-<dt id="mormo.convert.PostmanConfig">
-<em class="property">class </em><code class="sig-prename descclassname">mormo.convert.</code><code class="sig-name descname">PostmanConfig</code><span class="sig-paren">(</span><em class="sig-param">expect</em>, <em class="sig-param">test_data</em>, <em class="sig-param">test_scripts</em>, <em class="sig-param">prerequest_scripts</em>, <em class="sig-param">postman_global_variables</em>, <em class="sig-param">collection_test_scripts</em>, <em class="sig-param">collection_prerequest_scripts</em><span class="sig-paren">)</span><a class="headerlink" href="#mormo.convert.PostmanConfig" title="Permalink to this definition">¶</a></dt>
+<dt id="mormo.convert.ParameterBuilder">
+<em class="property">class </em><code class="sig-prename descclassname">mormo.convert.</code><code class="sig-name descname">ParameterBuilder</code><span class="sig-paren">(</span><em class="sig-param">mormo</em>, <em class="sig-param">verb</em>, <em class="sig-param">path</em>, <em class="sig-param">operation</em>, <em class="sig-param">test_data</em><span class="sig-paren">)</span><a class="headerlink" href="#mormo.convert.ParameterBuilder" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
+<dt id="mormo.convert.ParameterBuilder.build">
+<code class="sig-name descname">build</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; mormo.convert.PostmanVariables<a class="headerlink" href="#mormo.convert.ParameterBuilder.build" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mormo.convert.ParameterBuilder.build_test_data_from_param">
+<code class="sig-name descname">build_test_data_from_param</code><span class="sig-paren">(</span><em class="sig-param">param</em>, <em class="sig-param">mapped_value</em><span class="sig-paren">)</span><a class="headerlink" href="#mormo.convert.ParameterBuilder.build_test_data_from_param" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mormo.convert.ParameterBuilder.get_mapped_value">
+<code class="sig-name descname">get_mapped_value</code><span class="sig-paren">(</span><em class="sig-param">v</em><span class="sig-paren">)</span><a class="headerlink" href="#mormo.convert.ParameterBuilder.get_mapped_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mormo.convert.ParameterBuilder.get_missing_path_variables">
+<code class="sig-name descname">get_missing_path_variables</code><span class="sig-paren">(</span><em class="sig-param">global_</em>, <em class="sig-param">url</em><span class="sig-paren">)</span><a class="headerlink" href="#mormo.convert.ParameterBuilder.get_missing_path_variables" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mormo.convert.ParameterBuilder.get_path_param_variables">
+<code class="sig-name descname">get_path_param_variables</code><span class="sig-paren">(</span><em class="sig-param">url</em>, <em class="sig-param">param</em><span class="sig-paren">)</span><a class="headerlink" href="#mormo.convert.ParameterBuilder.get_path_param_variables" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mormo.convert.ParameterBuilder.get_request_body">
+<code class="sig-name descname">get_request_body</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mormo.convert.ParameterBuilder.get_request_body" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mormo.convert.PostmanConfig">
+<em class="property">class </em><code class="sig-prename descclassname">mormo.convert.</code><code class="sig-name descname">PostmanConfig</code><span class="sig-paren">(</span><em class="sig-param">expect</em>, <em class="sig-param">test_data</em>, <em class="sig-param">test_scripts</em>, <em class="sig-param">prerequest_scripts</em>, <em class="sig-param">collection_global_variables</em>, <em class="sig-param">collection_test_scripts</em>, <em class="sig-param">collection_prerequest_scripts</em><span class="sig-paren">)</span><a class="headerlink" href="#mormo.convert.PostmanConfig" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="mormo.convert.PostmanConfig.collection_global_variables">
+<em class="property">property </em><code class="sig-name descname">collection_global_variables</code><a class="headerlink" href="#mormo.convert.PostmanConfig.collection_global_variables" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 4</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="mormo.convert.PostmanConfig.collection_prerequest_scripts">
 <em class="property">property </em><code class="sig-name descname">collection_prerequest_scripts</code><a class="headerlink" href="#mormo.convert.PostmanConfig.collection_prerequest_scripts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alias for field number 6</p>
@@ -158,12 +187,6 @@
 </dd></dl>
 
 <dl class="method">
-<dt id="mormo.convert.PostmanConfig.postman_global_variables">
-<em class="property">property </em><code class="sig-name descname">postman_global_variables</code><a class="headerlink" href="#mormo.convert.PostmanConfig.postman_global_variables" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for field number 4</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="mormo.convert.PostmanConfig.prerequest_scripts">
 <em class="property">property </em><code class="sig-name descname">prerequest_scripts</code><a class="headerlink" href="#mormo.convert.PostmanConfig.prerequest_scripts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alias for field number 3</p>
@@ -178,6 +201,41 @@
 <dl class="method">
 <dt id="mormo.convert.PostmanConfig.test_scripts">
 <em class="property">property </em><code class="sig-name descname">test_scripts</code><a class="headerlink" href="#mormo.convert.PostmanConfig.test_scripts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mormo.convert.PostmanVariables">
+<em class="property">class </em><code class="sig-prename descclassname">mormo.convert.</code><code class="sig-name descname">PostmanVariables</code><span class="sig-paren">(</span><em class="sig-param">global_</em>, <em class="sig-param">query</em>, <em class="sig-param">url</em>, <em class="sig-param">header</em>, <em class="sig-param">body</em><span class="sig-paren">)</span><a class="headerlink" href="#mormo.convert.PostmanVariables" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="mormo.convert.PostmanVariables.body">
+<em class="property">property </em><code class="sig-name descname">body</code><a class="headerlink" href="#mormo.convert.PostmanVariables.body" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 4</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mormo.convert.PostmanVariables.global_">
+<em class="property">property </em><code class="sig-name descname">global_</code><a class="headerlink" href="#mormo.convert.PostmanVariables.global_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mormo.convert.PostmanVariables.header">
+<em class="property">property </em><code class="sig-name descname">header</code><a class="headerlink" href="#mormo.convert.PostmanVariables.header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mormo.convert.PostmanVariables.query">
+<em class="property">property </em><code class="sig-name descname">query</code><a class="headerlink" href="#mormo.convert.PostmanVariables.query" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mormo.convert.PostmanVariables.url">
+<em class="property">property </em><code class="sig-name descname">url</code><a class="headerlink" href="#mormo.convert.PostmanVariables.url" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alias for field number 2</p>
 </dd></dl>
 

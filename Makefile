@@ -16,12 +16,9 @@ clean:
 	test "`ls .hypothesis`" && rm -rf .hypothesis/ || return 0
 	test "`ls newman`" && rm -rf newman/ || return 0
 
-.PHONY: test-nobuild
-test-nobuild:
-	poetry run pytest -sq
-
 .PHONY: test
-test: default test-nobuild
+test:
+	poetry run pytest -s --full-trace -vv --new-first --maxfail=1
 
 .PHONY: bumpversion
 bumpversion:
@@ -34,9 +31,14 @@ coveralls:
 .PHONY: update_badge_branches
 update_badge_branches:
 	sed -Ei "s/(\?|\&)branch\=(\w|\.)+/\1branch\=`git branch | grep '*' | cut -d ' ' -f2`/g" README.md
+	sed -Ei "s/(\?|\&)version\=(\w|\.)+/\1version\=`git branch | grep '*' | cut -d ' ' -f2`/g" README.md
+	sed -Ei "s/readthedocs\.io\/en\/(\w|\.)+/readthedocs\.io\/en\/`git branch | grep '*' | cut -d ' ' -f2`/g" README.md
+	sed -Ei "s/(\?|\&)branch\=(\w|\.)+/\1branch\=`git branch | grep '*' | cut -d ' ' -f2`/g" docs/src/index.rst
+	sed -Ei "s/(\?|\&)version\=(\w|\.)+/\1version\=`git branch | grep '*' | cut -d ' ' -f2`/g" docs/src/index.rst
+	sed -Ei "s/readthedocs\.io\/en\/(\w|\.)+/readthedocs\.io\/en\/`git branch | grep '*' | cut -d ' ' -f2`/g" docs/src/index.rst
 
 .PHONY: build
-build: update_badge_branches default requirements.txt coverage coveralls docs bumpversion
+build: coverage coveralls bumpversion default docs update_badge_branches requirements.txt publish_pypi
 	git commit requirements.txt -m "Requirements $(poetry version)"
 
 .PHONY: requirements.txt
@@ -83,11 +85,19 @@ test_against_local_api_curl:
 
 .PHONY: lint
 lint:
-	poetry run flake8 --ignore E731,W503 --exclude tests/
+	poetry run flake8 --ignore E731,W503 --exclude tests/,.tox/
 
 .PHONY: coverage
 coverage:
 	poetry run pytest --cov=mormo tests/
+
+.PHONY: upload_schema
+upload_schema:
+	sed -Ei "s/(url:\s+)(.*?),/\1\"$(shell cat tests/data/openapi/json/openapi.json | nc termbin.com 9999 | sed 's/\//\\\//g')\",/" docs/src/swagger_ui.html
+
+.PHONY: convert_openapi_schema_to_yaml
+convert_openapi_schema_to_yaml:
+	python3 scripts/json_to_yaml.py tests/data/openapi/json/openapi.json tests/data/openapi/yaml/openapi.yaml
 
 .PHONY: docs
 docs:
@@ -96,3 +106,11 @@ docs:
 .PHONY: view-docs
 view-docs:
 	xdg-open docs/build/index.html
+
+.PHONY: terraform
+terraform:
+	terraform apply -auto-approve
+
+.PHONY: publish_pypi
+publish_pypi:
+	poetry publish -u __token__  -p "$(MORMO_PYPI_TOKEN)"

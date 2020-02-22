@@ -2,7 +2,8 @@ import tempfile
 import json
 import pytest
 from mormo.model import BaseModel
-from mormo.util import gen_string, cls_from_str, DB
+from mormo.schema.postman_collection_v2 import Variable
+from mormo.util import load_db, save_db, gen_string, cls_from_str, DB
 
 from .conftest import generate_dicts
 
@@ -16,6 +17,19 @@ def test_base_model(test_object):
     test_object.to_file(tmp)
     with open(tmp, 'r') as f:
         assert json.load(f) == expected
+
+
+def test_base_model_save(test_object, redis):
+    test_object, expected = test_object
+    test_dbo = test_object.save()
+    assert json.loads(test_dbo._get(redis, test_dbo.uid))['data'] == expected
+
+
+def test_save_db_model_wrapper(test_object, redis):
+    test_object, expected = test_object
+    o = save_db(test_object)
+    assert o.object == expected
+    assert load_db(o.id) == expected    
 
 
 def test_db_save(test_dbo, redis):

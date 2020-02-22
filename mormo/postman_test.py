@@ -1,13 +1,15 @@
+import json
+
 from shlex import quote
 import subprocess
 import tempfile
 
 from .schema import NewmanResult
 from .schema.postman_collection_v2 import (
-    Event, Script, Variable,
+    Event, Script,
 )
 from .util import (
-    load_file, trim, uuidgen,
+    fingerprint, load_file, trim, uuidgen,
 )
 
 
@@ -55,7 +57,7 @@ def new_event(listen, script):
 
 def javascript(name, exec):
     return Script(
-        id=uuidgen(),
+        id=fingerprint([name, exec]),
         name=name,
         exec=trim(exec),
         type='text/javascript',
@@ -92,4 +94,17 @@ def js_test_response_time(route, max_time_ms):
                     return pm.expect(pm.response.responseTime).to.be.below({max_time_ms});
                 }});
             """.format(max_time_ms=max_time_ms),
+    )
+
+
+def js_test_validate_schema(route, schema, reference_schema):
+    return javascript(
+        name=f"{route} responds according to schema",
+        exec="""
+            pm.test('Schema is valid', function() {{
+                var schema = {schema};
+                tv4.addSchema({reference_schema});
+                pm.expect(tv4.validate(pm.response.json(), schema)).to.be.true;
+            }});
+        """.format(schema=json.dumps(schema), reference_schema=json.dumps(reference_schema))
     )

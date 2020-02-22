@@ -3,15 +3,29 @@ python: 3.7
 services:
   - docker
 
-before_install:
-  - docker build -t mormo:api .
-
-script:
-  - docker-compose up -d
-  - docker-compose exec app pip install pytest pytest-cov coveralls
-  - docker-compose exec app pytest --cov=mormo
-  - docker-compose exec app bash -c 'curl 127.0.0.1:8001/openapi.json > openapi.json'
-  - docker-compose exec app mormo run -i openapi.json --test --host http://127.0.0.1:8001 -t mormo.yaml --verbose
-
-after_success:
-  - docker-compose exec app bash -c "export COVERALLS_REPO_TOKEN=$REPO_TOKEN; coveralls"
+jobs:
+  include:
+    - stage: build
+      script:
+          - docker build -t joeystevens00/mormo:api .
+          - docker login --username joeystevens00 --password $DOCKER_HUB_TOKEN
+          - docker image push joeystevens00/mormo:api
+    - stage: "test"
+      script:
+          - docker-compose up -d
+          - docker-compose exec app pip install pytest pytest-cov coveralls
+          - docker-compose exec app pytest --cov=mormo --new-first -vv
+      name: unit test
+      after_success: docker-compose exec app bash -c "export COVERALLS_REPO_TOKEN=$REPO_TOKEN; coveralls"
+    - script:
+          - docker-compose up -d
+          - sleep 10
+          - docker-compose exec app bash -c 'curl 127.0.0.1:8001/openapi.json > openapi.json'
+          - docker-compose exec app mormo run -i openapi.json --test --host http://127.0.0.1:8001 -t mormo.yaml --verbose
+      name: integration test
+      deploy:
+        provider: releases
+        api_key: $GITHUB_OAUTH_TOKEN
+        file: "openapi.json"
+        skip_cleanup: true
+        draft: true

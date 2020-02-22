@@ -1,6 +1,6 @@
 import enum
 import tempfile
-from typing import Any, List, Optional, Union, Sequence
+from typing import List, Optional, Union, Sequence
 
 from ..model import BaseModel
 
@@ -12,8 +12,8 @@ EventListen = enum.Enum(
 )
 
 Mode = enum.Enum('mode', [
-    ('raw','raw'),
-    ('urlencoded','urlencoded'),
+    ('raw', 'raw'),
+    ('urlencoded', 'urlencoded'),
     ('formdata', 'formdata'),
     ('file', 'file'),
     ('graphql', 'graphql'),
@@ -93,12 +93,13 @@ class Script(BaseModel):
     name: Optional[str]
 
     def __add__(self, x):
-        if isinstance(self.exec, str):
-            self.exec = [self.exec]
+        n = self.copy(deep=True)
+        if isinstance(n.exec, str):
+            n.exec = [n.exec]
         if isinstance(x.exec, str):
             x.exec = [x.exec]
-        self.exec.extend(x.exec)
-        return self
+        n.exec.extend(x.exec)
+        return n
 
 
 class Event(BaseModel):

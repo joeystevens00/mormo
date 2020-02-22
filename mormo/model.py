@@ -12,7 +12,9 @@ class BaseModel(PyDanticBaseModel):
             json.dump(json.loads(self.json()), f)
 
     def save(self):
-        DB(redis_handle(), model=self).save()
+        dbo = DB(redis_handle(), model=self)
+        dbo.save()
+        return dbo
 
     def to_dict(self, no_empty=True):
         """Fixes serialization of dict()"""

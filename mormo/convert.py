@@ -8,15 +8,17 @@ import yaml
 from .postman_test import (
     new_event, javascript, js_test_code,
     js_test_content_type, js_test_response_time,
+    js_test_validate_schema,
 )
 from .schema import (
-    Expect, OpenAPISchemaToPostmanRequest, TestData, TestConfig,
+    Expect, OpenAPISchemaToPostmanRequest, PostmanTest,
+    TestData, TestConfig,
     list_of_test_data_to_params,
 )
 from .schema import openapi_v3 as oapi
 from .schema.openapi_v3 import (
     Operation, OpenAPISchemaV3, ParameterIn,
-    ParameterRequestData, Reference,
+    ParameterRequestData, Reference, SchemaObject,
 )
 from .schema.postman_collection_v2 import (
     Auth, Collection, Item,
@@ -26,7 +28,7 @@ from .schema.postman_collection_v2 import (
 from .util import (
     blind_load,
     fingerprint, flatten_iterables_in_dict, generate_from_schema,
-    get_http_reason, hashable_lru, load_file, pick_one,
+    get_http_reason, hashable_lru, is_local_path, load_file, pick_one,
     uuidgen, trim, HTTP_VERBS,
 )
 from . import logger
@@ -43,9 +45,16 @@ PostmanConfig = namedtuple('PostmanConfig', [
     'test_data',
     'test_scripts',
     'prerequest_scripts',
-    'postman_global_variables',
+    'collection_global_variables',
     'collection_test_scripts',
     'collection_prerequest_scripts',
+])
+PostmanVariables = namedtuple('PostmanVariables', [
+    'global_',
+    'query',
+    'url',
+    'header',
+    'body',
 ])
 
 
@@ -66,7 +75,7 @@ class OpenAPIToPostman:
         self.prerequest_scripts = defaultdict(lambda: [], request.prerequest_scripts or [])  # noqa: E501
         self.collection_test_scripts = request.collection_test_scripts or []
         self.collection_prerequest_scripts = request.collection_prerequest_scripts or []  # noqa: E501
-        self.postman_global_variables = request.postman_global_variables or []
+        self.collection_global_variables = request.collection_global_variables or []
         self.default_expect = Expect()
         self.expect = request.expect or defaultdict(self.get_default_expect)
         path = request.path
@@ -87,10 +96,6 @@ class OpenAPIToPostman:
             )
         if isinstance(self.schema, OpenAPISchemaV3):
             self.schema = self.schema.to_dict(no_empty=False)
-        if not isinstance(self.schema, dict):
-            raise ValueError("Could not load schema")
-        if request.resolve_references:
-            self.schema = self.resolve_refs(self.schema)
         # Validate schema
         self.schema = OpenAPISchemaV3(**self.schema)
         self.test_data = self.load_test_data(
@@ -108,9 +113,11 @@ class OpenAPIToPostman:
                 ref_path = schema_path.split('#')[-1]
             try:
                 logger.debug(f"Fetching remote reference: {schema_path}")
-                schema_path = blind_load(requests.get(schema_path).content.decode('utf-8'))
+                schema_path = blind_load(
+                    requests.get(schema_path).content.decode('utf-8'),
+                )
                 if ref_path:
-                    schema_path = cls.find_ref(ref_path, schema_path)
+                    schema_path = cls.find_ref(f'#/{ref_path}', schema_path)
             except Exception as e:
                 logger.error(f"Exception: {type(e)}: {e}")
                 raise e
@@ -138,47 +145,6 @@ class OpenAPIToPostman:
 
         return schema_path
 
-    @classmethod
-    def resolve_refs(cls, schema: dict):
-        """Replace OpenAPI references in schema with Python references.
-
-        Leaves the '$ref' key but points the value to the path in the schema."""
-        logger.debug("Resolving references in schema")
-        if isinstance(schema, OpenAPISchemaV3):
-            schema = schema.to_dict()
-
-        def traverse(d: dict):
-            for k, v in d.copy().items():
-                if isinstance(v, dict):
-                    schema_ref = None
-                    found_parent = None
-                    # TODO: Support escape chars '~0' escapes '~' '~1' escapes '/'
-                    # #/paths/~1cases~1/post/responses/200/content/application~1json/schema/properties/createdBy/oneOf/1
-                    #
-                    # TODO: Support array indexing (see above example)
-                    for p in v.keys():
-                        if isinstance(v[p], list):
-                            for i, e in enumerate(v[p]):
-                                if isinstance(e, dict):
-                                    schema_ref = e.get('$ref')
-                                    if schema_ref:
-                                        v[p][i] = cls.find_ref(schema_ref, schema)
-                                    else:
-                                        logger.debug(
-                                            f"No $ref found in List[dict]: {e}",
-                                        )
-                        if not isinstance(v[p], dict):
-                            continue
-                        if not schema_ref:
-                            schema_ref = v.get(p, {}).get('$ref')
-                            if schema_ref:
-                                found_parent = p
-                    if schema_ref and schema_ref.startswith('#/') and found_parent:
-                        v[found_parent] = cls.find_ref(schema_ref, schema)
-                    traverse(v)
-            return d
-        return traverse(schema)
-
 
     @classmethod
     def path_parts(cls, path: str) -> list:
@@ -186,7 +152,7 @@ class OpenAPIToPostman:
         for part in path.split('/')[1:]:
             is_path_variable = re.match('^{(\w+)}$', part)  # noqa: W605
             is_path_segment = RE_PATH_VARIABLE.findall(part)
-            queries = RE_PATH_VARIABLE_SEGMENT.findall(part)
+            # queries = RE_PATH_VARIABLE_SEGMENT.findall(part)
             if is_path_variable:
                 part = f':{is_path_variable.group(1)}'
             elif is_path_segment:
@@ -202,10 +168,10 @@ class OpenAPIToPostman:
 
     def test_config_to_postman_config(self, test_config) -> PostmanConfig:
         test_data = []
-        expect = defaultdict(lambda: self.default_expect)
+        expect = defaultdict(self.get_default_expect)
         test_scripts = defaultdict(lambda: [])
         prerequest_scripts = defaultdict(lambda: [])
-        postman_global_variables = []
+        collection_global_variables = []
         collection_test_scripts = []
         collection_prerequest_scripts = []
         for route, td_item in test_config.items():
@@ -215,7 +181,7 @@ class OpenAPIToPostman:
             else:
                 variables = i.variables
             if route.lower() == 'collection':
-                postman_global_variables.extend([
+                collection_global_variables.extend([
                     Variable(id=k, type='string', value=v)
                     for k, v in (variables or {}).items()
                 ])
@@ -236,7 +202,8 @@ class OpenAPIToPostman:
                         ) for t in i.prerequest
                     ])
                 continue
-
+            verb, path = route.split(' ')
+            route = f'{verb.upper()} {path}'
             for variable, response_path in (i.make_global or {}).items():
                 response_path = ''.join([
                     '["' + trim(p) + '"]'
@@ -260,9 +227,11 @@ class OpenAPIToPostman:
                         }});
                     """.format(variable=variable, response_path=response_path),  # noqa: E501
                 ))
-            # self.postman_global_variables.append(
+            # self.collection_global_variables.append(
             # Variable(id=variable, type='string', value='default'))
             for k, v in (variables or {}).items():
+                if is_local_path(v):
+                    v = load_file(v)
                 test_data.extend([
                     TestData(route=route, in_=in_, key=k, value=v)
                     for in_ in list(ParameterIn)
@@ -290,7 +259,7 @@ class OpenAPIToPostman:
                 if code == 'default':
                     code = 500
                 appended_test_scripts = False
-                for mimetype, route_definition in (response.content or {}).items():
+                for mimetype, media_type in (response.content or {}).items():
                     if appended_test_scripts:
                         continue
                     candidate_route = (
@@ -298,22 +267,35 @@ class OpenAPIToPostman:
                         or str(code).startswith('2')
                     )
                     if candidate_route:
-                        test_scripts[route_str].append(
-                            js_test_code(route_str, code),
-                        )
-                        test_scripts[route_str].append(
-                            js_test_content_type(route_str, mimetype),
-                        )
-                        test_scripts[route_str].append(
-                            js_test_response_time(
-                                route_str,
-                                expect[route_str].response_time,
+                        enabled_tests = expect[route_str].enabled_tests
+                        if mimetype == 'application/json':
+                            schema_ = self._resolve_object(media_type.schema_ or {})
+                            mt_props = self._resolve_object(
+                                schema_.get('properties') or {},
                             )
-                        )
+                            if PostmanTest.schema_validation in enabled_tests:
+                                test_scripts[route_str].append(
+                                    js_test_validate_schema(route_str, mt_props, self.schema.to_dict())
+                                )
+                        if PostmanTest.code in enabled_tests:
+                            test_scripts[route_str].append(
+                                js_test_code(route_str, code),
+                            )
+                        if PostmanTest.content_type in enabled_tests:
+                            test_scripts[route_str].append(
+                                js_test_content_type(route_str, mimetype),
+                            )
+                        if PostmanTest.response_time in enabled_tests:
+                            test_scripts[route_str].append(
+                                js_test_response_time(
+                                    route_str,
+                                    expect[route_str].response_time,
+                                )
+                            )
                         appended_test_scripts = True
         return PostmanConfig(
             expect, test_data, test_scripts,
-            prerequest_scripts, postman_global_variables,
+            prerequest_scripts, collection_global_variables,
             collection_test_scripts, collection_prerequest_scripts,
         )
 
@@ -328,9 +310,15 @@ class OpenAPIToPostman:
         postman_config = self.test_config_to_postman_config(test_config)
         self.test_scripts.update(postman_config.test_scripts)
         self.prerequest_scripts.update(postman_config.prerequest_scripts)
-        self.postman_global_variables.extend(postman_config.postman_global_variables)
-        self.collection_test_scripts.extend(postman_config.collection_test_scripts)
-        self.collection_prerequest_scripts.extend(postman_config.collection_prerequest_scripts)
+        self.collection_global_variables.extend(
+            postman_config.collection_global_variables,
+        )
+        self.collection_test_scripts.extend(
+            postman_config.collection_test_scripts,
+        )
+        self.collection_prerequest_scripts.extend(
+            postman_config.collection_prerequest_scripts,
+        )
         test_data.extend(postman_config.test_data)
         return test_data
 
@@ -338,14 +326,6 @@ class OpenAPIToPostman:
     def paths(self):
         for path in self.schema.paths:
             yield (path, self.schema.paths[path])
-
-    @property
-    def tags(self):
-        tags = set()
-        for path in self.paths:
-            for _, definition in path[1].items():
-                tags = tags.union(set(definition.get_safe('tags', [])))
-        return tags
 
     @classmethod
     def guess_resource(cls, path: str):
@@ -366,13 +346,11 @@ class OpenAPIToPostman:
     @classmethod
     def order_routes_by_resource(
         cls, routes: Iterable[Route],
-        verb_ordering: Optional[List] = None
+        verb_ordering: List = list(['post', 'put', 'get', 'patch', 'delete'])
     ) -> List[Route]:
         """Identify REST resources and order CRUD operations safely."""
         by_resource = defaultdict(lambda: {})
         output = []
-        if not verb_ordering:
-            verb_ordering = ['post', 'put', 'get', 'patch', 'delete']
         for route in routes:
             verb, path, operation = route
             by_resource[cls.guess_resource(path)][verb] = route
@@ -383,8 +361,11 @@ class OpenAPIToPostman:
         return output
 
     def fake_data_from_route_schema(
-        self, path: str, operation: Operation,
+        self, verb: str, path: str, operation: Operation,
     ) -> ParameterRequestData:
+        if not self.expect[f'{verb.upper()} {path}'].fake_data:
+            logger.debug(f"Skipping fake_data generation for {verb} {path}")
+            return ParameterRequestData()
         d = defaultdict(lambda: {})
         all_path_vars = RE_PATH_VARIABLE.findall(path)
         parameters = self._resolve_object(operation.parameters)
@@ -415,8 +396,9 @@ class OpenAPIToPostman:
         )
         if request_body:
             for mimetype, media_type in request_body.content.items():
+                schema_ = self._resolve_object(media_type.schema_ or {})
                 mt_props = self._resolve_object(
-                    media_type.schema_.properties or {},
+                    schema_.get('properties') or {},
                 )
                 for name, prop in mt_props.items():
                     prop = self._resolve_object(prop)
@@ -430,7 +412,7 @@ class OpenAPIToPostman:
         for path_var in set(all_path_vars).difference(set(d.get('path', []))):
             logger.warning(
                 f"Path variable {path_var} isn't defined as a parameter "
-                f" generating test data for it assuming it's a string."
+                f"generating test data for it assuming it's a string."
             )
             d['path'][path_var] = pick_one(
                 generate_from_schema({'type': 'string'}),
@@ -459,13 +441,19 @@ class OpenAPIToPostman:
         examples = defaultdict(lambda: defaultdict(lambda: []))
         for param in self._resolve_object(operation.parameters or []):
             param = self._resolve_object(param, new_cls=oapi.Parameter)
+            param_in = param.in_.value
+            if param_in == 'body':
+                examples['body'] = []
+                target = examples['body']
+            else:
+                target = examples[param_in][param.name]
             if param.example:
-                examples[param.in_.value][param.name].extend([param.example])
+                target.extend([param.example])
             if param.examples:
-                examples[param.in_.value][param.name].extend(param.examples)
+                target.extend(param.examples)
         return examples
 
-    def _resolve_object(self, o, new_cls=None):
+    def _resolve_object(self, o, new_cls=None, deep=False):
         if isinstance(o, Reference):
             logger.debug(f"Resolving reference {o.ref} Try #{self.ref_depth[o.ref]}")  # noqa; E501
             if self.ref_depth[o.ref] > self.max_ref_depth:
@@ -475,165 +463,45 @@ class OpenAPIToPostman:
                     return
             self.ref_depth[o.ref] += 1
             o = o.resolve_ref(self.schema)
-        if isinstance(o, dict):
-            if new_cls:
-                o = new_cls(**o)
+        elif '$ref' in dir(o):
+            if isinstance(o, SchemaObject):
+                logger.warning("SchemaObject should be a Reference object, catching serialization issue...")
+                o = self._resolve_object(
+                    Reference(
+                        **{'$ref': o.__getattribute__('$ref')},
+                    ),
+                    new_cls=new_cls,
+                    deep=deep,
+                )
+            else:
+                logger.error(
+                    "Possible serialization issue with object,"
+                    f" object of type ({type(o)}) shouldn't be a reference: ({o})"
+                )
+        elif isinstance(o, dict) and o.get('$ref'):
+            o = self._resolve_object(
+                Reference(**o),
+                new_cls=new_cls,
+                deep=deep,
+            )
+        if 'to_dict' in dir(o):
+            o = o.to_dict()
+        if deep and isinstance(o, dict):
+            for k, v in o.items():
+                if (isinstance(v, dict) and v.get('$ref')) or isinstance(v, Reference):
+                    if isinstance(v, Reference):
+                        v = v.to_dict()
+                    o[k] = self._resolve_object(Reference(**v), deep=True)
+                else:
+                    o[k] = self._resolve_object(v, deep=True)
+        if isinstance(o, dict) and new_cls:
+            o = new_cls(**o)
         return o
 
     def convert_parameters(self, verb, path, operation: Operation):
-        params = defaultdict(lambda: {})
-        config_test_data = list_of_test_data_to_params(f"{verb} {path}", self.test_data).dict()
-        fake_data = self.fake_data_from_route_schema(path, operation).dict()
-        examples = flatten_iterables_in_dict(
-            self.operation_param_examples(operation),
-        )
-        request_headers = []
-        request_url_variables = []
-        global_variables = []
-        query = []
-        kwargs = {}
-        params = self._resolve_object(operation.parameters or [])
-        path_vars = [p[1:] for p in self.path_parts(path) if p.startswith(':')]
-        segment_vars = set(RE_PATH_VARIABLE.findall(path))\
-            .difference(path_vars)
-        for param in params:
-            param = self._resolve_object(param, new_cls=oapi.Parameter)
-            param_in = param.in_.value
-            # Parameter precedence:
-            # Test Data,
-            # Examples in OpenAPI Schema,
-            # Fake Data generated from OpenAPI Schema
-            mapped_value = ChainMap(
-                config_test_data.get(param_in, {}),
-                examples.get(param_in, {}),
-                fake_data.get(param_in, {}),
-            )
-            if param.required:
-                test_data = None
-                if param_in != 'body':
-                    test_data = Parameter(
-                        key=param.name,
-                        value=str(mapped_value[param.name]),
-                    )
-                if param_in == 'path':
-                    # If path param not defined in path
-                    found_var_location = False
-                    for v in segment_vars:
-                        if v == param.name:
-                            if v in mapped_value:
-                                global_variables.append(
-                                    Variable(
-                                        id=v, type='string',
-                                        value=str(mapped_value[v])
-                                    )
-                                )
-                                found_var_location = True
-                            else:
-                                logger.error(f"Path segment {v} not mapped to a value.")  # noqa; E501
-                    if found_var_location:
-                        continue
-                    if param.name not in path_vars:
-                        not_processed_path_vars = set(path_vars).difference(
-                            {v.key for v in request_url_variables},
-                        )
-                        if len(not_processed_path_vars) > 1:
-                            err = f"Path variable ({param.name}) not in path and multiple path variables ({not_processed_path_vars}) to choose from."  # noqa; E501
-                            if self.strict:
-                                logger.warning(err)
-                            else:
-                                raise ValueError(err)
-                        elif len(not_processed_path_vars) == 1:
-                            first_var = not_processed_path_vars.pop()
-                            if first_var in mapped_value:
-                                request_url_variables.append(
-                                    Parameter(
-                                        key=first_var,
-                                        value=str(mapped_value[first_var]),
-                                    )
-                                )
-                            else:
-                                if mapped_value[param.name]:
-                                    # if self.strict:
-                                    #     raise ValueError("")
-                                    logger.warning(
-                                        f"Path variable doesn't exist in path ({param.name}), guessed to be path var ({path_vars[0]}) but not mapped to value"  # noqa; E501
-                                        " param is mapped to a value so using that value with the guessed name."  # noqa; E501
-                                    )
-                                    request_url_variables.append(
-                                        Parameter(
-                                            key=path_vars[0],
-                                            value=str(mapped_value[param.name]),
-                                        )
-                                    )
-                                else:
-                                    logger.error(f"Path variable doesn't exist in path ({param.name}).")  # noqa; E501
-                        else:
-                            logger.error(f"Path variable doesn't exist in path ({param.name}).")  # noqa; E501
-                    else:
-                        request_url_variables.append(test_data)
-                elif param_in == 'query':
-                    query.append(test_data)
-                elif param_in == 'header':
-                    request_headers.append(test_data)
-                elif param_in == 'cookie':
-                    raise ValueError(f"unhandled param location: {param_in}")
-                elif param_in == 'body':
-                    if mapped_value:
-                        kwargs['mode'] = 'raw'
-                        kwargs['raw'] = json.dumps(dict(mapped_value))
-                        request_headers.append(
-                            Parameter(
-                                key='Content-Type',
-                                value='application/json',
-                            ),
-                        )
-                    else:
-                        logger.warning(f"Missing content for body parameter: {param.name}")
-                else:
-                    raise ValueError(f"unknown param location: {param_in}")
-        request_body = self._resolve_object(
-            operation.requestBody,
-            new_cls=oapi.RequestBody,
-        )
-
-        if (
-            request_body and not kwargs.get('mode') == 'raw'
-            and config_test_data.get('requestBody')
-        ):
-            kwargs['mode'] = 'raw'
-            kwargs['raw'] = json.dumps(config_test_data.get('requestBody'))
-        missing_variable = set(path_vars).difference(
-            set([
-                *[p.key for p in request_url_variables],
-                *[p.id for p in global_variables],
-            ]),
-        )
-        for path_var in missing_variable:
-            mapped_value = ChainMap(
-                config_test_data.get('path', {}),
-                examples.get('path', {}),
-                fake_data.get('path', {}),
-            )
-            if mapped_value.get(path_var):
-                request_url_variables.append(
-                    Parameter(
-                        key=path_var,
-                        value=str(mapped_value[path_var]),
-                    )
-                )
-            else:
-                logger.warning(f"Path variable {path_var} missing variable and no mapped value!")  # noqa: E501
-
-        if kwargs:
-            request_body = RequestBody(
-                **kwargs,
-            )
-        else:
-            request_body = None
-        return (
-            global_variables, query, request_url_variables, request_headers,
-            request_body,
-        )
+        return ParameterBuilder(
+            self, verb, path, operation, self.test_data,
+        ).build()
 
     def _generate_postman_collections(self):
         build_url = lambda path, vars=None, query=[]: Url(
@@ -643,7 +511,7 @@ class OpenAPIToPostman:
             variable=vars or [],
         )
         items = []
-        global_variables = self.postman_global_variables or []
+        global_variables = self.collection_global_variables or []
         ordered_routes = self.order_routes_by_resource(self.routes)
         for verb, path, operation in ordered_routes:
             responses = []
@@ -681,15 +549,17 @@ class OpenAPIToPostman:
                 request_header, request_body
             ) = self.convert_parameters(verb, path, operation)
             global_variables.extend(new_globals)
-            logger.debug('GLOBALS', new_globals)
-            logger.debug('REQUEST', request_url_variables)
+            logger.debug('GLOBALS: ' + repr(new_globals))
+            logger.debug('REQUEST: ' + repr(request_url_variables))
             items.append(
                 Item(
                     id=uuidgen(),
                     name=operation.summary or route_str,
                     request=Request(
                         auth=Auth(type='noauth'),
-                        url=build_url(path, vars=request_url_variables, query=query),
+                        url=build_url(
+                            path, vars=request_url_variables, query=query,
+                        ),
                         method=verb.upper(),
                         name=operation.summary or route_str,
                         description={},
@@ -744,3 +614,201 @@ class OpenAPIToPostman:
                 ),
             )
         )
+
+
+class ParameterBuilder:
+    def __init__(self, mormo, verb, path, operation, test_data):
+        self.mormo, self.verb, self.path, self.operation, self.test_data = (
+            mormo, verb, path, operation, test_data,
+        )
+        self.params = mormo._resolve_object(operation.parameters or [])
+        self.config_test_data = list_of_test_data_to_params(
+            f"{verb} {path}",
+            self.test_data,
+        ).dict()
+        self.fake_data = mormo.fake_data_from_route_schema(
+            verb, path, operation,
+        ).dict()
+        self.examples = flatten_iterables_in_dict(
+            mormo.operation_param_examples(operation),
+        )
+        self.path_vars = [p[1:] for p in mormo.path_parts(path) if p.startswith(':')]
+
+    def get_mapped_value(self, v):
+        return ChainMap(
+            self.config_test_data.get(v, {}),
+            self.examples.get(v, {}),
+            self.fake_data.get(v, {}),
+        )
+
+    def build_test_data_from_param(self, param, mapped_value):
+        return Parameter(
+            key=param.name,
+            value=str(mapped_value[param.name]),
+        )
+
+    def get_path_param_variables(self, url, param):
+        global_ = []
+        segment_vars = set(RE_PATH_VARIABLE.findall(self.path))\
+            .difference(self.path_vars)
+        found_var_location = False
+        mapped_value = self.get_mapped_value('path')
+        for v in segment_vars:
+            if v == param.name:
+                if v in mapped_value:
+                    global_.append(
+                        Variable(
+                            id=v, type='string',
+                            value=str(mapped_value[v])
+                        )
+                    )
+                    found_var_location = True
+                else:
+                    logger.error(f"Path segment {v} not mapped to a value.")  # noqa; E501
+        if found_var_location:
+            return global_, url
+        if param.name not in self.path_vars:
+            not_processed_path_vars = set(self.path_vars).difference(
+                {v.key for v in url},
+            )
+            if len(not_processed_path_vars) > 1:
+                err = f"Path variable ({param.name}) not in path and multiple path variables ({not_processed_path_vars}) to choose from."  # noqa; E501
+                if self.mormo.strict:
+                    raise ValueError(err)
+                else:
+                    logger.warning(err)
+            elif len(not_processed_path_vars) == 1:
+                first_var = not_processed_path_vars.pop()
+                if first_var in mapped_value:
+                    url.append(
+                        Parameter(
+                            key=first_var,
+                            value=str(mapped_value[first_var]),
+                        )
+                    )
+                else:
+                    if mapped_value[param.name]:
+                        # if self.strict:
+                        #     raise ValueError("")
+                        logger.warning(
+                            f"Path variable doesn't exist in path ({param.name}), guessed to be path var ({self.path_vars[0]}) but not mapped to value"  # noqa; E501
+                            " param is mapped to a value so using that value with the guessed name."  # noqa; E501
+                        )
+                        url.append(
+                            Parameter(
+                                key=self.path_vars[0],
+                                value=str(mapped_value[param.name]),
+                            )
+                        )
+                    else:
+                        logger.error(f"Path variable doesn't exist in path ({param.name}).")  # noqa; E501
+            else:
+                logger.error(f"Path variable doesn't exist in path ({param.name}).")  # noqa; E501
+        else:
+            url.append(self.build_test_data_from_param(param, mapped_value))
+        return global_, url
+
+    def get_missing_path_variables(self, global_, url):
+        global_ = global_.copy()
+        url = url.copy()
+        missing_variable = set(self.path_vars).difference(
+            set([
+                *[p.key for p in url if p],
+                *[p.id for p in global_ if p],
+            ]),
+        )
+
+        for path_var in missing_variable:
+            mapped_value = self.get_mapped_value('path')
+            if mapped_value.get(path_var):
+                url.append(
+                    Parameter(
+                        key=path_var,
+                        value=str(mapped_value[path_var]),
+                    )
+                )
+            else:
+                logger.warning(f"Path variable {path_var} missing variable and no mapped value!")  # noqa: E501
+        return global_, url
+
+    def get_request_body(self):
+        header = []
+        body_args = {}
+        for param in self.params:
+            param = self.mormo._resolve_object(param, new_cls=oapi.Parameter)
+            if param.in_.value != "body":
+                continue
+            mapped_value = self.get_mapped_value('body')
+            if not mapped_value:
+                logger.warning(
+                    f"Missing content for body parameter: {param.name}",
+                )
+                continue
+            body_args['mode'] = 'raw'
+            body_args['raw'] = json.dumps(dict(mapped_value))
+            header.append(
+                Parameter(
+                    key='Content-Type',
+                    value='application/json',
+                ),
+            )
+
+        request_body = self.mormo._resolve_object(
+            self.operation.requestBody,
+            new_cls=oapi.RequestBody,
+        )
+
+        if (
+            request_body and not body_args.get('mode') == 'raw'
+            and self.config_test_data.get('requestBody')
+        ):
+            body_args['mode'] = 'raw'
+            body_args['raw'] = json.dumps(
+                self.config_test_data.get('requestBody'),
+            )
+        if body_args:
+            return header, RequestBody(
+                **body_args,
+            )
+        else:
+            return header, None
+
+    def build(self) -> PostmanVariables:
+        global_, query, url, header, body = ([], [], [], [], [])
+        for param in self.params:
+            param = self.mormo._resolve_object(param, new_cls=oapi.Parameter)
+            if not param.required:
+                continue
+            param_in = param.in_.value
+            mapped_value = self.get_mapped_value(param_in)
+            if param_in == 'body':
+                continue
+            test_data = Parameter(
+                key=param.name,
+                value=str(mapped_value[param.name]),
+            )
+            if param_in == 'path':
+                n_global, n_url = self.get_path_param_variables(url, param)
+                if global_ != n_global:
+                    global_.extend(n_global)
+                if url != n_url:
+                    url.extend(n_url)
+            elif param_in == 'query':
+                query.append(test_data)
+            elif param_in == 'header':
+                header.append(test_data)
+            elif param_in == 'cookie':
+                raise ValueError(f"unhandled param location: {param_in}")
+            else:
+                raise ValueError(f"unknown param location: {param_in}")
+
+        n_header, body = self.get_request_body()
+        if header != n_header:
+            header.extend(n_header)
+
+        n_global, n_url = self.get_missing_path_variables(global_, url)
+        if global_ != n_global:
+            global_.extend(n_global)
+        if url != n_url:
+            url.extend(n_url)
+        return PostmanVariables(global_, query, url, header, body)

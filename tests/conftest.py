@@ -7,12 +7,12 @@ import pytest
 from mormo import redis_handle
 from mormo.convert import OpenAPIToPostman
 from mormo.model import BaseModel
-from mormo.util import DB, gen_string
+from mormo.util import DB, gen_string, hashable_lru
 
 tests_dir_path = Path(__file__).parent.absolute()
 
 
-def get_test_data(format, limit=5):
+def get_test_data(format, limit=3):
     data_path = str(tests_dir_path) + f'/data/openapi/{format}'
     d = [f"{data_path}/{f}" for f in os.listdir(data_path)]
     if limit and limit < len(d):
@@ -27,12 +27,15 @@ def pytest_addoption(parser):
         help="Execute tests against OpenAPI Schema at path",
     )
 
+
+@hashable_lru
 def test_data(paths, collection=False):
     for path in paths:
         o =  OpenAPIToPostman(path=path)
         if collection:
             o = o.to_postman_collection_v2()
         yield o
+
 
 def pytest_generate_tests(metafunc):
     files = [*get_test_data('yaml'), *get_test_data('json')]

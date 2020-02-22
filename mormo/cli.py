@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import json
 from multiprocessing import Process
-import pkg_resources
 import sys
+import tempfile
 import time
 
 import click
@@ -22,7 +22,7 @@ def cli():
 
 @cli.command()
 def api():
-    uvicorn.run(host="127.0.0.1", port=8001, log_level="info")
+    uvicorn.run(app, host="127.0.0.1", port=8001, log_level="info")
 
 
 def generate_schema(infile, outfile, test_file, **kwargs):
@@ -34,12 +34,11 @@ def generate_schema(infile, outfile, test_file, **kwargs):
 
 @cli.command()
 @click.option('-i', '--in', 'in_file', type=click.Path(),
-              help='The OpenAPI Schema to convert.')
+              help='Path to the OpenAPI Schema to convert (YAML or JSON)', required=True)
 @click.option('-t', '--test_file', 'test_file', type=click.Path(),
-              help='Load test_data from file.')
+              help='Path to test config (YAML or JSON)')
 @click.option('-o', '--out', 'out_file', type=click.Path(),
-              help='The path to write the Postman Collection to.',
-              default='postman_collection_v2.json')
+              help='The path to write the Postman Collection to.')
 @click.option('--test', is_flag=True,
               help='Execute the generated schema with newman.')
 @click.option('--test_mormo_api', is_flag=True,
@@ -49,6 +48,8 @@ def generate_schema(infile, outfile, test_file, **kwargs):
               help='Verbose option in newman.')
 def run(in_file, test_file, out_file, test, test_mormo_api, host, verbose):
     """Generate Postman Collections."""
+    if not out_file:
+        out_file = tempfile.mktemp()
     if test_mormo_api:
         test = True
         addr, port = host.split('/')[-1].split(':')
@@ -65,7 +66,7 @@ def run(in_file, test_file, out_file, test, test_mormo_api, host, verbose):
         )
         proc.start()
         time.sleep(1)
-        with open (in_file, 'w') as f:
+        with open(in_file, 'w') as f:
             json.dump(requests.get(f'{host}/openapi.json').json(), f)
     generate_schema(in_file, out_file, test_file, host=host)
     if test:

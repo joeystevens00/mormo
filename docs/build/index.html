@@ -44,11 +44,161 @@
 <li class="toctree-l1"><a class="reference internal" href="convert.html">OpenAPI To Postman Conversion</a></li>
 </ul>
 </div>
-<span class="target" id="module-mormo"></span><dl class="class">
-<dt id="mormo.Settings">
-<em class="property">class </em><code class="sig-prename descclassname">mormo.</code><code class="sig-name descname">Settings</code><a class="headerlink" href="#mormo.Settings" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><th class="stub"><p>docs</p></th>
+<td><p><a class="reference external" href="https://mormo.readthedocs.io/en/0.7"><img alt="Documentation Status" src="https://readthedocs.org/projects/mormo/badge/?version=0.7" /></a></p></td>
+</tr>
+<tr class="row-even"><th class="stub"><p>tests</p></th>
+<td><div class="line-block">
+<div class="line"><a class="reference external" href="https://travis-ci.com/joeystevens00/mormo"><img alt="Travis-CI Build Status" src="https://travis-ci.com/joeystevens00/mormo.svg?branch=0.7" /></a> <a class="reference external" href="https://coveralls.io/github/joeystevens00/mormo?branch=0.7"><img alt="Coveralls Coverage Status" src="https://coveralls.io/repos/github/joeystevens00/mormo/badge.svg?branch=0.7" /></a></div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>package</p></th>
+<td><div class="line-block">
+<div class="line"><a class="reference external" href="https://github.com/joeystevens00/mormo/compare/master...0.7"><img alt="Commits since latest release" src="https://img.shields.io/github/commits-since/joeystevens00/mormo/master/0.7.svg" /></a></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Mormo is an API testing framework that attempts to automatically test APIs given their OpenAPI schema. It works by converting the OpenAPI schema into Postman collection schema with automatically generated tests, and executing the resulting collection with Newman.</p>
+<div class="section" id="install">
+<h2>Install<a class="headerlink" href="#install" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip3</span> <span class="n">install</span> <span class="n">mormo</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="cli">
+<h2>CLI<a class="headerlink" href="#cli" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Convert OpenAPI Schema to Postman Collection V2 Schema</span>
+<span class="n">mormo</span> <span class="n">run</span> <span class="o">--</span><span class="ow">in</span> <span class="n">openapi</span><span class="o">.</span><span class="n">json</span> <span class="o">--</span><span class="n">out</span> <span class="n">postman_collection</span><span class="o">.</span><span class="n">json</span>
+<span class="c1"># Run the generated postman collection with Newman</span>
+<span class="n">mormo</span> <span class="n">run</span> <span class="o">--</span><span class="ow">in</span> <span class="n">openapi</span><span class="o">.</span><span class="n">json</span> <span class="o">--</span><span class="n">test</span> <span class="o">--</span><span class="n">host</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span><span class="mi">8001</span>
+<span class="c1"># ... with a test config</span>
+<span class="n">mormo</span> <span class="n">run</span> <span class="o">--</span><span class="ow">in</span> <span class="n">openapi</span><span class="o">.</span><span class="n">json</span> <span class="o">--</span><span class="n">test</span> <span class="o">--</span><span class="n">host</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span><span class="mi">8001</span> <span class="o">--</span><span class="n">test_file</span> <span class="n">test_config</span><span class="o">.</span><span class="n">json</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="api">
+<h2>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mormo</span> <span class="n">api</span>
 
+<span class="c1"># Or use uvicorn directly</span>
+<span class="n">uvicorn</span> <span class="o">--</span><span class="n">port</span> <span class="mi">8001</span> <span class="n">mormo</span><span class="o">.</span><span class="n">api</span><span class="p">:</span><span class="n">app</span>
+</pre></div>
+</div>
+<p>See <a class="reference external" href="http://127.0.0.1:8001/docs">http://127.0.0.1:8001/docs</a> for API documentation</p>
+</div>
+<div class="section" id="test-config">
+<h2>Test Config<a class="headerlink" href="#test-config" title="Permalink to this headline">¶</a></h2>
+<p>A test config can be provided to set test data, insert tests/prerequest scripts, override test expectations, set response values to global variables, and more.</p>
+<div class="section" id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="make-global">
+<h4>make_global<a class="headerlink" href="#make-global" title="Permalink to this headline">¶</a></h4>
+<p>The response from POST /operation is serialized as JSON and the JSON attribute ‘operationId’ is set to a postman global variable named ‘operation_id’. In the request to GET /operation/{id} the ‘operation_id’ global variable is used effectively mapping the response of one route as test data for another.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">POST</span> <span class="o">/</span><span class="n">operation</span><span class="p">:</span>
+  <span class="n">make_global</span><span class="p">:</span>
+    <span class="n">operation_id</span><span class="p">:</span> <span class="o">.</span><span class="n">operationId</span>
+  <span class="n">variables</span><span class="p">:</span>
+    <span class="n">summary</span><span class="p">:</span> <span class="n">Test</span> <span class="n">Operation</span>
+    <span class="n">tags</span><span class="p">:</span> <span class="n">openapi</span>
+<span class="n">GET</span> <span class="o">/</span><span class="n">operation</span><span class="o">/</span><span class="p">{</span><span class="nb">id</span><span class="p">}</span>
+  <span class="n">variables</span><span class="p">:</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="p">{{</span><span class="n">operation_id</span><span class="p">}}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="collection-test-config">
+<h4>Collection Test Config<a class="headerlink" href="#collection-test-config" title="Permalink to this headline">¶</a></h4>
+<p>The collection test config can be used to set default test expectations, insert collection prerequest/test scripts, or global variables</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">collection</span><span class="p">:</span>
+  <span class="n">expect</span><span class="p">:</span>
+    <span class="n">response_time</span><span class="p">:</span> <span class="mi">200</span>
+    <span class="n">fake_data</span><span class="p">:</span> <span class="kc">True</span>
+    <span class="n">enabled_tests</span><span class="p">:</span> <span class="p">[</span><span class="n">schema_validation</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">content_type</span><span class="p">,</span> <span class="n">response_time</span><span class="p">]</span>
+  <span class="n">prerequest</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">console</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s1">&#39;before every request&#39;</span><span class="p">);</span>
+  <span class="n">test</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">console</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s1">&#39;some global test&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="setting-expectations">
+<h4>Setting expectations<a class="headerlink" href="#setting-expectations" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">collection</span><span class="p">:</span>
+  <span class="n">expect</span><span class="p">:</span>
+    <span class="n">code</span><span class="p">:</span> <span class="mi">200</span> <span class="c1"># All routes should return 200 unless set otherwise</span>
+    <span class="n">response_time</span><span class="p">:</span> <span class="mi">100</span> <span class="c1"># All routes should reply within 100ms</span>
+<span class="n">PUT</span> <span class="o">/</span><span class="n">abc</span><span class="p">:</span>
+  <span class="n">expect</span><span class="p">:</span>
+    <span class="n">code</span><span class="p">:</span> <span class="mi">202</span> <span class="c1"># Override the default expectations for a route</span>
+    <span class="n">response_time</span><span class="p">:</span> <span class="mi">125</span>
+<span class="n">GET</span> <span class="o">/</span><span class="n">removed</span><span class="o">/</span><span class="n">route</span><span class="p">:</span>
+  <span class="n">expect</span><span class="p">:</span>
+    <span class="n">code</span><span class="p">:</span> <span class="mi">404</span>
+    <span class="n">response_time</span><span class="p">:</span> <span class="mi">50</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="disabling-tests">
+<h4>Disabling Tests<a class="headerlink" href="#disabling-tests" title="Permalink to this headline">¶</a></h4>
+<p>The builtin tests can be disabled all together by setting Expect.enabled to False</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">collection</span><span class="p">:</span>
+  <span class="n">expect</span><span class="p">:</span>
+    <span class="n">enabled</span><span class="p">:</span> <span class="kc">False</span> <span class="c1"># Disabled by default</span>
+<span class="n">POST</span> <span class="o">/</span><span class="n">abc</span><span class="p">:</span>
+  <span class="n">expect</span><span class="p">:</span>
+    <span class="n">enabled</span><span class="p">:</span> <span class="kc">True</span> <span class="c1"># Enabled for specific route</span>
+</pre></div>
+</div>
+<p>See <a class="reference internal" href="schema.html#mormo.schema.TestConfig" title="mormo.schema.TestConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">mormo.schema.TestConfig</span></code></a> and  <a class="reference internal" href="schema.html#mormo.schema.Expect" title="mormo.schema.Expect"><code class="xref py py-class docutils literal notranslate"><span class="pre">mormo.schema.Expect</span></code></a> for all options.</p>
+</div>
+</div>
+</div>
+<div class="section" id="test-data-precedence">
+<h2>Test Data Precedence<a class="headerlink" href="#test-data-precedence" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Test Data in Test Config</p></li>
+<li><p>example or examples field in schema <a class="reference internal" href="openapi.html#mormo.schema.openapi_v3.Parameter" title="mormo.schema.openapi_v3.Parameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">mormo.schema.openapi_v3.Parameter</span></code></a></p></li>
+<li><p>Randomly generated from schema <a class="reference internal" href="openapi.html#mormo.schema.openapi_v3.ParameterSchema" title="mormo.schema.openapi_v3.ParameterSchema"><code class="xref py py-class docutils literal notranslate"><span class="pre">mormo.schema.openapi_v3.ParameterSchema</span></code></a></p></li>
+</ul>
+</div>
+<div class="section" id="builtin-tests">
+<h2>Builtin Tests<a class="headerlink" href="#builtin-tests" title="Permalink to this headline">¶</a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 85%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>code</p></td>
+<td><p>Response code should match the first 2XX response defined in the schema (or the Expect setting if set)</p></td>
+</tr>
+<tr class="row-even"><td><p>schema_validation</p></td>
+<td><p>Response JSON is validated with Tiny Validator against the schema</p></td>
+</tr>
+<tr class="row-odd"><td><p>content_type</p></td>
+<td><p>Content-Type Header should match the mimetype defined in the schema</p></td>
+</tr>
+<tr class="row-even"><td><p>response_time</p></td>
+<td><p>Server should respond within a number of milliseconds</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="safe-ordering-of-crud-operations">
+<h2>Safe Ordering of CRUD Operations<a class="headerlink" href="#safe-ordering-of-crud-operations" title="Permalink to this headline">¶</a></h2>
+<p>Mormo assumes your API is RESTFul so it orders operations to resources safely. It detects resources based on the path (/store, /store/{id}) and prioritizes HTTP verbs associated with create operations to ensure that the resource exists before reads/updates and deprioritizes deletes.</p>
+<p>The ordering used can be seen in the <cite>verb_ordering</cite> parameter of the <cite>order_routes_by_resource</cite> method:
+<a class="reference internal" href="convert.html#mormo.convert.OpenAPIToPostman.order_routes_by_resource" title="mormo.convert.OpenAPIToPostman.order_routes_by_resource"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mormo.convert.OpenAPIToPostman.order_routes_by_resource()</span></code></a></p>
+</div>
 </div>
 <div class="section" id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>

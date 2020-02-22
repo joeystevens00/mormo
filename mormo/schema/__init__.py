@@ -1,9 +1,7 @@
+import enum
 from typing import Any, Dict, Optional, Union
-import tempfile
 from collections import defaultdict
 from typing import List
-
-from pydantic import AnyHttpUrl
 
 from . import openapi_v3, postman_collection_v2
 from ..model import BaseModel
@@ -16,12 +14,25 @@ class TestData(BaseModel):
     value: Any
 
 
+class PostmanTest(enum.Enum):
+    schema_validation = 'schema_validation'
+    code = 'code'
+    content_type = 'content_type'
+    response_time = 'response_time'
+
+
 class Expect(BaseModel):
-    comment: Optional[str]
     code: Optional[Union[int, str]]
-    enabled: Optional[bool] = True
-    response_time: Optional[int] = 200
+    enabled: bool = True
+    response_time: int = 200
     headers: Optional[Dict[str, str]]
+    fake_data: bool = True
+    enabled_tests: List[PostmanTest] = [
+        PostmanTest.schema_validation,
+        PostmanTest.code,
+        PostmanTest.content_type,
+        PostmanTest.response_time,
+    ]
 
 
 class TestConfig(BaseModel):
@@ -90,10 +101,9 @@ class OpenAPISchemaToPostmanRequest(BaseModel):
     prerequest_scripts: Optional[Dict[str, postman_collection_v2.Script]] = None  # noqa: E501
     collection_test_scripts: Optional[List[postman_collection_v2.Script]] = None  # noqa: E501
     collection_prerequest_scripts: Optional[List[postman_collection_v2.Script]] = None  # noqa: E501
-    postman_global_variables: Optional[List[postman_collection_v2.Variable]] = None  # noqa: E501
+    collection_global_variables: Optional[List[postman_collection_v2.Variable]] = None  # noqa: E501
     expect: Optional[Dict[str, Expect]] = None
     verbose: Optional[bool] = False
-    resolve_references: Optional[bool] = False
 
     class Config:
         fields = {'schema_': 'schema'}
