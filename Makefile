@@ -44,7 +44,6 @@ build: coverage coveralls bumpversion default docs update_badge_branches require
 .PHONY: docs/requirements.txt
 docs/requirements.txt:
 	poetry export --dev -f requirements.txt > docs/requirements.txt
-	echo 'mormo' >> docs/requirements.txt
 
 .PHONY: requirements.txt
 requirements.txt:
