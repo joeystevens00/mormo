@@ -66,7 +66,7 @@ CLI
   mormo run --in openapi.json --out postman_collection.json
   # Run the generated postman collection with Newman
   mormo run --in openapi.json --test --host http://127.0.0.1:8001
-  # .. with a test config
+  # ... with a test config
   mormo run --in openapi.json --test --host http://127.0.0.1:8001 --test_file test_config.json
 
 
@@ -92,7 +92,7 @@ Examples
 
 make_global
 ***********
-The response from POST /operation is serialized as JSON and the JSON attribute 'operationId' set to a postman global variable named 'operation_id'. In the request to GET /operation/{id} the 'operation_id' global variable is used.
+The response from POST /operation is serialized as JSON and the JSON attribute 'operationId' is set to a postman global variable named 'operation_id'. In the request to GET /operation/{id} the 'operation_id' global variable is used effectively mapping the response of one route as test data for another.
 
 ::
 
