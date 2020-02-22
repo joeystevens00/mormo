@@ -31,7 +31,7 @@ Welcome to Mormo's documentation!
       - | |commits-since|
 
 .. |docs| image:: https://readthedocs.org/projects/mormo/badge/?version=0.7
-    :target: https://mormo.readthedocs.io/en/latest/?badge=0.7
+    :target: https://mormo.readthedocs.io/en/0.7
     :alt: Documentation Status
 
 .. |travis| image:: https://travis-ci.com/joeystevens00/mormo.svg?branch=0.7
