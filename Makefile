@@ -31,6 +31,8 @@ coveralls:
 .PHONY: update_badge_branches
 update_badge_branches:
 	sed -Ei "s/(\?|\&)branch\=(\w|\.)+/\1branch\=`git branch | grep '*' | cut -d ' ' -f2`/g" README.md
+	sed -Ei "s/(\?|\&)version\=(\w|\.)+/\1version\=`git branch | grep '*' | cut -d ' ' -f2`/g" README.md
+	sed -Ei "s/(\?|\&)badge\=(\w|\.)+/\1badge\=`git branch | grep '*' | cut -d ' ' -f2`/g" README.md
 	sed -Ei "s/(\?|\&)branch\=(\w|\.)+/\1branch\=`git branch | grep '*' | cut -d ' ' -f2`/g" docs/src/index.rst
 	sed -Ei "s/(\?|\&)version\=(\w|\.)+/\1version\=`git branch | grep '*' | cut -d ' ' -f2`/g" docs/src/index.rst
 	sed -Ei "s/(\?|\&)badge\=(\w|\.)+/\1badge\=`git branch | grep '*' | cut -d ' ' -f2`/g" docs/src/index.rst
