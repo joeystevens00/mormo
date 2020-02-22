@@ -1,1 +1,2 @@
 mormo
+sphinx==2.4.1
