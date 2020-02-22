@@ -1,12 +1,18 @@
 Collection:
   expect:
     response_time: 100
+    fake_data: False
+    enabled_tests: [schema_validation, code, content_type, response_time]
 POST /schema:
   make_global:
     openapi_id: .id
   variables: ./tests/data/openapi/json/openapi.json
   expect:
     response_time: 150
+  test:
+    - console.log("test duplicate cmd");
+    - console.log("test duplicate cmd");
+    - console.log("test duplicate cmd");
 GET /schema/{id}:
   variables:
     id: "{{openapi_id}}"
@@ -16,7 +22,7 @@ POST /schema/{id}/to_postman:
   make_global:
     postman_id: .id
   expect:
-    response_time: 2500
+    response_time: 105000
 GET /postman/{id}:
   variables:
     id: "{{postman_id}}"
@@ -25,14 +31,15 @@ GET /postman/{id}/test:
     id: "{{postman_id}}"
     host: localhost:8001
   expect:
-    response_time: 3000
+    response_time: 2000
 POST /postman/{id}/test:
   comment: Disabled in API
   variables:
     id: "{{postman_id}}"
     host: localhost:8001
 POST /run/test/from_schema:
-  variables: ./tests/data/openapi/json/openapi.json
-  comment: Needs a OpenAPISchemaToPostmanRequest, ideally need a way to provide a mixture of file and inline dict variables
+  variables:
+    schema: ./tests/data/openapi/json/openapi.json
+    host: 127.0.0.1:8001
   expect:
-    code: 500
+    response_time: 105000

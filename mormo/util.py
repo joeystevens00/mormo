@@ -5,6 +5,7 @@ import importlib
 import hashlib
 import jinja2
 import json
+import os
 import random
 import re
 import secrets
@@ -79,6 +80,16 @@ def blind_load(content):
         map_type = "yaml" if content_type == "json" else "json"
         parsed_content = load_map[map_type](content)
     return parsed_content
+
+
+def is_local_path(s):
+    """Does not consider paths above cwd to be valid."""
+    if (
+        isinstance(s, str)
+        and os.path.exists(s)
+        and os.path.abspath(s).startswith(os.getcwd())
+    ):
+        return True
 
 
 def load_file(f, content_type=None):
@@ -291,6 +302,7 @@ def generate_from_schema(schema, no_empty=True, retry=5):
     if (
         schema.get('type') == 'string'
         and not schema.get('minLength')
+        and not schema.get('maxLength')
         and not schema.get('format')
     ):
         schema['minLength'] = settings.test_data_str_min_length
@@ -314,7 +326,7 @@ def generate_from_schema(schema, no_empty=True, retry=5):
             f()
             passed = True
             retry = 0
-        except hypothesis.errors.Unsatisfiable:
+        except (hypothesis.errors.Unsatisfiable, hypothesis.errors.FailedHealthCheck):
             retry -= 1
     if not passed:
         raise hypothesis.errors.Unsatisfiable("Max retries hit")

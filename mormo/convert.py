@@ -8,15 +8,17 @@ import yaml
 from .postman_test import (
     new_event, javascript, js_test_code,
     js_test_content_type, js_test_response_time,
+    js_test_validate_schema,
 )
 from .schema import (
-    Expect, OpenAPISchemaToPostmanRequest, TestData, TestConfig,
+    Expect, OpenAPISchemaToPostmanRequest, PostmanTest,
+    TestData, TestConfig,
     list_of_test_data_to_params,
 )
 from .schema import openapi_v3 as oapi
 from .schema.openapi_v3 import (
     Operation, OpenAPISchemaV3, ParameterIn,
-    ParameterRequestData, Reference,
+    ParameterRequestData, Reference, SchemaObject,
 )
 from .schema.postman_collection_v2 import (
     Auth, Collection, Item,
@@ -26,7 +28,7 @@ from .schema.postman_collection_v2 import (
 from .util import (
     blind_load,
     fingerprint, flatten_iterables_in_dict, generate_from_schema,
-    get_http_reason, hashable_lru, load_file, pick_one,
+    get_http_reason, hashable_lru, is_local_path, load_file, pick_one,
     uuidgen, trim, HTTP_VERBS,
 )
 from . import logger
@@ -166,7 +168,7 @@ class OpenAPIToPostman:
 
     def test_config_to_postman_config(self, test_config) -> PostmanConfig:
         test_data = []
-        expect = defaultdict(lambda: self.default_expect)
+        expect = defaultdict(self.get_default_expect)
         test_scripts = defaultdict(lambda: [])
         prerequest_scripts = defaultdict(lambda: [])
         collection_global_variables = []
@@ -200,7 +202,8 @@ class OpenAPIToPostman:
                         ) for t in i.prerequest
                     ])
                 continue
-
+            verb, path = route.split(' ')
+            route = f'{verb.upper()} {path}'
             for variable, response_path in (i.make_global or {}).items():
                 response_path = ''.join([
                     '["' + trim(p) + '"]'
@@ -227,6 +230,8 @@ class OpenAPIToPostman:
             # self.collection_global_variables.append(
             # Variable(id=variable, type='string', value='default'))
             for k, v in (variables or {}).items():
+                if is_local_path(v):
+                    v = load_file(v)
                 test_data.extend([
                     TestData(route=route, in_=in_, key=k, value=v)
                     for in_ in list(ParameterIn)
@@ -254,7 +259,7 @@ class OpenAPIToPostman:
                 if code == 'default':
                     code = 500
                 appended_test_scripts = False
-                for mimetype, route_definition in (response.content or {}).items():
+                for mimetype, media_type in (response.content or {}).items():
                     if appended_test_scripts:
                         continue
                     candidate_route = (
@@ -262,18 +267,31 @@ class OpenAPIToPostman:
                         or str(code).startswith('2')
                     )
                     if candidate_route:
-                        test_scripts[route_str].append(
-                            js_test_code(route_str, code),
-                        )
-                        test_scripts[route_str].append(
-                            js_test_content_type(route_str, mimetype),
-                        )
-                        test_scripts[route_str].append(
-                            js_test_response_time(
-                                route_str,
-                                expect[route_str].response_time,
+                        enabled_tests = expect[route_str].enabled_tests
+                        if mimetype == 'application/json':
+                            schema_ = self._resolve_object(media_type.schema_ or {})
+                            mt_props = self._resolve_object(
+                                schema_.get('properties') or {},
                             )
-                        )
+                            if PostmanTest.schema_validation in enabled_tests:
+                                test_scripts[route_str].append(
+                                    js_test_validate_schema(route_str, mt_props, self.schema.to_dict())
+                                )
+                        if PostmanTest.code in enabled_tests:
+                            test_scripts[route_str].append(
+                                js_test_code(route_str, code),
+                            )
+                        if PostmanTest.content_type in enabled_tests:
+                            test_scripts[route_str].append(
+                                js_test_content_type(route_str, mimetype),
+                            )
+                        if PostmanTest.response_time in enabled_tests:
+                            test_scripts[route_str].append(
+                                js_test_response_time(
+                                    route_str,
+                                    expect[route_str].response_time,
+                                )
+                            )
                         appended_test_scripts = True
         return PostmanConfig(
             expect, test_data, test_scripts,
@@ -328,13 +346,11 @@ class OpenAPIToPostman:
     @classmethod
     def order_routes_by_resource(
         cls, routes: Iterable[Route],
-        verb_ordering: Optional[List] = None
+        verb_ordering: List = list(['post', 'put', 'get', 'patch', 'delete'])
     ) -> List[Route]:
         """Identify REST resources and order CRUD operations safely."""
         by_resource = defaultdict(lambda: {})
         output = []
-        if not verb_ordering:
-            verb_ordering = ['post', 'put', 'get', 'patch', 'delete']
         for route in routes:
             verb, path, operation = route
             by_resource[cls.guess_resource(path)][verb] = route
@@ -345,8 +361,11 @@ class OpenAPIToPostman:
         return output
 
     def fake_data_from_route_schema(
-        self, path: str, operation: Operation,
+        self, verb: str, path: str, operation: Operation,
     ) -> ParameterRequestData:
+        if not self.expect[f'{verb.upper()} {path}'].fake_data:
+            logger.debug(f"Skipping fake_data generation for {verb} {path}")
+            return ParameterRequestData()
         d = defaultdict(lambda: {})
         all_path_vars = RE_PATH_VARIABLE.findall(path)
         parameters = self._resolve_object(operation.parameters)
@@ -377,8 +396,9 @@ class OpenAPIToPostman:
         )
         if request_body:
             for mimetype, media_type in request_body.content.items():
+                schema_ = self._resolve_object(media_type.schema_ or {})
                 mt_props = self._resolve_object(
-                    media_type.schema_.properties or {},
+                    schema_.get('properties') or {},
                 )
                 for name, prop in mt_props.items():
                     prop = self._resolve_object(prop)
@@ -433,7 +453,7 @@ class OpenAPIToPostman:
                 target.extend(param.examples)
         return examples
 
-    def _resolve_object(self, o, new_cls=None):
+    def _resolve_object(self, o, new_cls=None, deep=False):
         if isinstance(o, Reference):
             logger.debug(f"Resolving reference {o.ref} Try #{self.ref_depth[o.ref]}")  # noqa; E501
             if self.ref_depth[o.ref] > self.max_ref_depth:
@@ -443,9 +463,39 @@ class OpenAPIToPostman:
                     return
             self.ref_depth[o.ref] += 1
             o = o.resolve_ref(self.schema)
-        if isinstance(o, dict):
-            if new_cls:
-                o = new_cls(**o)
+        elif '$ref' in dir(o):
+            if isinstance(o, SchemaObject):
+                logger.warning("SchemaObject should be a Reference object, catching serialization issue...")
+                o = self._resolve_object(
+                    Reference(
+                        **{'$ref': o.__getattribute__('$ref')},
+                    ),
+                    new_cls=new_cls,
+                    deep=deep,
+                )
+            else:
+                logger.error(
+                    "Possible serialization issue with object,"
+                    f" object of type ({type(o)}) shouldn't be a reference: ({o})"
+                )
+        elif isinstance(o, dict) and o.get('$ref'):
+            o = self._resolve_object(
+                Reference(**o),
+                new_cls=new_cls,
+                deep=deep,
+            )
+        if 'to_dict' in dir(o):
+            o = o.to_dict()
+        if deep and isinstance(o, dict):
+            for k, v in o.items():
+                if (isinstance(v, dict) and v.get('$ref')) or isinstance(v, Reference):
+                    if isinstance(v, Reference):
+                        v = v.to_dict()
+                    o[k] = self._resolve_object(Reference(**v), deep=True)
+                else:
+                    o[k] = self._resolve_object(v, deep=True)
+        if isinstance(o, dict) and new_cls:
+            o = new_cls(**o)
         return o
 
     def convert_parameters(self, verb, path, operation: Operation):
@@ -499,8 +549,8 @@ class OpenAPIToPostman:
                 request_header, request_body
             ) = self.convert_parameters(verb, path, operation)
             global_variables.extend(new_globals)
-            logger.debug('GLOBALS', new_globals)
-            logger.debug('REQUEST', request_url_variables)
+            logger.debug('GLOBALS: ' + repr(new_globals))
+            logger.debug('REQUEST: ' + repr(request_url_variables))
             items.append(
                 Item(
                     id=uuidgen(),
@@ -577,7 +627,7 @@ class ParameterBuilder:
             self.test_data,
         ).dict()
         self.fake_data = mormo.fake_data_from_route_schema(
-            path, operation,
+            verb, path, operation,
         ).dict()
         self.examples = flatten_iterables_in_dict(
             mormo.operation_param_examples(operation),

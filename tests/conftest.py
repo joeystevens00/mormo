@@ -12,7 +12,7 @@ from mormo.util import DB, gen_string, hashable_lru
 tests_dir_path = Path(__file__).parent.absolute()
 
 
-def get_test_data(format, limit=5):
+def get_test_data(format, limit=3):
     data_path = str(tests_dir_path) + f'/data/openapi/{format}'
     d = [f"{data_path}/{f}" for f in os.listdir(data_path)]
     if limit and limit < len(d):

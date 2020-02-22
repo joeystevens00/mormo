@@ -10,7 +10,7 @@ from .schema.postman_collection_v2 import (
     SaveDBResult as PostmanSaveDBResult,
 )
 from .util import DB, load_db, save_db
-from . import logger, redis_handle
+from . import logger, redis_handle, Settings
 
 app = FastAPI()
 
@@ -75,13 +75,15 @@ def run_postman_test(
 #     return save_db(o)
 
 
-# @app.post('/run/test/from_schema', response_model=TestResult)
-# def run_test_run_from_schema(o: OpenAPISchemaToPostmanRequest) -> TestResult:
-#     """Create a new test run from OpenAPI Schema."""
-#     from .convert import OpenAPIToPostman
-#     return run_postman_collection(
-#         OpenAPIToPostman(o).to_postman_collection_v2(),
-#     )
+@app.post('/run/test/from_schema', response_model=TestResult)
+def run_test_run_from_schema(o: OpenAPISchemaToPostmanRequest) -> TestResult:
+    """Create a new test run from OpenAPI Schema."""
+    from .convert import OpenAPIToPostman
+    return run_postman_collection(
+        OpenAPIToPostman(o).to_postman_collection_v2(),
+        host=o.host,
+        verbose=o.verbose,
+    )
 
 # @app.get('/test/run/{id}/fire', response_model=TestResult)
 # def run_test_run(id):

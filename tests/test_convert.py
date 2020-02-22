@@ -9,7 +9,7 @@ from mormo.convert import OpenAPIToPostman as oapi2pm, ParameterBuilder, Postman
 from mormo.schema import Expect, TestData
 from mormo.schema import postman_collection_v2 as pm
 from mormo.schema.openapi_v3 import Operation, OpenAPISchemaV3, Reference, Parameter, ParameterIn, ParameterSchema
-
+from mormo.schema.postman_collection_v2 import Script
 
 REF_OR_OPERATION = Union[dict, Operation, Reference]
 
@@ -39,7 +39,6 @@ def in_all_params(**kwargs):
         yield TestData(**kwargs, in_=in_)
 
 @pytest.mark.parametrize("build_params, test_config, postman_config", [
-    # Path Segment Variable
     (
         ['POST', '/test/route({id})', Operation(
             parameters=[Parameter(**{
@@ -59,6 +58,209 @@ def in_all_params(**kwargs):
             expect=defaultdict(lambda: Expect()),
             test_data=list(in_all_params(route='POST /test/route({id})', key='id', value='77')),
             test_scripts=defaultdict(lambda: []),
+            prerequest_scripts=defaultdict(lambda: []),
+            collection_global_variables=[],
+            collection_test_scripts=[],
+            collection_prerequest_scripts=[],
+        ),
+    ),
+    (
+        ['POST', '/test/route({id})', Operation(
+            parameters=[Parameter(**{
+                'in': 'path',
+                'required': True,
+                'name': 'id',
+                'schema': {'type':'string'},
+                'example': '1',
+            })],
+            responses={},
+        ),
+        []],
+        {
+            'Collection': {'expect': {'code': 202}},
+            'POST /test/route({id})': {
+                'variables': {'id': '77'},
+                'expect': {'code': 201},
+                'test': ['console.log("test");'],
+                'prerequest': ['console.log("test");'],
+        }}, # Test Config,
+        PostmanConfig(
+            expect=defaultdict(lambda: Expect(code=202), {'POST /test/route({id})': Expect(code=201)}),
+            test_data=list(in_all_params(route='POST /test/route({id})', key='id', value='77')),
+            test_scripts=defaultdict(lambda: [], {
+                'POST /test/route({id})': [
+                    Script(
+                        id='dd74c680f13f3a3e9f534f73d50f3a6cbde69a32cffa994abc0c93a95b73dc8ebbaea0cb24b2d2513127acd70c8e0d9b3c530e8207031f111e91cdfe166e2a08',
+                        type='text/javascript',
+                        exec='console.log("test");',
+                        src=None,
+                        name='POST /test/route({id}) cmd(2b0b62971ac3693a3d3105ce01b1fdd5eafa1a8b1db07c69f2050e43a2ae4b865f3587d73209d8ea8251d41c913bc1808e1e08d79dbc416ce882be87036de73d)',
+                ),
+            ],
+            }),
+            prerequest_scripts=defaultdict(lambda: [], {
+                'POST /test/route({id})': [
+                    Script(
+                        id='dd74c680f13f3a3e9f534f73d50f3a6cbde69a32cffa994abc0c93a95b73dc8ebbaea0cb24b2d2513127acd70c8e0d9b3c530e8207031f111e91cdfe166e2a08',
+                        type='text/javascript',
+                        exec='console.log("test");',
+                        src=None,
+                        name='POST /test/route({id}) cmd(2b0b62971ac3693a3d3105ce01b1fdd5eafa1a8b1db07c69f2050e43a2ae4b865f3587d73209d8ea8251d41c913bc1808e1e08d79dbc416ce882be87036de73d)'
+                    ),
+                ],
+            }),
+            collection_global_variables=[],
+            collection_test_scripts=[],
+            collection_prerequest_scripts=[],
+        ),
+    ),
+    (
+        ['POST', '/test/route/{id}', Operation(
+            parameters=[Parameter(**{
+                'in': 'path',
+                'required': True,
+                'name': 'id',
+                'schema': {'type':'string'},
+                'example': '1',
+            })],
+            responses={
+                '200': {
+                    'description': 'Unit test',
+                    'content': {
+                        'application/json': {
+                            'schema': {
+
+                            }
+                        }
+                    }
+                }
+            },
+        ),
+        []],
+        {'POST /test/route/{id}': {
+            'make_global': {'id': '.data.id'},
+        }}, # Test Config,
+        PostmanConfig(
+            expect=defaultdict(lambda: Expect(), {'POST /test/route/{id}': Expect()}),
+            test_data=[],
+            test_scripts=defaultdict(lambda: [], {
+                'POST /test/route/{id}': [
+                    Script(
+                        id='869cf12650e96e118728aaee69d8f1f4993b8953d2e7679eaf66f1ad4b05849c608dda41b570a4ba32c820f7f801060f283355208d6607bb65d308c8cbe13a4a',
+                        type='text/javascript',
+                        exec='pm.test(\'set id\', function() {\n                            pm.globals.set("id", pm.response.json()["data"]["id"]);\n                        });',
+                        src=None,
+                        name='Set response of POST /test/route/{id}: JSON_RESPONSE["data"]["id"] to id'
+                    ),
+                    Script(
+                        id='54fb06459f83b072978891343588e4e468d8fda81c0108aa70c195408de48342ab0570a05183f6678ea8d6c052dfa14fd359e3b9ab44e51493f8895193b54a04',
+                        type='text/javascript',
+                        exec='pm.test(\'Schema is valid\', function() {\n                var schema = {};\n                tv4.addSchema({"openapi": "3", "paths": {"/test/route/{id}": {"post": {"responses": {"200": {"description": "Unit test", "content": {"application/json": {"schema": {}}}}}, "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "string"}, "example": "1"}]}}}, "test_data": []});\n                pm.expect(tv4.validate(pm.response.json(), schema)).to.be.true;\n            });',
+                        src=None,
+                        name='POST /test/route/{id} responds according to schema'
+                    ),
+                    Script(
+                        id='d686677df40800c0484e5d2e97ccf0624337f1954824d14770223589661815df710209a6e067128fef6d3c25209b1b7be61d9e37559f0c50fae243a1184a6d45',
+                        type='text/javascript',
+                        exec='pm.test("Status code is 200", function () {\n                    return pm.response.to.have.status(200);\n                });',
+                        src=None,
+                        name='POST /test/route/{id} Test Code is 200',
+                    ),
+                    Script(
+                        id='7271ebccb313a66e7273e76cfb653d91cde5c11145f2715b68e92d4ecec5d6d6daf4f68ff1becd810e4a70acd2623c92b73eb795eedafe19b3c578f9a6bd3173',
+                        type='text/javascript',
+                        exec='pm.test("Content-Type Header is application/json", function () {\n                    return pm.expect(postman.getResponseHeader("Content-type")).to.be.eql("application/json");\n                });',
+                        src=None,
+                        name='POST /test/route/{id} Mimetype is application/json',
+                    ),
+                    Script(
+                        id='06b8b02870fa3b1287dc7ffb6e01a0e190c0b4c7b3b738daec708818ba44463147ce6dac76dfe8bb5d9b013d02bf1401f7f46ad23c6b0de22e828d85fe9d283b',
+                        type='text/javascript',
+                        exec='pm.test("Response time is less than 200ms", function () {\n                    return pm.expect(pm.response.responseTime).to.be.below(200);\n                });',
+                        src=None,
+                        name='POST /test/route/{id} responds in less than 200ms',
+                    ),
+                ]
+            }),
+            prerequest_scripts=defaultdict(lambda: [], {
+                'POST /test/route/{id}': [
+                    Script(
+                        id='e12dd7ddea0c35b0adff13a7090c802b3175a92f05252b6fbb6a33f79dd205f76bc61dc4b6932963c125e26835ce998f5e7f83c5b8cb0309b43ea8204bb950eb',
+                        type='text/javascript',
+                        exec='console.log("[prerequest] GLOBAL(id):", pm.globals.get("id"));',
+                        src=None,
+                        name='[prerequest] Debug id',
+                    ),
+                ]
+            }),
+            collection_global_variables=[],
+            collection_test_scripts=[],
+            collection_prerequest_scripts=[
+                Script(
+                    id='5a37c84da267fb100d69ea316458c094b92483f9a3b1fb88529f5e3eb1ddc91cd9eab062486ecae95ab357565ad1e804a5108122a5c500636bf40eab65e23d83',
+                    type='text/javascript',
+                    exec='console.log("[collection_prerequest] GLOBAL(id):", pm.globals.get("id"));',
+                    src=None,
+                    name='[collection_prerequest] Debug id',
+                ),
+            ],
+        ),
+    ),
+    (
+        ['POST', '/test/route/{id}', Operation(
+            parameters=[Parameter(**{
+                'in': 'path',
+                'required': True,
+                'name': 'id',
+                'schema': {'type':'string'},
+                'example': '1',
+            })],
+            responses={
+                'default': {
+                    'description': 'Unit test',
+                    'content': {
+                        'application/json': { 'schema': {}}
+                    }
+                }
+            },
+        ),
+        []],
+        {'POST /test/route/{id}': {'expect': {'code': 500}}}, # Test Config,
+        PostmanConfig(
+            expect=defaultdict(lambda: Expect(), {'POST /test/route/{id}': Expect(code=500)}),
+            test_data=[],
+            test_scripts=defaultdict(lambda: [], {
+                'POST /test/route/{id}': [
+                    Script(
+                        id='a0501876f789f067e8ee4bec1c4c6c75ce8cb2fcbada21a7acbf1c8699a6aa4167bd271c2544fab0597175cb1ccbc04d8a87b74fcee0344e9c46ee26fa85bc85',
+                        type='text/javascript',
+                        exec='pm.test(\'Schema is valid\', function() {\n                var schema = {};\n                tv4.addSchema({"openapi": "3", "paths": {"/test/route/{id}": {"post": {"responses": {"default": {"description": "Unit test", "content": {"application/json": {"schema": {}}}}}, "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "string"}, "example": "1"}]}}}, "test_data": []});\n                pm.expect(tv4.validate(pm.response.json(), schema)).to.be.true;\n            });',
+                        src=None,
+                        name='POST /test/route/{id} responds according to schema',
+                    ),
+                    Script(
+                        id='d1486e47ab45163fa21da236d64ff74f680834bc6e4c2cf8c5234da5fd37750a662b549c62c15fdfbfcf665923def16342b8ba3c98ada84d4c246334614b819c',
+                        type='text/javascript',
+                        exec='pm.test("Status code is 500", function () {\n                    return pm.response.to.have.status(500);\n                });',
+                        src=None,
+                        name='POST /test/route/{id} Test Code is 500',
+                    ),
+                    Script(
+                        id='7271ebccb313a66e7273e76cfb653d91cde5c11145f2715b68e92d4ecec5d6d6daf4f68ff1becd810e4a70acd2623c92b73eb795eedafe19b3c578f9a6bd3173',
+                        type='text/javascript',
+                        exec='pm.test("Content-Type Header is application/json", function () {\n                    return pm.expect(postman.getResponseHeader("Content-type")).to.be.eql("application/json");\n                });',
+                        src=None,
+                        name='POST /test/route/{id} Mimetype is application/json',
+                    ),
+                    Script(
+                        id='06b8b02870fa3b1287dc7ffb6e01a0e190c0b4c7b3b738daec708818ba44463147ce6dac76dfe8bb5d9b013d02bf1401f7f46ad23c6b0de22e828d85fe9d283b',
+                        type='text/javascript',
+                        exec='pm.test("Response time is less than 200ms", function () {\n                    return pm.expect(pm.response.responseTime).to.be.below(200);\n                });',
+                        src=None,
+                        name='POST /test/route/{id} responds in less than 200ms',
+                    ),
+                ]
+            }),
             prerequest_scripts=defaultdict(lambda: []),
             collection_global_variables=[],
             collection_test_scripts=[],
@@ -310,7 +512,7 @@ def test_to_postman_collection_v2(mormo):
 
 def test_fake_data_route_schema(mormo):
     for verb, path, operation in mormo.routes:
-        fake_data = mormo.fake_data_from_route_schema(path, operation).dict()
+        fake_data = mormo.fake_data_from_route_schema(verb, path, operation).dict()
         for param in mormo._resolve_object(operation.parameters or []):
             param = mormo._resolve_object(param, new_cls=Parameter)
             assert param.name in fake_data[param.in_.value]

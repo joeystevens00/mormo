@@ -15,12 +15,14 @@ function list_diff {
 # Skip passed tests
 files=$(list_diff "$(grep 'Passed:' $log_file | cut -d ':' -f2- | tr -d ' ')" "$(ls $data_dir)")
 # Skip max recursion hits
+set +e
 max_recursion_fails=$(grep ": Max reference recursion" log/test_results/fail_* | rev | cut -d ':' -f3 | rev | cut -d '/' -f3- | sed 's/fail_//' | tr '_' '.' | sed 's/\.txt//')
 files=$(list_diff "$files" "$max_recursion_fails")
 # Clear log file
 curdate=$(date +%Y_%m_%d)
 cp $log_file "$(echo -n $log_file | sed "s/prune/$curdate\_prune/")"
 echo -n "" > $log_file
+set -e
 for file in $files
 do
   echo "Testing file $file"

@@ -155,7 +155,7 @@ class SchemaObject(BaseModel):
 
 
 class MediaType(BaseModel):
-    schema_: Union[SchemaObject, Reference, None]
+    schema_: Union[Reference, SchemaObject, None]
 
     class Config:
         fields = {'schema_': 'schema'}

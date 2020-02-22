@@ -5,14 +5,11 @@ from pydantic import BaseSettings
 
 FAKE_REDIS_SERVER = None
 
-logger = logging.Logger(__name__)
-logging.basicConfig(level='DEBUG')
-
-
 class Settings(BaseSettings):
     redis_host: str = 'localhost'
     redis_port: int = 6379
     testing: bool = False
+    log_level: str = 'WARNING'
     test_data_str_min_length: int = 1
     test_data_int_min: int = 1
 
@@ -42,6 +39,11 @@ def redis_handle():
             port=settings['redis_port'],
         )
     return r
+
+
+logging.basicConfig()
+logger = logging.getLogger(__name__)
+logger.setLevel(Settings().log_level)
 
 
 from . import cli  # noqa: E402, F401

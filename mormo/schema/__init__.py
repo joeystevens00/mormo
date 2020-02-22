@@ -1,3 +1,4 @@
+import enum
 from typing import Any, Dict, Optional, Union
 from collections import defaultdict
 from typing import List
@@ -13,12 +14,25 @@ class TestData(BaseModel):
     value: Any
 
 
+class PostmanTest(enum.Enum):
+    schema_validation = 'schema_validation'
+    code = 'code'
+    content_type = 'content_type'
+    response_time = 'response_time'
+
+
 class Expect(BaseModel):
-    comment: Optional[str]
     code: Optional[Union[int, str]]
-    enabled: Optional[bool] = True
-    response_time: Optional[int] = 200
+    enabled: bool = True
+    response_time: int = 200
     headers: Optional[Dict[str, str]]
+    fake_data: bool = True
+    enabled_tests: List[PostmanTest] = [
+        PostmanTest.schema_validation,
+        PostmanTest.code,
+        PostmanTest.content_type,
+        PostmanTest.response_time,
+    ]
 
 
 class TestConfig(BaseModel):

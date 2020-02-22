@@ -2,6 +2,7 @@
 import json
 from multiprocessing import Process
 import sys
+import tempfile
 import time
 
 import click
@@ -33,12 +34,11 @@ def generate_schema(infile, outfile, test_file, **kwargs):
 
 @cli.command()
 @click.option('-i', '--in', 'in_file', type=click.Path(),
-              help='The OpenAPI Schema to convert.')
+              help='Path to the OpenAPI Schema to convert (YAML or JSON)', required=True)
 @click.option('-t', '--test_file', 'test_file', type=click.Path(),
-              help='Load test_data from file.')
+              help='Path to test config (YAML or JSON)')
 @click.option('-o', '--out', 'out_file', type=click.Path(),
-              help='The path to write the Postman Collection to.',
-              default='postman_collection_v2.json')
+              help='The path to write the Postman Collection to.')
 @click.option('--test', is_flag=True,
               help='Execute the generated schema with newman.')
 @click.option('--test_mormo_api', is_flag=True,
@@ -48,6 +48,8 @@ def generate_schema(infile, outfile, test_file, **kwargs):
               help='Verbose option in newman.')
 def run(in_file, test_file, out_file, test, test_mormo_api, host, verbose):
     """Generate Postman Collections."""
+    if not out_file:
+        out_file = tempfile.mktemp()
     if test_mormo_api:
         test = True
         addr, port = host.split('/')[-1].split(':')

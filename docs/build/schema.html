@@ -43,13 +43,18 @@
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="mormo.schema.Expect.comment">
-<code class="sig-name descname">comment</code><em class="property">: Optional[str]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.Expect.comment" title="Permalink to this definition">¶</a></dt>
+<dt id="mormo.schema.Expect.enabled">
+<code class="sig-name descname">enabled</code><em class="property">: bool</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.Expect.enabled" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="mormo.schema.Expect.enabled">
-<code class="sig-name descname">enabled</code><em class="property">: Optional[bool]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.Expect.enabled" title="Permalink to this definition">¶</a></dt>
+<dt id="mormo.schema.Expect.enabled_tests">
+<code class="sig-name descname">enabled_tests</code><em class="property">: List[PostmanTest]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.Expect.enabled_tests" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.Expect.fake_data">
+<code class="sig-name descname">fake_data</code><em class="property">: bool</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.Expect.fake_data" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -59,7 +64,7 @@
 
 <dl class="attribute">
 <dt id="mormo.schema.Expect.response_time">
-<code class="sig-name descname">response_time</code><em class="property">: Optional[int]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.Expect.response_time" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">response_time</code><em class="property">: int</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.Expect.response_time" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -175,6 +180,32 @@
 <dl class="attribute">
 <dt id="mormo.schema.OpenAPISchemaToPostmanRequest.verbose">
 <code class="sig-name descname">verbose</code><em class="property">: Optional[bool]</em><em class="property"> = None</em><a class="headerlink" href="#mormo.schema.OpenAPISchemaToPostmanRequest.verbose" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mormo.schema.PostmanTest">
+<em class="property">class </em><code class="sig-prename descclassname">mormo.schema.</code><code class="sig-name descname">PostmanTest</code><a class="headerlink" href="#mormo.schema.PostmanTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>An enumeration.</p>
+<dl class="attribute">
+<dt id="mormo.schema.PostmanTest.code">
+<code class="sig-name descname">code</code><em class="property"> = 'code'</em><a class="headerlink" href="#mormo.schema.PostmanTest.code" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.PostmanTest.content_type">
+<code class="sig-name descname">content_type</code><em class="property"> = 'content_type'</em><a class="headerlink" href="#mormo.schema.PostmanTest.content_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.PostmanTest.response_time">
+<code class="sig-name descname">response_time</code><em class="property"> = 'response_time'</em><a class="headerlink" href="#mormo.schema.PostmanTest.response_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mormo.schema.PostmanTest.schema_validation">
+<code class="sig-name descname">schema_validation</code><em class="property"> = 'schema_validation'</em><a class="headerlink" href="#mormo.schema.PostmanTest.schema_validation" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
