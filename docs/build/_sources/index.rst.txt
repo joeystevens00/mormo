@@ -30,16 +30,16 @@ Welcome to Mormo's documentation!
     * - package
       - | |commits-since|
 
-.. |docs| image:: https://readthedocs.org/projects/mormo/badge/?version=latest
-    :target: https://mormo.readthedocs.io/en/latest/?badge=latest
+.. |docs| image:: https://readthedocs.org/projects/mormo/badge/?version=0.7
+    :target: https://mormo.readthedocs.io/en/latest/?badge=0.7
     :alt: Documentation Status
 
 .. |travis| image:: https://travis-ci.com/joeystevens00/mormo.svg?branch=0.7
     :alt: Travis-CI Build Status
     :target: https://travis-ci.com/joeystevens00/mormo
 
-.. |coverage| image:: https://coveralls.io/repos/github/joeystevens00/mormo/badge.svg?branch=master
-    :target: https://coveralls.io/github/joeystevens00/mormo?branch=master
+.. |coverage| image:: https://coveralls.io/repos/github/joeystevens00/mormo/badge.svg?branch=0.7
+    :target: https://coveralls.io/github/joeystevens00/mormo?branch=0.7
     :alt: Coveralls Coverage Status
 
 .. |commits-since| image:: https://img.shields.io/github/commits-since/joeystevens00/mormo/master/0.7.svg
