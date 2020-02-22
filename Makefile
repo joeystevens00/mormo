@@ -38,8 +38,13 @@ update_badge_branches:
 	sed -Ei "s/readthedocs\.io\/en\/(\w|\.)+/readthedocs\.io\/en\/`git branch | grep '*' | cut -d ' ' -f2`/g" docs/src/index.rst
 
 .PHONY: build
-build: coverage coveralls bumpversion default docs update_badge_branches requirements.txt publish_pypi
+build: coverage coveralls bumpversion default docs update_badge_branches requirements.txt docs/requirements.txt publish_pypi
 	git commit requirements.txt -m "Requirements $(poetry version)"
+
+.PHONY: docs/requirements.txt
+docs/requirements.txt:
+	poetry export --dev -f requirements.txt > docs/requirements.txt
+	echo 'mormo' >> docs/requirements.txt
 
 .PHONY: requirements.txt
 requirements.txt:
