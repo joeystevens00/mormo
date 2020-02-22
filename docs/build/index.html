@@ -68,6 +68,12 @@
 </tbody>
 </table>
 <p>Mormo is an API testing framework that attempts to automatically test APIs given their OpenAPI schema. It works by converting the OpenAPI schema into Postman collection schema with automatically generated tests, and executing the resulting collection with Newman.</p>
+<div class="section" id="install">
+<h2>Install<a class="headerlink" href="#install" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip3</span> <span class="n">install</span> <span class="n">mormo</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="cli">
 <h2>CLI<a class="headerlink" href="#cli" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Convert OpenAPI Schema to Postman Collection V2 Schema</span>
@@ -78,6 +84,16 @@
 <span class="n">mormo</span> <span class="n">run</span> <span class="o">--</span><span class="ow">in</span> <span class="n">openapi</span><span class="o">.</span><span class="n">json</span> <span class="o">--</span><span class="n">test</span> <span class="o">--</span><span class="n">host</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span><span class="mi">8001</span> <span class="o">--</span><span class="n">test_file</span> <span class="n">test_config</span><span class="o">.</span><span class="n">json</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="api">
+<h2>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mormo</span> <span class="n">api</span>
+
+<span class="c1"># Or use uvicorn directly</span>
+<span class="n">uvicorn</span> <span class="o">--</span><span class="n">port</span> <span class="mi">8001</span> <span class="n">mormo</span><span class="o">.</span><span class="n">api</span><span class="p">:</span><span class="n">app</span>
+</pre></div>
+</div>
+<p>See <a class="reference external" href="http://127.0.0.1:8001/docs">http://127.0.0.1:8001/docs</a> for API documentation</p>
 </div>
 <div class="section" id="test-config">
 <h2>Test Config<a class="headerlink" href="#test-config" title="Permalink to this headline">¶</a></h2>
@@ -150,8 +166,8 @@
 <h2>Test Data Precedence<a class="headerlink" href="#test-data-precedence" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>Test Data in Test Config</p></li>
-<li><p>example or examples field in Operation schema</p></li>
-<li><p>Randomly generated from Operation parameter schema (only if Expect.fake_data is True)</p></li>
+<li><p>example or examples field in schema <a class="reference internal" href="openapi.html#mormo.schema.openapi_v3.Parameter" title="mormo.schema.openapi_v3.Parameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">mormo.schema.openapi_v3.Parameter</span></code></a></p></li>
+<li><p>Randomly generated from schema <a class="reference internal" href="openapi.html#mormo.schema.openapi_v3.ParameterSchema" title="mormo.schema.openapi_v3.ParameterSchema"><code class="xref py py-class docutils literal notranslate"><span class="pre">mormo.schema.openapi_v3.ParameterSchema</span></code></a></p></li>
 </ul>
 </div>
 <div class="section" id="builtin-tests">
@@ -179,7 +195,7 @@
 </div>
 <div class="section" id="safe-ordering-of-crud-operations">
 <h2>Safe Ordering of CRUD Operations<a class="headerlink" href="#safe-ordering-of-crud-operations" title="Permalink to this headline">¶</a></h2>
-<p>Mormo assumes your API is RESTFul so it orders operations to resources safely. It detects resources based on the path (/store, /store/{id}) and prioritizes HTTP verbs associated with create operations to ensure that the resource exists before reads/updates and deprioritizes DELETEs.</p>
+<p>Mormo assumes your API is RESTFul so it orders operations to resources safely. It detects resources based on the path (/store, /store/{id}) and prioritizes HTTP verbs associated with create operations to ensure that the resource exists before reads/updates and deprioritizes deletes.</p>
 <p>The ordering used can be seen in the <cite>verb_ordering</cite> parameter of the <cite>order_routes_by_resource</cite> method:
 <a class="reference internal" href="convert.html#mormo.convert.OpenAPIToPostman.order_routes_by_resource" title="mormo.convert.OpenAPIToPostman.order_routes_by_resource"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mormo.convert.OpenAPIToPostman.order_routes_by_resource()</span></code></a></p>
 </div>

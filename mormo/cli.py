@@ -22,7 +22,7 @@ def cli():
 
 @cli.command()
 def api():
-    uvicorn.run(host="127.0.0.1", port=8001, log_level="info")
+    uvicorn.run(app, host="127.0.0.1", port=8001, log_level="info")
 
 
 def generate_schema(infile, outfile, test_file, **kwargs):

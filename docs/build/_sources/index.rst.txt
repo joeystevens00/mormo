@@ -50,6 +50,13 @@ Welcome to Mormo's documentation!
 
 Mormo is an API testing framework that attempts to automatically test APIs given their OpenAPI schema. It works by converting the OpenAPI schema into Postman collection schema with automatically generated tests, and executing the resulting collection with Newman.
 
+Install
+--------
+
+::
+
+  pip3 install mormo
+
 CLI
 ----
 
@@ -61,6 +68,19 @@ CLI
   mormo run --in openapi.json --test --host http://127.0.0.1:8001
   # .. with a test config
   mormo run --in openapi.json --test --host http://127.0.0.1:8001 --test_file test_config.json
+
+
+API
+----
+
+::
+
+  mormo api
+
+  # Or use uvicorn directly
+  uvicorn --port 8001 mormo.api:app
+
+See http://127.0.0.1:8001/docs for API documentation
 
 
 Test Config
@@ -140,8 +160,8 @@ See :class:`mormo.schema.TestConfig` and  :class:`mormo.schema.Expect` for all o
 Test Data Precedence
 -----------------------
 - Test Data in Test Config
-- example or examples field in Operation schema
-- Randomly generated from Operation parameter schema (only if Expect.fake_data is True)
+- example or examples field in schema :class:`mormo.schema.openapi_v3.Parameter`
+- Randomly generated from schema :class:`mormo.schema.openapi_v3.ParameterSchema`
 
 Builtin Tests
 ---------------
@@ -158,7 +178,7 @@ response_time       Server should respond within a number of milliseconds
 
 Safe Ordering of CRUD Operations
 ---------------------------------
-Mormo assumes your API is RESTFul so it orders operations to resources safely. It detects resources based on the path (/store, /store/{id}) and prioritizes HTTP verbs associated with create operations to ensure that the resource exists before reads/updates and deprioritizes DELETEs.
+Mormo assumes your API is RESTFul so it orders operations to resources safely. It detects resources based on the path (/store, /store/{id}) and prioritizes HTTP verbs associated with create operations to ensure that the resource exists before reads/updates and deprioritizes deletes.
 
 The ordering used can be seen in the `verb_ordering` parameter of the `order_routes_by_resource` method:
 :meth:`mormo.convert.OpenAPIToPostman.order_routes_by_resource`
