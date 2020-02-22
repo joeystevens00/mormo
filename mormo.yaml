@@ -22,7 +22,7 @@ POST /schema/{id}/to_postman:
   make_global:
     postman_id: .id
   expect:
-    response_time: 105000
+    response_time: 120000
 GET /postman/{id}:
   variables:
     id: "{{postman_id}}"
@@ -42,4 +42,4 @@ POST /run/test/from_schema:
     schema: ./tests/data/openapi/json/openapi.json
     host: 127.0.0.1:8001
   expect:
-    response_time: 105000
+    response_time: 120000
