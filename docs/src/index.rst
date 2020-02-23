@@ -33,7 +33,7 @@ Welcome to Mormo's documentation!
 .. |docs| image:: https://readthedocs.org/projects/mormo/badge/?version=0.7
     :target: https://mormo.readthedocs.io/en/0.7
     :alt: Documentation Status
-.. |api_docs| image:: https://img.shields.io/badge/dynamic/json?url=http://45.56.119.5/0.7/openapi.json&label=API%20Docs&query=$.info.version&color=success
+.. |api_docs| image:: https://img.shields.io/badge/dynamic/json?url=http://45.56.119.5/0.7/openapi.json&label=api%20docs&query=$.info.version&color=success
     :target: http://45.56.119.5/0.7/docs?url=/0.7/openapi.json
     :alt: API Documentation Status
 
