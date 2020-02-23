@@ -24,7 +24,7 @@ Welcome to Mormo's documentation!
     :stub-columns: 1
 
     * - docs
-      - |docs|
+      - |docs| |api_docs|
     * - tests
       - | |travis| |coverage|
     * - package
@@ -33,6 +33,9 @@ Welcome to Mormo's documentation!
 .. |docs| image:: https://readthedocs.org/projects/mormo/badge/?version=0.7
     :target: https://mormo.readthedocs.io/en/0.7
     :alt: Documentation Status
+.. |api_docs| image:: https://img.shields.io/badge/dynamic/json?url=http://45.56.119.5/0.7/openapi.json&label=API%20Docs&query=$.info.version&color=success
+    :target: http://45.56.119.5/0.7/docs?url=/0.7/openapi.json
+    :alt: API Documentation Status
 
 .. |travis| image:: https://travis-ci.com/joeystevens00/mormo.svg?branch=0.7
     :alt: Travis-CI Build Status
