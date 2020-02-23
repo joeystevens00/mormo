@@ -80,7 +80,7 @@ API
   # Or use uvicorn directly
   uvicorn --port 8001 mormo.api:app
 
-See http://127.0.0.1:8001/docs for API documentation
+See `/docs <http://45.56.119.5/0.7/docs?url=/0.7/openapi.json>`_ for API documentation.
 
 
 Test Config

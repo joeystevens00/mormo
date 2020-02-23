@@ -4,6 +4,13 @@ ifeq ($(REMOTE), 1)
 	ec = make ec
 endif
 
+define update_badge_branch
+	sed -Ei "s/(\?|\&)branch\=(\w|\.)+/\1branch\=`git branch | grep '*' | cut -d ' ' -f2`/g" $(1)
+	sed -Ei "s/(\?|\&)version\=(\w|\.)+/\1version\=`git branch | grep '*' | cut -d ' ' -f2`/g" $(1)
+	sed -Ei "s/readthedocs\.io\/en\/(\w|\.)+/readthedocs\.io\/en\/`git branch | grep '*' | cut -d ' ' -f2`/g" $(1)
+	sed -Ei "s/45\.56\.119\.5\/(\w|\.)+\/docs\?url\=(\w|\.)+\/openapi\.json/45\.56\.119\.5\/`git branch | grep '*' | cut -d ' ' -f2`\/docs\?url\=`git branch | grep '*' | cut -d ' ' -f2`\/openapi\.json/" $(1)
+endef
+
 .PHONY: default
 default: clean
 	poetry install
@@ -28,17 +35,19 @@ bumpversion:
 coveralls:
 	poetry run coveralls
 
+.PHONY: update_api_version
+update_api_version:
+	sed -Ei "s/(FastAPI\()version\='(\w|\.)+'/\1version\='`poetry version | cut -d ' ' -f2`'/g" mormo/api.py
+
+
+
 .PHONY: update_badge_branches
 update_badge_branches:
-	sed -Ei "s/(\?|\&)branch\=(\w|\.)+/\1branch\=`git branch | grep '*' | cut -d ' ' -f2`/g" README.md
-	sed -Ei "s/(\?|\&)version\=(\w|\.)+/\1version\=`git branch | grep '*' | cut -d ' ' -f2`/g" README.md
-	sed -Ei "s/readthedocs\.io\/en\/(\w|\.)+/readthedocs\.io\/en\/`git branch | grep '*' | cut -d ' ' -f2`/g" README.md
-	sed -Ei "s/(\?|\&)branch\=(\w|\.)+/\1branch\=`git branch | grep '*' | cut -d ' ' -f2`/g" docs/src/index.rst
-	sed -Ei "s/(\?|\&)version\=(\w|\.)+/\1version\=`git branch | grep '*' | cut -d ' ' -f2`/g" docs/src/index.rst
-	sed -Ei "s/readthedocs\.io\/en\/(\w|\.)+/readthedocs\.io\/en\/`git branch | grep '*' | cut -d ' ' -f2`/g" docs/src/index.rst
+	$(call update_badge_branch,README.md)
+	$(call update_badge_branch,docs/src/index.rst)
 
 .PHONY: build
-build: coverage coveralls bumpversion default docs update_badge_branches requirements.txt docs/requirements.txt publish_pypi
+build: coverage coveralls bumpversion default docs update_api_version update_badge_branches requirements.txt docs/requirements.txt publish_pypi
 	git commit requirements.txt -m "Requirements $(poetry version)"
 
 .PHONY: docs/requirements.txt
