@@ -12,7 +12,7 @@ from .schema.postman_collection_v2 import (
 from .util import DB, load_db, save_db
 from . import logger, redis_handle, Settings
 
-app = FastAPI(version='0.7.40')
+app = FastAPI(version='0.7.41')
 
 
 @app.post("/schema", response_model=SaveDBResult)

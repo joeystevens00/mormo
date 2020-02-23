@@ -3,12 +3,15 @@ ec =
 ifeq ($(REMOTE), 1)
 	ec = make ec
 endif
+branch = `git branch | grep '*' | cut -d ' ' -f2`
 
-define update_badge_branch
-	sed -Ei "s/(\?|\&)branch\=(\w|\.)+/\1branch\=`git branch | grep '*' | cut -d ' ' -f2`/g" $(1)
-	sed -Ei "s/(\?|\&)version\=(\w|\.)+/\1version\=`git branch | grep '*' | cut -d ' ' -f2`/g" $(1)
-	sed -Ei "s/readthedocs\.io\/en\/(\w|\.)+/readthedocs\.io\/en\/`git branch | grep '*' | cut -d ' ' -f2`/g" $(1)
-	sed -Ei "s/\/(\w|\.)+\/docs\?url\=\/(\w|\.)+\/openapi\.json/\/`git branch | grep '*' | cut -d ' ' -f2`\/docs\?url\=\/`git branch | grep '*' | cut -d ' ' -f2`\/openapi\.json/" $(1)
+define update_badge_branch	
+	sed -Ei "s/(\?|\&)branch\=(\w|\.)+/\1branch\=$(branch)/g" $(1)
+	sed -Ei "s/(\?|\&)version\=(\w|\.)+/\1version\=$(branch)/g" $(1)
+	sed -Ei "s/readthedocs\.io\/en\/(\w|\.)+/readthedocs\.io\/en\/$(branch)/g" $(1)
+	sed -Ei "s/\/(\w|\.)+\/docs\?url\=\/(\w|\.)+\/openapi\.json/\/$(branch)\/docs\?url\=\/$(branch)\/openapi\.json/" $(1)
+	sed -Ei "s/master\.\.\.(\w|\.)+/master\.\.\.$(branch)/" $(1)
+	sed -Ei "s/master\/(\w|\.)+\.svg/master\/$(branch)\.svg/" $(1)
 endef
 
 .PHONY: default
