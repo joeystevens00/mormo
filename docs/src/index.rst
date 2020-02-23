@@ -33,8 +33,8 @@ Welcome to Mormo's documentation!
 .. |docs| image:: https://readthedocs.org/projects/mormo/badge/?version=master
     :target: https://mormo.readthedocs.io/en/master
     :alt: Documentation Status
-.. |api_docs| image:: https://img.shields.io/badge/dynamic/json?url=http://45.56.119.5/0.7/openapi.json&label=api%20docs&query=$.info.version&color=success
-    :target: http://45.56.119.5/0.7/docs?url=/0.7/openapi.json
+.. |api_docs| image:: https://img.shields.io/badge/dynamic/json?url=http://45.56.119.5/master/openapi.json&label=api%20docs&query=$.info.version&color=success
+    :target: http://45.56.119.5/master/docs?url=/master/openapi.json
     :alt: API Documentation Status
 
 .. |travis| image:: https://travis-ci.com/joeystevens00/mormo.svg?branch=master
@@ -45,9 +45,9 @@ Welcome to Mormo's documentation!
     :target: https://coveralls.io/github/joeystevens00/mormo?branch=master
     :alt: Coveralls Coverage Status
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/joeystevens00/mormo/master/0.7.svg
+.. |commits-since| image:: https://img.shields.io/github/commits-since/joeystevens00/mormo/master/master.svg
     :alt: Commits since latest release
-    :target: https://github.com/joeystevens00/mormo/compare/master...0.7
+    :target: https://github.com/joeystevens00/mormo/compare/master...master
 
 .. end-badges
 

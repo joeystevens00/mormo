@@ -4,6 +4,6 @@
 
 [![Coverage Status](https://coveralls.io/repos/github/joeystevens00/mormo/badge.svg?branch=master)](https://coveralls.io/github/joeystevens00/mormo?branch=master)
 
-[![Documentation Status](https://readthedocs.org/projects/mormo/badge/?version=0.7)](https://mormo.readthedocs.io/en/0.7)
+[![Documentation Status](https://readthedocs.org/projects/mormo/badge/?version=master)](https://mormo.readthedocs.io/en/master)
 
-[![API Documentation Status](https://img.shields.io/badge/dynamic/json?url=http://45.56.119.5/0.7/openapi.json&label=api%20docs&query=$.info.version&color=success)](http://45.56.119.5/0.7/docs?url=/0.7/openapi.json)
+[![API Documentation Status](https://img.shields.io/badge/dynamic/json?url=http://45.56.119.5/master/openapi.json&label=api%20docs&query=$.info.version&color=success)](http://45.56.119.5/master/docs?url=/master/openapi.json)
