@@ -22,8 +22,7 @@ exclude_patterns = [
 
 [[analyzers]]
 name = "python"
-enabled = true 
+enabled = true
 
   [analyzers.meta]
-  runtime_version = "3.x.x"
-
+  runtime_version = "3.6.9"
