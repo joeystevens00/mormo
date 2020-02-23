@@ -9,7 +9,7 @@ define update_badge_branch
 	sed -Ei "s/(\?|\&)branch\=(\w|\.)+/\1branch\=$(branch)/g" $(1)
 	sed -Ei "s/(\?|\&)version\=(\w|\.)+/\1version\=$(branch)/g" $(1)
 	sed -Ei "s/readthedocs\.io\/en\/(\w|\.)+/readthedocs\.io\/en\/$(branch)/g" $(1)
-	sed -Ei "s/\/(\w|\.)+\/openapi\.json/\/$(branch)\/openapi\.json/" $(1)
+	sed -Ei "s/\/(\w|\.)+\/openapi\.json/\/$(branch)\/openapi\.json/g" $(1)
 	sed -Ei "s/\/(\w|\.)+\/docs/\/$(branch)\/docs/" $(1)
 	sed -Ei "s/master\.\.\.(\w|\.)+/master\.\.\.$(branch)/" $(1)
 	sed -Ei "s/master\/(\w|\.)+\.svg/master\/$(branch)\.svg/" $(1)
