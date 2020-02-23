@@ -30,24 +30,24 @@ Welcome to Mormo's documentation!
     * - package
       - | |commits-since|
 
-.. |docs| image:: https://readthedocs.org/projects/mormo/badge/?version=0.7
-    :target: https://mormo.readthedocs.io/en/0.7
+.. |docs| image:: https://readthedocs.org/projects/mormo/badge/?version=master
+    :target: https://mormo.readthedocs.io/en/master
     :alt: Documentation Status
-.. |api_docs| image:: https://img.shields.io/badge/dynamic/json?url=http://45.56.119.5/0.7/openapi.json&label=api%20docs&query=$.info.version&color=success
-    :target: http://45.56.119.5/0.7/docs?url=/0.7/openapi.json
+.. |api_docs| image:: https://img.shields.io/badge/dynamic/json?url=http://45.56.119.5/master/openapi.json&label=api%20docs&query=$.info.version&color=success
+    :target: http://45.56.119.5/master/docs?url=/master/openapi.json
     :alt: API Documentation Status
 
-.. |travis| image:: https://travis-ci.com/joeystevens00/mormo.svg?branch=0.7
+.. |travis| image:: https://travis-ci.com/joeystevens00/mormo.svg?branch=master
     :alt: Travis-CI Build Status
     :target: https://travis-ci.com/joeystevens00/mormo
 
-.. |coverage| image:: https://coveralls.io/repos/github/joeystevens00/mormo/badge.svg?branch=0.7
-    :target: https://coveralls.io/github/joeystevens00/mormo?branch=0.7
+.. |coverage| image:: https://coveralls.io/repos/github/joeystevens00/mormo/badge.svg?branch=master
+    :target: https://coveralls.io/github/joeystevens00/mormo?branch=master
     :alt: Coveralls Coverage Status
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/joeystevens00/mormo/master/0.7.svg
+.. |commits-since| image:: https://img.shields.io/github/commits-since/joeystevens00/mormo/master/master.svg
     :alt: Commits since latest release
-    :target: https://github.com/joeystevens00/mormo/compare/master...0.7
+    :target: https://github.com/joeystevens00/mormo/compare/master...master
 
 .. end-badges
 
@@ -83,7 +83,7 @@ API
   # Or use uvicorn directly
   uvicorn --port 8001 mormo.api:app
 
-See `/docs <http://45.56.119.5/0.7/docs?url=/0.7/openapi.json>`_ for API documentation.
+See `/docs <http://45.56.119.5/master/docs?url=/master/openapi.json>`_ for API documentation.
 
 
 Test Config
