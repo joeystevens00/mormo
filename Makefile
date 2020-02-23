@@ -8,7 +8,7 @@ define update_badge_branch
 	sed -Ei "s/(\?|\&)branch\=(\w|\.)+/\1branch\=`git branch | grep '*' | cut -d ' ' -f2`/g" $(1)
 	sed -Ei "s/(\?|\&)version\=(\w|\.)+/\1version\=`git branch | grep '*' | cut -d ' ' -f2`/g" $(1)
 	sed -Ei "s/readthedocs\.io\/en\/(\w|\.)+/readthedocs\.io\/en\/`git branch | grep '*' | cut -d ' ' -f2`/g" $(1)
-	sed -Ei "s/45\.56\.119\.5\/(\w|\.)+\/docs\?url\=(\w|\.)+\/openapi\.json/45\.56\.119\.5\/`git branch | grep '*' | cut -d ' ' -f2`\/docs\?url\=`git branch | grep '*' | cut -d ' ' -f2`\/openapi\.json/" $(1)
+	sed -Ei "s/\/(\w|\.)+\/docs\?url\=\/(\w|\.)+\/openapi\.json/\/`git branch | grep '*' | cut -d ' ' -f2`\/docs\?url\=\/`git branch | grep '*' | cut -d ' ' -f2`\/openapi\.json/" $(1)
 endef
 
 .PHONY: default
@@ -47,7 +47,7 @@ update_badge_branches:
 	$(call update_badge_branch,docs/src/index.rst)
 
 .PHONY: build
-build: coverage coveralls bumpversion default docs update_api_version update_badge_branches requirements.txt docs/requirements.txt publish_pypi
+build: coverage coveralls bumpversion default update_api_version update_badge_branches docs requirements.txt docs/requirements.txt publish_pypi
 	git commit requirements.txt -m "Requirements $(poetry version)"
 
 .PHONY: docs/requirements.txt
