@@ -15,12 +15,12 @@ CallBackType = Dict[str, Dict[str, Dict]]
 
 
 class ParameterRequestData(BaseModel):
-    body: dict = dict()
-    requestBody: dict = dict()
-    path: dict = dict()
-    query: dict = dict()
-    header: dict = dict()
-    cookie: dict = dict()
+    body: dict = {}
+    requestBody: dict = {}
+    path: dict = {}
+    query: dict = {}
+    header: dict = {}
+    cookie: dict = {}
 
 
 class ParameterIn(enum.Enum):

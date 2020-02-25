@@ -22,7 +22,8 @@ def run_newman(collection_file, host=None, verbose=None, json=False):
         cmdargs.append('--verbose')
     cmdargs.extend(['--reporters', f'cli{",json" if json else ""}'])
     if json:
-        json_outfile = tempfile.mktemp()
+        temp = tempfile.NamedTemporaryFile()
+        json_outfile = temp.name
         cmdargs.extend(["--reporter-json-export", json_outfile])
     run_newman_args = ['newman', 'run', quote(collection_file), *cmdargs]
     e = subprocess.run(
@@ -46,7 +47,7 @@ def run_newman(collection_file, host=None, verbose=None, json=False):
 
 def new_event(listen, script):
     if isinstance(script, list):
-        if not len(script):
+        if not script:
             return
         _script = script[0]
         for i in script[1:]:
@@ -55,11 +56,11 @@ def new_event(listen, script):
     return Event(id=uuidgen(), listen=listen, script=script, disabled=False)
 
 
-def javascript(name, exec):
+def javascript(name, cmd):
     return Script(
-        id=fingerprint([name, exec]),
+        id=fingerprint([name, cmd]),
         name=name,
-        exec=trim(exec),
+        exec=trim(cmd),
         type='text/javascript',
     )
 
@@ -67,7 +68,7 @@ def javascript(name, exec):
 def js_test_code(route, code):
     return javascript(
         name=f"{route} Test Code is {code}",
-        exec="""
+        cmd="""
                 pm.test("Status code is {code}", function () {{
                     return pm.response.to.have.status({code});
                 }});
@@ -78,7 +79,7 @@ def js_test_code(route, code):
 def js_test_content_type(route, mimetype):
     return javascript(
         name=f"{route} Mimetype is {mimetype}",
-        exec="""
+        cmd="""
                 pm.test("Content-Type Header is {mimetype}", function () {{
                     return pm.expect(postman.getResponseHeader("Content-type")).to.be.eql("{mimetype}");
                 }});
@@ -89,7 +90,7 @@ def js_test_content_type(route, mimetype):
 def js_test_response_time(route, max_time_ms):
     return javascript(
         name=f"{route} responds in less than {max_time_ms}ms",
-        exec="""
+        cmd="""
                 pm.test("Response time is less than {max_time_ms}ms", function () {{
                     return pm.expect(pm.response.responseTime).to.be.below({max_time_ms});
                 }});
@@ -100,7 +101,7 @@ def js_test_response_time(route, max_time_ms):
 def js_test_validate_schema(route, schema, reference_schema):
     return javascript(
         name=f"{route} responds according to schema",
-        exec="""
+        cmd="""
             pm.test('Schema is valid', function() {{
                 var schema = {schema};
                 tv4.addSchema({reference_schema});

@@ -13,29 +13,29 @@ POST /schema:
     - console.log("test duplicate cmd");
     - console.log("test duplicate cmd");
     - console.log("test duplicate cmd");
-GET /schema/{id}:
+GET /schema/{digest}:
   variables:
-    id: "{{openapi_id}}"
-POST /schema/{id}/to_postman:
+    digest: "{{openapi_id}}"
+POST /schema/{digest}/to_postman:
   variables:
-    id: "{{openapi_id}}"
+    digest: "{{openapi_id}}"
   make_global:
     postman_id: .id
   expect:
     response_time: 120000
-GET /postman/{id}:
+GET /postman/{digest}:
   variables:
-    id: "{{postman_id}}"
-GET /postman/{id}/test:
+    digest: "{{postman_id}}"
+GET /postman/{digest}/test:
   variables:
-    id: "{{postman_id}}"
+    digest: "{{postman_id}}"
     host: localhost:8001
   expect:
     response_time: 3000
-POST /postman/{id}/test:
+POST /postman/{digest}/test:
   comment: Disabled in API
   variables:
-    id: "{{postman_id}}"
+    digest: "{{postman_id}}"
     host: localhost:8001
 POST /run/test/from_schema:
   variables:

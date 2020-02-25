@@ -49,7 +49,8 @@ def generate_schema(infile, outfile, test_file, **kwargs):
 def run(in_file, test_file, out_file, test, test_mormo_api, host, verbose):
     """Generate Postman Collections."""
     if not out_file:
-        out_file = tempfile.mktemp()
+        temp = tempfile.NamedTemporaryFile()
+        out_file = temp.name
     if test_mormo_api:
         test = True
         addr, port = host.split('/')[-1].split(':')
@@ -68,7 +69,7 @@ def run(in_file, test_file, out_file, test, test_mormo_api, host, verbose):
         time.sleep(1)
         with open(in_file, 'w') as f:
             json.dump(requests.get(f'{host}/openapi.json').json(), f)
-    generate_schema(in_file, out_file, test_file, host=host)
+    generate_schema(in_file, out_file, test_file, host=host, verbose=verbose)
     if test:
         res = run_newman(out_file, host=host, verbose=verbose)
         if test_mormo_api:

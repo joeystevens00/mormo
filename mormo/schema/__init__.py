@@ -1,7 +1,6 @@
 import enum
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 from collections import defaultdict
-from typing import List
 
 from . import openapi_v3, postman_collection_v2
 from ..model import BaseModel
