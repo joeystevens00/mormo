@@ -2,13 +2,12 @@ from collections import defaultdict, ChainMap
 import tempfile
 import json
 import pytest
-from types import GeneratorType
 from typing import Union
 
 from mormo.convert import OpenAPIToPostman as oapi2pm, ParameterBuilder, PostmanConfig, PostmanVariables, Route
 from mormo.schema import Expect, TestData
 from mormo.schema import postman_collection_v2 as pm
-from mormo.schema.openapi_v3 import Operation, OpenAPISchemaV3, Reference, Parameter, ParameterIn, ParameterSchema
+from mormo.schema.openapi_v3 import Operation, OpenAPISchemaV3, Reference, Parameter, ParameterIn
 from mormo.schema.postman_collection_v2 import Script
 
 REF_OR_OPERATION = Union[dict, Operation, Reference]

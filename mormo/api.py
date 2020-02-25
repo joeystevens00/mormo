@@ -9,10 +9,10 @@ from .schema.postman_collection_v2 import (
     Collection,
     SaveDBResult as PostmanSaveDBResult,
 )
-from .util import DB, load_db, save_db
-from . import logger, redis_handle, Settings
+from .util import load_db, save_db
+from . import logger
 
-app = FastAPI(version='0.7.43')
+app = FastAPI(version='0.7.44')
 
 
 @app.post("/schema", response_model=SaveDBResult)

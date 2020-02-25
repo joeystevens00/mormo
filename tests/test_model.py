@@ -1,11 +1,8 @@
 import tempfile
 import json
-import pytest
 from mormo.model import BaseModel
-from mormo.schema.postman_collection_v2 import Variable
-from mormo.util import load_db, save_db, gen_string, cls_from_str, DB
+from mormo.util import load_db, save_db, cls_from_str, DB
 
-from .conftest import generate_dicts
 
 def test_cls_from_str():
     assert isinstance(cls_from_str('mormo.model.BaseModel'), type(BaseModel))
@@ -29,7 +26,7 @@ def test_save_db_model_wrapper(test_object, redis):
     test_object, expected = test_object
     o = save_db(test_object)
     assert o.object == expected
-    assert load_db(o.id) == expected    
+    assert load_db(o.id) == expected
 
 
 def test_db_save(test_dbo, redis):

@@ -1,4 +1,4 @@
-from mormo.postman_test import javascript, new_event, run_newman
+from mormo.postman_test import javascript, new_event
 from mormo.schema.postman_collection_v2 import Script
 
 

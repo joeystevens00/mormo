@@ -1,6 +1,6 @@
 import os
 from collections import defaultdict, ChainMap, Counter, namedtuple
-from typing import Generator, Iterable, List, Set, Optional
+from typing import Generator, Iterable, List, Tuple, Optional
 import json
 import re
 import yaml
@@ -151,7 +151,7 @@ class OpenAPIToPostman:
     def path_parts(cls, path: str) -> list:
         url = []
         for part in path.split('/')[1:]:
-            is_path_variable = re.match('^{(\w+)}$', part)  # noqa: W605
+            is_path_variable = re.match(r'^{(\w+)}$', part)  # noqa: W605
             is_path_segment = RE_PATH_VARIABLE.findall(part)
             # queries = RE_PATH_VARIABLE_SEGMENT.findall(part)
             if is_path_variable:
@@ -206,10 +206,10 @@ class OpenAPIToPostman:
             verb, path = route.split(' ')
             route = f'{verb.upper()} {path}'
             for variable, response_path in (i.make_global or {}).items():
-                response_path = ''.join([
+                response_path = ''.join(
                     '["' + trim(p) + '"]'
                     for p in response_path.split('.')[1:]
-                ])
+                )
                 debug_global = lambda x: javascript(
                     name=f'[{x}] Debug {variable}',
                     cmd=f'console.log("[{x}] GLOBAL({variable}):", pm.globals.get("{variable}"));',  # noqa: E501
@@ -351,7 +351,7 @@ class OpenAPIToPostman:
     @classmethod
     def order_routes_by_resource(
         cls, routes: Iterable[Route],
-        verb_ordering: Set = set(['post', 'put', 'get', 'patch', 'delete'])
+        verb_ordering: Tuple = ('post', 'put', 'get', 'patch', 'delete',)
     ) -> List[Route]:
         """Identify REST resources and order CRUD operations safely."""
         by_resource = defaultdict(lambda: {})
@@ -725,10 +725,10 @@ class ParameterBuilder:
         global_ = global_.copy()
         url = url.copy()
         missing_variable = set(self.path_vars).difference(
-            set([
+            {
                 *[p.key for p in url if p],
                 *[p.id for p in global_ if p],
-            ]),
+            },
         )
 
         for path_var in missing_variable:
@@ -783,8 +783,7 @@ class ParameterBuilder:
             return header, RequestBody(
                 **body_args,
             )
-        else:
-            return header, None
+        return header, None
 
     def build(self) -> PostmanVariables:
         global_, query, url, header, body = ([], [], [], [], [])

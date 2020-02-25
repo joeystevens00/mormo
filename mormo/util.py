@@ -19,7 +19,7 @@ from hypothesis_jsonschema._from_schema import from_schema
 
 from . import logger, redis_handle, Settings
 
-RE_WORDCHARS = re.compile('^\w+$')  # noqa: W605
+RE_WORDCHARS = re.compile(r'^\w+$')  # noqa: W605
 
 HTTP_VERBS = [
     "get",
@@ -225,12 +225,12 @@ def render_jinja2(template: str, **kwargs) -> str:
 
 
 def uuidgen(*_, **__):
-    t = '-'.join([secrets.token_hex(i // 2) for i in [8, 4, 4, 4, 12]])
+    t = '-'.join(secrets.token_hex(i // 2) for i in [8, 4, 4, 4, 12])
     return t
 
 
 def gen_string(length, charset=string.printable, choice_f=random.choice):
-    return ''.join([choice_f(charset) for i in range(0, length)])
+    return ''.join(choice_f(charset) for i in range(0, length))
 
 
 def flatten_iterables_in_dict(d: dict, index=0, no_null=True, min_length=0):
@@ -340,8 +340,7 @@ def pick_one(gen: GeneratorType, strategy="random"):
     # often enough the first element is rather boring like 0 or '0'
     if "rand" in strategy.lower():
         return random.choice(next(gen))
-    else:
-        return next(gen)[0]
+    return next(gen)[0]
 
 
 def hashable_lru(func):
@@ -354,7 +353,7 @@ def hashable_lru(func):
             return value
 
     def func_with_serialized_params(*args, **kwargs):
-        _args = tuple([deserialise(arg) for arg in args])
+        _args = tuple(deserialise(arg) for arg in args)
         _kwargs = {k: deserialise(v) for k, v in kwargs.items()}
         return func(*_args, **_kwargs)
 
@@ -362,7 +361,7 @@ def hashable_lru(func):
 
     @functools.wraps(func)
     def lru_decorator(*args, **kwargs):
-        _args = tuple([json.dumps(arg, sort_keys=True) if type(arg) in (list, dict) else arg for arg in args])  # noqa: E501
+        _args = tuple(json.dumps(arg, sort_keys=True) if type(arg) in (list, dict) else arg for arg in args)  # noqa: E501
         _kwargs = {k: json.dumps(v, sort_keys=True) if type(v) in (list, dict) else v for k, v in kwargs.items()}  # noqa: E501
         return cached_function(*_args, **_kwargs)
     lru_decorator.cache_info = cached_function.cache_info
