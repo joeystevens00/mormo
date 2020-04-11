@@ -102,7 +102,7 @@ def test_trim():
 
 def test_cls_from_str():
     assert cls_from_str('mormo.model.BaseModel').__name__ == "BaseModel"
-    assert cls_from_str('mormo.schema.openapi_v3.SaveDBResult').__name__ == "SaveDBResult"
+    assert cls_from_str('mormo.schema.api.SaveOpenAPISchema').__name__ == "SaveOpenAPISchema"
 
 
 def test_fingerprint():
