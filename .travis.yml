@@ -8,8 +8,6 @@ jobs:
     - stage: build
       script:
           - docker build -t joeystevens00/mormo:api .
-          - docker login --username joeystevens00 --password $DOCKER_HUB_TOKEN
-          - docker image push joeystevens00/mormo:api
     - stage: "test"
       script:
           - docker-compose up -d
@@ -21,4 +19,7 @@ jobs:
           - docker-compose up -d
           - sleep 10
           - docker-compose exec app mormo test -t http://127.0.0.1:8001/openapi.json -c mormo.yaml -v
+      after_success:
+        - docker login --username joeystevens00 --password $DOCKER_HUB_TOKEN
+        - docker image push joeystevens00/mormo:api
       name: integration test

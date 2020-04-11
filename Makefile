@@ -43,8 +43,6 @@ coveralls:
 update_api_version:
 	sed -Ei "s/(FastAPI\()version\='(\w|\.)+'/\1version\='`poetry version | cut -d ' ' -f2`'/g" mormo/api.py
 
-
-
 .PHONY: update_badge_branches
 update_badge_branches:
 	$(call update_badge_branch,README.md)
