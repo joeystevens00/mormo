@@ -21,4 +21,4 @@ def test_new_event():
 def test_run_newman(postman_collection):
     res = postman_collection.run(host=None, json=True)
     error = res.json_['run']['failures'][0]['error']['message'].lower()
-    assert 'invalid uri' in error or 'ENOTFOUND' in error
+    assert 'invalid uri' in error or 'enotfound' in error
