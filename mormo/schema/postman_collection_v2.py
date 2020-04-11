@@ -157,8 +157,3 @@ class Collection(BaseModel):
         t = tempfile.NamedTemporaryFile()
         self.to_file(t.name)
         return run_newman(t.name, **kwargs)
-
-
-class SaveDBResult(BaseModel):
-    id: str
-    object: Collection

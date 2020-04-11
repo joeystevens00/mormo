@@ -252,8 +252,3 @@ class OpenAPISchemaV3(BaseModel):
     components: Optional[dict]
     security: Optional[List[Dict[str, List]]]
     externalDocs: Optional[ExternalDocs]
-
-
-class SaveDBResult(BaseModel):
-    id: str
-    object: OpenAPISchemaV3

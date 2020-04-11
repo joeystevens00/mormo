@@ -3,6 +3,7 @@ from collections import defaultdict, ChainMap, Counter, namedtuple
 from typing import Generator, Iterable, List, Tuple, Optional
 import json
 import re
+import requests
 import yaml
 
 from .postman_test import (
@@ -91,9 +92,12 @@ class OpenAPIToPostman:
                 raise ValueError(f"Unknown file type for: {path}")
         elif schema:
             self.schema = schema
+        elif request.target:
+            self.host = request.target.split('/')[2:][0]
+            self.schema = requests.get(request.target).json()
         else:
             raise ValueError(
-                "Either path to schema or schema is a required field",
+                "Either path to schema, URL to OpenAPI schema, or schema is a required field",
             )
         if isinstance(self.schema, OpenAPISchemaV3):
             self.schema = self.schema.to_dict(no_empty=False)
@@ -175,7 +179,9 @@ class OpenAPIToPostman:
         collection_test_scripts = []
         collection_prerequest_scripts = []
         for route, td_item in test_config.items():
-            i = TestConfig(**td_item)
+            i = td_item
+            if isinstance(i, dict):
+                i = TestConfig(**td_item)
             if isinstance(i.variables, str):
                 variables = load_file(i.variables)
             else:
