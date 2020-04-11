@@ -13,5 +13,5 @@ RUN pip install -r requirements.txt
 RUN pip install .
 
 ARG target
-RUN test "$target" = "test" && pip install pytest || return 0
+RUN test "$target" = "test" && pip install pytest || { "$target" != "test" && return 0; }
 CMD uvicorn --host 0.0.0.0 --port 8001 mormo.api:app
