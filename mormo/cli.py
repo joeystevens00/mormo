@@ -91,7 +91,7 @@ def run(in_file, test_file, out_file, test, test_mormo_api, host, verbose):
     help='Target API with path to schema (e.g. http://localhost:8000/openapi.json)',
 )
 @click.option(
-    '--verbose', is_flag=True, help='verbose option in newman.',
+    '-v', '--verbose', is_flag=True, help='verbose option in newman.',
 )
 def test(test_config, target, test_mormo_api, verbose):
     """Run Mormo Tests."""
