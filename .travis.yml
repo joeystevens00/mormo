@@ -20,12 +20,5 @@ jobs:
     - script:
           - docker-compose up -d
           - sleep 10
-          - docker-compose exec app bash -c 'curl 127.0.0.1:8001/openapi.json > openapi.json'
-          - docker-compose exec app mormo run -i openapi.json --test --host http://127.0.0.1:8001 -t mormo.yaml --verbose
+          - docker-compose exec app mormo test -t http://127.0.0.1:8001/openapi.json -c mormo.yaml -v
       name: integration test
-      deploy:
-        provider: releases
-        api_key: $GITHUB_OAUTH_TOKEN
-        file: "openapi.json"
-        skip_cleanup: true
-        draft: true

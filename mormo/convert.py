@@ -146,7 +146,6 @@ class OpenAPIToPostman:
 
         return schema_path
 
-
     @classmethod
     def path_parts(cls, path: str) -> list:
         url = []

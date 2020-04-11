@@ -12,7 +12,7 @@ from .schema.postman_collection_v2 import (
 from .util import load_db, save_db
 from . import logger
 
-app = FastAPI(version='0.7.44')
+app = FastAPI(version='0.7.45')
 
 
 @app.post("/schema", response_model=SaveDBResult)
