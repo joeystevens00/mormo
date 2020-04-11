@@ -82,11 +82,13 @@ def blind_load(content):
     return parsed_content
 
 
-def is_local_path(s):
+def is_local_file_path(s):
     """Does not consider paths above cwd to be valid."""
     if (
         isinstance(s, str)
+        and s.startswith('./')
         and os.path.exists(s)
+        and os.path.isfile(s)
         and os.path.abspath(s).startswith(os.getcwd())
     ):
         return True
@@ -154,7 +156,7 @@ class DB:
         raw = cls._get(r, uid)
         if raw:
             raw = json.loads(raw)
-            return cls_from_str(raw['class']).construct(**raw['data'])
+            return cls_from_str(raw['class'])(**raw['data'])
 
     def save(self):
         logger.debug(f'Creating {repr(self)} in Redis.')
