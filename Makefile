@@ -43,8 +43,6 @@ coveralls:
 update_api_version:
 	sed -Ei "s/(FastAPI\()version\='(\w|\.)+'/\1version\='`poetry version | cut -d ' ' -f2`'/g" mormo/api.py
 
-
-
 .PHONY: update_badge_branches
 update_badge_branches:
 	$(call update_badge_branch,README.md)
@@ -73,7 +71,7 @@ docker_api_image: requirements.txt
 
 .PHONY: docker_api
 docker_api: docker_api_image
-	docker-compose up -d
+	env MORMO_IMAGE=mormo:api docker-compose up -d
 
 .PHONY: docker
 docker: requirements.txt

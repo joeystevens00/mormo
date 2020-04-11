@@ -154,11 +154,6 @@ class Collection(BaseModel):
 
     def run(self, **kwargs):
         from ..postman_test import run_newman
-        t = tempfile.mktemp()
-        self.to_file(t)
-        return run_newman(t, **kwargs)
-
-
-class SaveDBResult(BaseModel):
-    id: str
-    object: Collection
+        t = tempfile.NamedTemporaryFile()
+        self.to_file(t.name)
+        return run_newman(t.name, **kwargs)

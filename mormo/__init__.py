@@ -6,7 +6,7 @@ from pydantic import BaseSettings
 FAKE_REDIS_SERVER = None
 
 class Settings(BaseSettings):
-    redis_host: str = 'localhost'
+    redis_host: str = '127.0.0.1'
     redis_port: int = 6379
     testing: bool = False
     log_level: str = 'WARNING'

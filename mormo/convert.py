@@ -1,8 +1,9 @@
 import os
 from collections import defaultdict, ChainMap, Counter, namedtuple
-from typing import Generator, Iterable, List, Optional
+from typing import Generator, Iterable, List, Tuple, Optional
 import json
 import re
+import requests
 import yaml
 
 from .postman_test import (
@@ -28,15 +29,15 @@ from .schema.postman_collection_v2 import (
 from .util import (
     blind_load,
     fingerprint, flatten_iterables_in_dict, generate_from_schema,
-    get_http_reason, hashable_lru, is_local_path, load_file, pick_one,
+    get_http_reason, hashable_lru, is_local_file_path, load_file, pick_one,
     uuidgen, trim, HTTP_VERBS,
 )
 from . import logger
 
-RE_PATH_VARIABLE = re.compile('\{(.*?)\}')  # noqa: W605
-RE_PATH_GLOBAL_VARIABLE = re.compile('\{\{(.*?)\}\}')  # noqa: W605
-RE_PATH_VARIABLE_SEGMENT = re.compile('(\(\{(.*?)\}\))')  # noqa: W605
-RE_PATH_CONVERTED_VARIABLE_SEGMENT = re.compile('(\{\{(.*?)\}\})')  # noqa: W605
+RE_PATH_VARIABLE = re.compile(r'\{(.*?)\}')  # noqa: W605
+RE_PATH_GLOBAL_VARIABLE = re.compile(r'\{\{(.*?)\}\}')  # noqa: W605
+RE_PATH_VARIABLE_SEGMENT = re.compile(r'(\(\{(.*?)\}\))')  # noqa: W605
+RE_PATH_CONVERTED_VARIABLE_SEGMENT = re.compile(r'(\{\{(.*?)\}\})')  # noqa: W605
 
 Route = namedtuple('Route', ['verb', 'path', 'operation'])
 ReferenceSearch = namedtuple('ReferenceSearch', ['ref', 'schema'])
@@ -78,6 +79,7 @@ class OpenAPIToPostman:
         self.collection_global_variables = request.collection_global_variables or []
         self.default_expect = Expect()
         self.expect = request.expect or defaultdict(self.get_default_expect)
+        self.verbose = request.verbose
         path = request.path
         schema = request.schema_
         if path:
@@ -90,9 +92,12 @@ class OpenAPIToPostman:
                 raise ValueError(f"Unknown file type for: {path}")
         elif schema:
             self.schema = schema
+        elif request.target:
+            self.host = request.target.split('/')[2:][0]
+            self.schema = requests.get(request.target).json()
         else:
             raise ValueError(
-                "Either path to schema or schema is a required field",
+                "Either path to schema, URL to OpenAPI schema, or schema is a required field",
             )
         if isinstance(self.schema, OpenAPISchemaV3):
             self.schema = self.schema.to_dict(no_empty=False)
@@ -133,7 +138,7 @@ class OpenAPIToPostman:
     @hashable_lru
     def find_ref(cls, ref: str, schema_path):
         ref_path = ref.split('/')[1:]
-        while len(ref_path):
+        while ref_path:
             seek = ref_path.pop(0).replace('~1', '/').replace('~0', '~')
             if seek:
                 if isinstance(schema_path, list) and seek.isdigit():
@@ -145,12 +150,11 @@ class OpenAPIToPostman:
 
         return schema_path
 
-
     @classmethod
     def path_parts(cls, path: str) -> list:
         url = []
         for part in path.split('/')[1:]:
-            is_path_variable = re.match('^{(\w+)}$', part)  # noqa: W605
+            is_path_variable = re.match(r'^{(\w+)}$', part)  # noqa: W605
             is_path_segment = RE_PATH_VARIABLE.findall(part)
             # queries = RE_PATH_VARIABLE_SEGMENT.findall(part)
             if is_path_variable:
@@ -175,7 +179,9 @@ class OpenAPIToPostman:
         collection_test_scripts = []
         collection_prerequest_scripts = []
         for route, td_item in test_config.items():
-            i = TestConfig(**td_item)
+            i = td_item
+            if isinstance(i, dict):
+                i = TestConfig(**td_item)
             if isinstance(i.variables, str):
                 variables = load_file(i.variables)
             else:
@@ -190,14 +196,14 @@ class OpenAPIToPostman:
                 if i.test:
                     collection_test_scripts.extend([
                         javascript(
-                            exec=t,
+                            cmd=t,
                             name=f"{route} cmd({fingerprint(t)})"
                         ) for t in i.test
                     ])
                 if i.prerequest:
                     collection_prerequest_scripts.extend([
                         javascript(
-                            exec=t,
+                            cmd=t,
                             name=f"{route} cmd({fingerprint(t)})"
                         ) for t in i.prerequest
                     ])
@@ -205,13 +211,13 @@ class OpenAPIToPostman:
             verb, path = route.split(' ')
             route = f'{verb.upper()} {path}'
             for variable, response_path in (i.make_global or {}).items():
-                response_path = ''.join([
+                response_path = ''.join(
                     '["' + trim(p) + '"]'
                     for p in response_path.split('.')[1:]
-                ])
+                )
                 debug_global = lambda x: javascript(
                     name=f'[{x}] Debug {variable}',
-                    exec=f'console.log("[{x}] GLOBAL({variable}):", pm.globals.get("{variable}"));',  # noqa: E501
+                    cmd=f'console.log("[{x}] GLOBAL({variable}):", pm.globals.get("{variable}"));',  # noqa: E501
                 )
                 collection_prerequest_scripts.append(
                     debug_global('collection_prerequest'),
@@ -221,7 +227,7 @@ class OpenAPIToPostman:
                 )
                 test_scripts[route].append(javascript(
                     name=f'Set response of {route}: JSON_RESPONSE{response_path} to {variable}',  # noqa: E501
-                    exec="""
+                    cmd="""
                         pm.test('set {variable}', function() {{
                             pm.globals.set("{variable}", pm.response.json(){response_path});
                         }});
@@ -230,7 +236,7 @@ class OpenAPIToPostman:
             # self.collection_global_variables.append(
             # Variable(id=variable, type='string', value='default'))
             for k, v in (variables or {}).items():
-                if is_local_path(v):
+                if is_local_file_path(v):
                     v = load_file(v)
                 test_data.extend([
                     TestData(route=route, in_=in_, key=k, value=v)
@@ -242,14 +248,14 @@ class OpenAPIToPostman:
             if i.test:
                 test_scripts[route].extend([
                     javascript(
-                        exec=t,
+                        cmd=t,
                         name=f"{route} cmd({fingerprint(t)})",
                     ) for t in i.test
                 ])
             if i.prerequest:
                 prerequest_scripts[route].extend([
                     javascript(
-                        exec=t,
+                        cmd=t,
                         name=f"{route} cmd({fingerprint(t)})",
                     ) for t in i.prerequest
                 ])
@@ -343,10 +349,14 @@ class OpenAPIToPostman:
             last_part = part
         return last_part
 
+    def verbose_msg(self, *msg, delim=','):
+        if self.verbose:
+            logger.debug(delim.join(msg))
+
     @classmethod
     def order_routes_by_resource(
         cls, routes: Iterable[Route],
-        verb_ordering: List = list(['post', 'put', 'get', 'patch', 'delete'])
+        verb_ordering: Tuple = ('post', 'put', 'get', 'patch', 'delete',)
     ) -> List[Route]:
         """Identify REST resources and order CRUD operations safely."""
         by_resource = defaultdict(lambda: {})
@@ -459,8 +469,7 @@ class OpenAPIToPostman:
             if self.ref_depth[o.ref] > self.max_ref_depth:
                 if self.strict:
                     raise ValueError(f"Max reference recursion reached for {o.ref}")  # noqa; E501
-                else:
-                    return
+                return
             self.ref_depth[o.ref] += 1
             o = o.resolve_ref(self.schema)
         elif '$ref' in dir(o):
@@ -549,8 +558,17 @@ class OpenAPIToPostman:
                 request_header, request_body
             ) = self.convert_parameters(verb, path, operation)
             global_variables.extend(new_globals)
-            logger.debug('GLOBALS: ' + repr(new_globals))
-            logger.debug('REQUEST: ' + repr(request_url_variables))
+
+            if global_variables:
+                self.verbose_msg(f'{verb} {path} global variables {global_variables}')
+            if query:
+                self.verbose_msg(f'{verb} {path} query param variables {query}')
+            if request_url_variables:
+                self.verbose_msg(f'{verb} {path} url variables {request_url_variables}')
+            if request_header:
+                self.verbose_msg(f'{verb} {path} headers {request_header}')
+            if request_body:
+                self.verbose_msg(f'{verb} {path} request_body {request_body}')
             items.append(
                 Item(
                     id=uuidgen(),
@@ -641,6 +659,7 @@ class ParameterBuilder:
             self.fake_data.get(v, {}),
         )
 
+    @classmethod
     def build_test_data_from_param(self, param, mapped_value):
         return Parameter(
             key=param.name,
@@ -675,8 +694,7 @@ class ParameterBuilder:
                 err = f"Path variable ({param.name}) not in path and multiple path variables ({not_processed_path_vars}) to choose from."  # noqa; E501
                 if self.mormo.strict:
                     raise ValueError(err)
-                else:
-                    logger.warning(err)
+                logger.warning(err)
             elif len(not_processed_path_vars) == 1:
                 first_var = not_processed_path_vars.pop()
                 if first_var in mapped_value:
@@ -712,10 +730,10 @@ class ParameterBuilder:
         global_ = global_.copy()
         url = url.copy()
         missing_variable = set(self.path_vars).difference(
-            set([
+            {
                 *[p.key for p in url if p],
                 *[p.id for p in global_ if p],
-            ]),
+            },
         )
 
         for path_var in missing_variable:
@@ -770,8 +788,7 @@ class ParameterBuilder:
             return header, RequestBody(
                 **body_args,
             )
-        else:
-            return header, None
+        return header, None
 
     def build(self) -> PostmanVariables:
         global_, query, url, header, body = ([], [], [], [], [])

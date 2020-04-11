@@ -1,7 +1,6 @@
 import enum
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 from collections import defaultdict
-from typing import List
 
 from . import openapi_v3, postman_collection_v2
 from ..model import BaseModel
@@ -36,7 +35,7 @@ class Expect(BaseModel):
 
 
 class TestConfig(BaseModel):
-    variables: Optional[Union[Dict[str, str], str]]
+    variables: Optional[Union[str, Dict[str, Any]]]
     expect: Optional[Expect]
     make_global: Optional[Dict[str, str]]
     test: Optional[List[str]]
@@ -92,8 +91,9 @@ class TestResult(BaseModel):
 
 class OpenAPISchemaToPostmanRequest(BaseModel):
     schema_: Optional[openapi_v3.OpenAPISchemaV3]
-    path: Optional[str] = None
+    path: Optional[str]
     host: Optional[str]
+    target: Optional[str]
     test_config: Optional[Dict[str, TestConfig]] = None
     test_data_file: Optional[str] = None
     test_data: Optional[List[TestData]] = None

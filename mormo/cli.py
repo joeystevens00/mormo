@@ -49,7 +49,8 @@ def generate_schema(infile, outfile, test_file, **kwargs):
 def run(in_file, test_file, out_file, test, test_mormo_api, host, verbose):
     """Generate Postman Collections."""
     if not out_file:
-        out_file = tempfile.mktemp()
+        temp = tempfile.NamedTemporaryFile()
+        out_file = temp.name
     if test_mormo_api:
         test = True
         addr, port = host.split('/')[-1].split(':')
@@ -68,12 +69,60 @@ def run(in_file, test_file, out_file, test, test_mormo_api, host, verbose):
         time.sleep(1)
         with open(in_file, 'w') as f:
             json.dump(requests.get(f'{host}/openapi.json').json(), f)
-    generate_schema(in_file, out_file, test_file, host=host)
+    generate_schema(in_file, out_file, test_file, host=host, verbose=verbose)
     if test:
         res = run_newman(out_file, host=host, verbose=verbose)
         if test_mormo_api:
             proc.terminate()
         sys.exit(res.code)
+
+
+@cli.command()
+@click.option(
+    '-c', '--config', 'test_config', type=click.Path(),
+    help='path to test config (YAML or JSON)',
+)
+@click.option(
+    '--test_mormo_api', is_flag=True,
+    help='spin up a mormo API with the binds in target',
+)
+@click.option(
+    '-t', '--target', 'target',
+    help='Target API with path to schema (e.g. http://localhost:8000/openapi.json)',
+)
+@click.option(
+    '-v', '--verbose', is_flag=True, help='verbose option in newman.',
+)
+def test(test_config, target, test_mormo_api, verbose):
+    """Run Mormo Tests."""
+    temp_out = tempfile.NamedTemporaryFile(suffix='.json')
+    temp_in = tempfile.NamedTemporaryFile(suffix='.json')
+    out_file = temp_out.name
+    in_file = temp_in.name
+    host = target.split('/')[2:][0]
+    if test_mormo_api:
+        test = True
+        addr, port = host.split(':')
+        port = port or 80
+        proc = Process(
+            target=uvicorn.run,
+            args=(app,),
+            kwargs={
+                "host": addr,
+                "port": int(port),
+                "log_level": "info",
+            },
+            daemon=True,
+        )
+        proc.start()
+        time.sleep(1)
+    with open(in_file, 'w') as f:
+        json.dump(requests.get(target).json(), f)
+    generate_schema(in_file, out_file, test_config, host=host, verbose=verbose)
+    res = run_newman(out_file, host=host, verbose=verbose)
+    if test_mormo_api:
+        proc.terminate()
+    sys.exit(res.code)
 
 
 if __name__ == "__main__":

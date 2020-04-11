@@ -15,12 +15,12 @@ CallBackType = Dict[str, Dict[str, Dict]]
 
 
 class ParameterRequestData(BaseModel):
-    body: dict = dict()
-    requestBody: dict = dict()
-    path: dict = dict()
-    query: dict = dict()
-    header: dict = dict()
-    cookie: dict = dict()
+    body: dict = {}
+    requestBody: dict = {}
+    path: dict = {}
+    query: dict = {}
+    header: dict = {}
+    cookie: dict = {}
 
 
 class ParameterIn(enum.Enum):
@@ -213,7 +213,7 @@ class Operation(BaseModel):
     operationId: Optional[str]
     summary: Optional[str]
     responses: ResponsesType()
-    parameters: Optional[List[Union[Parameter, Reference]]]
+    parameters: Optional[List[Union[Reference, Parameter]]]
     tags: Optional[List[str]]
     externalDocs: Optional[ExternalDocs]
     requestBody: Optional[Union[RequestBody, Reference]]
@@ -252,8 +252,3 @@ class OpenAPISchemaV3(BaseModel):
     components: Optional[dict]
     security: Optional[List[Dict[str, List]]]
     externalDocs: Optional[ExternalDocs]
-
-
-class SaveDBResult(BaseModel):
-    id: str
-    object: OpenAPISchemaV3

@@ -6,7 +6,7 @@ services:
   app:
     depends_on:
       - redis
-    image: joeystevens00/mormo:api
+    image: "${MORMO_IMAGE:-joeystevens00/mormo:api}"
     restart: always
     ports:
       - 8001:8001

@@ -33,8 +33,13 @@ Welcome to Mormo's documentation!
 .. |docs| image:: https://readthedocs.org/projects/mormo/badge/?version=master
     :target: https://mormo.readthedocs.io/en/master
     :alt: Documentation Status
+<<<<<<< HEAD
 .. |api_docs| image:: https://img.shields.io/badge/dynamic/json?url=http://45.56.119.5/master/openapi.json&label=api%20docs&query=$.info.version&color=success
     :target: http://45.56.119.5/master/docs?url=/master/openapi.json
+=======
+.. |api_docs| image:: https://img.shields.io/badge/dynamic/json?url=https://mormo.dev/master/openapi.json&label=api%20docs&query=$.info.version&color=success
+    :target: https://mormo.dev/master/docs?url=/master/openapi.json
+>>>>>>> b0e487d32234a6d0f84c0a1dd4658c770221fbf6
     :alt: API Documentation Status
 
 .. |travis| image:: https://travis-ci.com/joeystevens00/mormo.svg?branch=master
@@ -64,14 +69,14 @@ CLI
 ----
 
 ::
-
   # Convert OpenAPI Schema to Postman Collection V2 Schema
   mormo run --in openapi.json --out postman_collection.json
   # Run the generated postman collection with Newman
   mormo run --in openapi.json --test --host http://127.0.0.1:8001
   # ... with a test config
   mormo run --in openapi.json --test --host http://127.0.0.1:8001 --test_file test_config.json
-
+  # Test the API at 127.0.0.1:8001 with the openapi schema /openapi.json using the test config mormo.yaml
+  mormo test -t http://127.0.0.1:8001/openapi.json -c mormo.yaml
 
 API
 ----
@@ -83,7 +88,11 @@ API
   # Or use uvicorn directly
   uvicorn --port 8001 mormo.api:app
 
+<<<<<<< HEAD
 See `/docs <http://45.56.119.5/master/docs?url=/master/openapi.json>`_ for API documentation.
+=======
+See `/docs <https://mormo.dev/master/docs?url=/master/openapi.json>`_ for API documentation.
+>>>>>>> b0e487d32234a6d0f84c0a1dd4658c770221fbf6
 
 
 Test Config

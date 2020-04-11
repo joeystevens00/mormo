@@ -1,4 +1,4 @@
-from mormo.postman_test import javascript, new_event, run_newman
+from mormo.postman_test import javascript, new_event
 from mormo.schema.postman_collection_v2 import Script
 
 
@@ -20,4 +20,5 @@ def test_new_event():
 
 def test_run_newman(postman_collection):
     res = postman_collection.run(host=None, json=True)
-    assert 'invalid uri' in res.json_['run']['failures'][0]['error']['message'].lower()
+    error = res.json_['run']['failures'][0]['error']['message'].lower()
+    assert 'invalid uri' in error or 'enotfound' in error

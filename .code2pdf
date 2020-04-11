@@ -21,6 +21,7 @@
   - docs/build
   - .terraform
   - .tox
+  - .build
 :files:
   - .gitignore
   - requirements.txt

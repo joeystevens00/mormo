@@ -19,7 +19,7 @@ from hypothesis_jsonschema._from_schema import from_schema
 
 from . import logger, redis_handle, Settings
 
-RE_WORDCHARS = re.compile('^\w+$')  # noqa: W605
+RE_WORDCHARS = re.compile(r'^\w+$')  # noqa: W605
 
 HTTP_VERBS = [
     "get",
@@ -76,17 +76,19 @@ def blind_load(content):
     try:
         parsed_content = load_map[content_type](content)
     except (yaml.scanner.ScannerError, yaml.parser.ParserError, json.decoder.JSONDecodeError) as e:
-        logger.warn(e)
+        logger.warning(e)
         map_type = "yaml" if content_type == "json" else "json"
         parsed_content = load_map[map_type](content)
     return parsed_content
 
 
-def is_local_path(s):
+def is_local_file_path(s):
     """Does not consider paths above cwd to be valid."""
     if (
         isinstance(s, str)
+        and s.startswith('./')
         and os.path.exists(s)
+        and os.path.isfile(s)
         and os.path.abspath(s).startswith(os.getcwd())
     ):
         return True
@@ -225,12 +227,12 @@ def render_jinja2(template: str, **kwargs) -> str:
 
 
 def uuidgen(*_, **__):
-    t = '-'.join([secrets.token_hex(i // 2) for i in [8, 4, 4, 4, 12]])
+    t = '-'.join(secrets.token_hex(i // 2) for i in [8, 4, 4, 4, 12])
     return t
 
 
 def gen_string(length, charset=string.printable, choice_f=random.choice):
-    return ''.join([choice_f(charset) for i in range(0, length)])
+    return ''.join(choice_f(charset) for i in range(0, length))
 
 
 def flatten_iterables_in_dict(d: dict, index=0, no_null=True, min_length=0):
@@ -242,7 +244,7 @@ def flatten_iterables_in_dict(d: dict, index=0, no_null=True, min_length=0):
                 min_length=min_length,
             )
         elif isinstance(v, Iterable):
-            if not len(v):
+            if not v:
                 continue
             if (
                 (no_null and v[index] is None)
@@ -260,22 +262,22 @@ def flatten_iterables_in_dict(d: dict, index=0, no_null=True, min_length=0):
 
 
 class TemplateMap:
-    def __init__(self, map: dict, defaults: dict, template_args: dict):
-        self.map = ChainMap(map, defaults)
+    def __init__(self, template: dict, defaults: dict, template_args: dict):
+        self.map = ChainMap(template, defaults)
         self.res = self.parse_map(self.map, template_args)
 
     @classmethod
     def parse_map_item(
-        cls, map: dict, k: Any,
+        cls, template: dict, k: Any,
         v: Union[Callable, str, dict, Iterable],
         template_args: dict,
     ):
         if isinstance(v, Callable):
-            res = v(map, k, template_args)
+            res = v(template, k, template_args)
             if isinstance(res, dict):
                 return cls.parse_map(res, template_args)
             else:
-                return cls.parse_map_item(map, k, res, template_args)
+                return cls.parse_map_item(template, k, res, template_args)
         elif isinstance(v, str):
             return render_jinja2(v, **template_args)
         elif isinstance(v, dict):
@@ -283,16 +285,16 @@ class TemplateMap:
         elif isinstance(v, Iterable):
             res = []
             for i in v:
-                res.append(cls.parse_map_item(map, k, i, template_args))
+                res.append(cls.parse_map_item(template, k, i, template_args))
             return res
         else:
             raise ValueError(f"Unhandled type: {type(v)}")
 
     @classmethod
-    def parse_map(cls, map: dict, template_args: dict) -> dict:
+    def parse_map(cls, template: dict, template_args: dict) -> dict:
         res = {}
-        for k, v in map.items():
-            res[k] = cls.parse_map_item(map, k, v, template_args)
+        for k, v in template.items():
+            res[k] = cls.parse_map_item(template, k, v, template_args)
         return res
 
 
@@ -340,8 +342,7 @@ def pick_one(gen: GeneratorType, strategy="random"):
     # often enough the first element is rather boring like 0 or '0'
     if "rand" in strategy.lower():
         return random.choice(next(gen))
-    else:
-        return next(gen)[0]
+    return next(gen)[0]
 
 
 def hashable_lru(func):
@@ -354,7 +355,7 @@ def hashable_lru(func):
             return value
 
     def func_with_serialized_params(*args, **kwargs):
-        _args = tuple([deserialise(arg) for arg in args])
+        _args = tuple(deserialise(arg) for arg in args)
         _kwargs = {k: deserialise(v) for k, v in kwargs.items()}
         return func(*_args, **_kwargs)
 
@@ -362,7 +363,7 @@ def hashable_lru(func):
 
     @functools.wraps(func)
     def lru_decorator(*args, **kwargs):
-        _args = tuple([json.dumps(arg, sort_keys=True) if type(arg) in (list, dict) else arg for arg in args])  # noqa: E501
+        _args = tuple(json.dumps(arg, sort_keys=True) if type(arg) in (list, dict) else arg for arg in args)  # noqa: E501
         _kwargs = {k: json.dumps(v, sort_keys=True) if type(v) in (list, dict) else v for k, v in kwargs.items()}  # noqa: E501
         return cached_function(*_args, **_kwargs)
     lru_decorator.cache_info = cached_function.cache_info

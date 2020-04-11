@@ -6,4 +6,4 @@
 
 [![Documentation Status](https://readthedocs.org/projects/mormo/badge/?version=master)](https://mormo.readthedocs.io/en/master)
 
-[![API Documentation Status](https://img.shields.io/badge/dynamic/json?url=http://45.56.119.5/master/openapi.json&label=api%20docs&query=$.info.version&color=success)](http://45.56.119.5/master/docs?url=/master/openapi.json)
+[![API Documentation Status](https://img.shields.io/badge/dynamic/json?url=https://mormo.dev/master/openapi.json&label=api%20docs&query=$.info.version&color=success)](https://mormo.dev/master/docs?url=/master/openapi.json)
