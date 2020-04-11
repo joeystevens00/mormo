@@ -28,7 +28,7 @@ from .schema.postman_collection_v2 import (
 from .util import (
     blind_load,
     fingerprint, flatten_iterables_in_dict, generate_from_schema,
-    get_http_reason, hashable_lru, is_local_path, load_file, pick_one,
+    get_http_reason, hashable_lru, is_local_file_path, load_file, pick_one,
     uuidgen, trim, HTTP_VERBS,
 )
 from . import logger
@@ -231,7 +231,7 @@ class OpenAPIToPostman:
             # self.collection_global_variables.append(
             # Variable(id=variable, type='string', value='default'))
             for k, v in (variables or {}).items():
-                if is_local_path(v):
+                if is_local_file_path(v):
                     v = load_file(v)
                 test_data.extend([
                     TestData(route=route, in_=in_, key=k, value=v)
