@@ -1,17 +1,19 @@
 FROM python:3.7
 
-# Add software artifacts
 WORKDIR /app
-COPY . /app
-#ADD requirements.txt .
 
-# Install dependencies
-RUN apt-get update && apt-get upgrade -y
-RUN apt-get install npm -y
-RUN npm install -g newman
+RUN apt-get update\
+  && apt-get upgrade -y\
+  && apt-get install npm -y\
+  && npm install -g newman
+
+COPY requirements.txt /app
 RUN pip install -r requirements.txt
-RUN pip install .
 
 ARG target
-RUN test "$target" = "test" && pip install pytest || { "$target" != "test" && return 0; }
+RUN test "$target" = "test" && pip install pytest || { test "$target" != "test" && return 0; }
+
+COPY . /app
+RUN pip install .
+
 CMD uvicorn --host 0.0.0.0 --port 8001 mormo.api:app
