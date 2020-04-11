@@ -71,7 +71,7 @@ docker_api_image: requirements.txt
 
 .PHONY: docker_api
 docker_api: docker_api_image
-	docker-compose up -d
+	env MORMO_IMAGE=mormo:api docker-compose up -d
 
 .PHONY: docker
 docker: requirements.txt

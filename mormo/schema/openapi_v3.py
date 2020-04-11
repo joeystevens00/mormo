@@ -213,7 +213,7 @@ class Operation(BaseModel):
     operationId: Optional[str]
     summary: Optional[str]
     responses: ResponsesType()
-    parameters: Optional[List[Union[Parameter, Reference]]]
+    parameters: Optional[List[Union[Reference, Parameter]]]
     tags: Optional[List[str]]
     externalDocs: Optional[ExternalDocs]
     requestBody: Optional[Union[RequestBody, Reference]]

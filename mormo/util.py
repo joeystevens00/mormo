@@ -156,7 +156,7 @@ class DB:
         raw = cls._get(r, uid)
         if raw:
             raw = json.loads(raw)
-            return cls_from_str(raw['class'])(**raw['data'])
+            return cls_from_str(raw['class']).construct(**raw['data'])
 
     def save(self):
         logger.debug(f'Creating {repr(self)} in Redis.')
