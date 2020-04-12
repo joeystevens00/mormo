@@ -1,4 +1,4 @@
-version: '3'
+version: '3.3'
 
 services:
   redis:
@@ -12,3 +12,8 @@ services:
       - 8001:8001
     environment:
       - REDIS_HOST=redis
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        target: api
