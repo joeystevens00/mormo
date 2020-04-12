@@ -65,13 +65,17 @@ docker_test: requirements.txt
 	docker build --build-arg target=test -t mormo:test .
 	docker run --rm mormo:test pytest
 
-.PHONY: docker_api_image
-docker_api_image: requirements.txt
-	docker build --build-arg target=api -t mormo:api .
-
 .PHONY: docker_api
-docker_api: docker_api_image
+docker_api:
 	env MORMO_IMAGE=mormo:api docker-compose up -d
+
+.PHONY: dcgoss_api_edit
+dcgoss_api_edit:
+	env MORMO_IMAGE=mormo:api dcgoss edit app
+
+.PHONY: test_docker_api
+test_docker_api:
+	env MORMO_IMAGE=mormo:api dcgoss run app
 
 .PHONY: docker
 docker: requirements.txt

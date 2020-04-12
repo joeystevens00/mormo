@@ -1,0 +1,23 @@
+file:
+  /app/mormo/api.py:
+    exists: true
+    mode: "0644"
+    owner: root
+    group: root
+    filetype: file
+    contains: []
+port:
+  tcp:8001:
+    listening: true
+    ip:
+    - 0.0.0.0
+command:
+  python3 -c "import os, redis; print(redis.Redis(os.getenv('REDIS_HOST')).ping())":
+    exit-status: 0
+    stdout:
+    - "True"
+    stderr: []
+    timeout: 10000
+process:
+  uvicorn:
+    running: true
