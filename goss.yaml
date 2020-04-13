@@ -12,6 +12,12 @@ port:
     ip:
     - 0.0.0.0
 command:
+  newman --version:
+    exit-status: 0
+    stdout:
+    - 5.0.0
+    stderr: []
+    timeout: 10000
   python3 -c "import os, redis; print(redis.Redis(os.getenv('REDIS_HOST')).ping())":
     exit-status: 0
     stdout:

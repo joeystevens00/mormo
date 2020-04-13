@@ -5,7 +5,7 @@ WORKDIR /app
 RUN apt-get update\
   && apt-get upgrade -y\
   && apt-get install npm -y\
-  && npm install -g newman
+  && npm install -g newman@5.0.0
 
 COPY requirements.txt /app
 RUN pip install -r requirements.txt
