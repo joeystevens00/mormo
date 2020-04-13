@@ -3,10 +3,3 @@ port:
     listening: true
     ip:
     - 0.0.0.0
-command:
-  python3 -c "import os, redis; print(redis.Redis(os.getenv('REDIS_HOST')).ping())":
-    exit-status: 0
-    stdout:
-    - "True"
-    stderr: []
-    timeout: 10000

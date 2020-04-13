@@ -18,9 +18,9 @@ jobs:
       name: unit test
       after_success: docker-compose exec app bash -c "export COVERALLS_REPO_TOKEN=$REPO_TOKEN; coveralls"
     - script:
-          - curl -fsSL https://goss.rocks/install | sh
-          - curl -L https://raw.githubusercontent.com/aelsabbahy/goss/master/extras/dcgoss/dcgoss -o /usr/local/bin/dcgoss
-          - chmod +rw /usr/local/bin/dcgoss
+          - curl -fsSL https://goss.rocks/install | sudo sh
+          - sudo curl -L https://raw.githubusercontent.com/aelsabbahy/goss/master/extras/dcgoss/dcgoss -o /usr/local/bin/dcgoss
+          - sudo chmod +x /usr/local/bin/dcgoss
           - env MORMO_IMAGE=joeystevens00/mormo:$TRAVIS_BRANCH-api dcgoss run app
       name: goss test
     - script:
