@@ -3,8 +3,8 @@ FROM python:3.7
 WORKDIR /app
 
 RUN apt-get update\
-  && apt-get upgrade -y\
-  && apt-get install npm -y\
+  && apt-get install --no-install-recommends npm -y\
+  && apt-get clean\
   && npm install -g newman@5.0.0
 
 COPY requirements.txt /app
