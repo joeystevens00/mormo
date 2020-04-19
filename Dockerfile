@@ -13,6 +13,8 @@ RUN pip install -r requirements.txt
 ARG target
 RUN test "$target" = "test" && pip install pytest || { test "$target" != "test" && return 0; }
 
+HEALTHCHECK --interval=5s --timeout=3s CMD curl --fail http://localhost:8001/docs || exit 1
+
 COPY . /app
 RUN pip install .
 
