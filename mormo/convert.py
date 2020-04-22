@@ -69,9 +69,6 @@ class OpenAPIToPostman:
             request = OpenAPISchemaToPostmanRequest(**kwargs)
         self.schema = None
         self.host = request.host
-        self.max_ref_depth = 5
-        self.ref_depth = Counter()
-        self.strict = True
         self.test_scripts = defaultdict(lambda: [], request.test_scripts or [])
         self.prerequest_scripts = defaultdict(lambda: [], request.prerequest_scripts or [])  # noqa: E501
         self.collection_test_scripts = request.collection_test_scripts or []
@@ -463,49 +460,8 @@ class OpenAPIToPostman:
                 target.extend(param.examples)
         return examples
 
-    def _resolve_object(self, o, new_cls=None, deep=False):
-        if isinstance(o, Reference):
-            logger.debug(f"Resolving reference {o.ref} Try #{self.ref_depth[o.ref]}")  # noqa; E501
-            if self.ref_depth[o.ref] > self.max_ref_depth:
-                if self.strict:
-                    raise ValueError(f"Max reference recursion reached for {o.ref}")  # noqa; E501
-                return
-            self.ref_depth[o.ref] += 1
-            o = o.resolve_ref(self.schema)
-        elif '$ref' in dir(o):
-            if isinstance(o, SchemaObject):
-                logger.warning("SchemaObject should be a Reference object, catching serialization issue...")
-                o = self._resolve_object(
-                    Reference(
-                        **{'$ref': o.__getattribute__('$ref')},
-                    ),
-                    new_cls=new_cls,
-                    deep=deep,
-                )
-            else:
-                logger.error(
-                    "Possible serialization issue with object,"
-                    f" object of type ({type(o)}) shouldn't be a reference: ({o})"
-                )
-        elif isinstance(o, dict) and o.get('$ref'):
-            o = self._resolve_object(
-                Reference(**o),
-                new_cls=new_cls,
-                deep=deep,
-            )
-        if 'to_dict' in dir(o):
-            o = o.to_dict()
-        if deep and isinstance(o, dict):
-            for k, v in o.items():
-                if (isinstance(v, dict) and v.get('$ref')) or isinstance(v, Reference):
-                    if isinstance(v, Reference):
-                        v = v.to_dict()
-                    o[k] = self._resolve_object(Reference(**v), deep=True)
-                else:
-                    o[k] = self._resolve_object(v, deep=True)
-        if isinstance(o, dict) and new_cls:
-            o = new_cls(**o)
-        return o
+    def _resolve_object(self, *args, **kwargs):
+        return self.resolve_object(self.schema, *args, **kwargs)
 
     def convert_parameters(self, verb, path, operation: Operation):
         return ParameterBuilder(
