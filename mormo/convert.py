@@ -6,6 +6,7 @@ import re
 import requests
 import yaml
 
+from .model import BaseModel, ReferenceResolve
 from .postman_test import (
     new_event, javascript, js_test_code,
     js_test_content_type, js_test_response_time,
@@ -59,7 +60,7 @@ PostmanVariables = namedtuple('PostmanVariables', [
 ])
 
 
-class OpenAPIToPostman:
+class OpenAPIToPostman(ReferenceResolve):
     def __init__(
         self,
         request: Optional[OpenAPISchemaToPostmanRequest] = None,
@@ -105,47 +106,7 @@ class OpenAPIToPostman:
             request.test_data_file,
             request.test_config,
         )
-
-    @classmethod
-    def load_remote_refs(cls, schema_path):
-        if isinstance(schema_path, str) and schema_path.startswith('http'):
-            import requests
-            ref_path = None
-            if '#' in schema_path:
-                ref_path = schema_path.split('#')[-1]
-            try:
-                logger.debug(f"Fetching remote reference: {schema_path}")
-                schema_path = blind_load(
-                    requests.get(schema_path).content.decode('utf-8'),
-                )
-                if ref_path:
-                    schema_path = cls.find_ref(f'#/{ref_path}', schema_path)
-            except Exception as e:
-                logger.error(f"Exception: {type(e)}: {e}")
-                raise e
-        return schema_path
-
-    @classmethod
-    def load_local_refs(cls, schema_path):
-        if isinstance(schema_path, str) and os.path.exists(schema_path):
-            schema_path = load_file(schema_path)
-        return schema_path
-
-    @classmethod
-    @hashable_lru
-    def find_ref(cls, ref: str, schema_path):
-        ref_path = ref.split('/')[1:]
-        while ref_path:
-            seek = ref_path.pop(0).replace('~1', '/').replace('~0', '~')
-            if seek:
-                if isinstance(schema_path, list) and seek.isdigit():
-                    schema_path = schema_path[int(seek)]
-                else:
-                    schema_path = schema_path[seek]
-        schema_path = cls.load_remote_refs(schema_path)
-        schema_path = cls.load_local_refs(schema_path)
-
-        return schema_path
+        self.strict = True
 
     @classmethod
     def path_parts(cls, path: str) -> list:
@@ -461,7 +422,7 @@ class OpenAPIToPostman:
         return examples
 
     def _resolve_object(self, *args, **kwargs):
-        return self.resolve_object(self.schema, *args, **kwargs)
+        return BaseModel.resolve_object(self.schema, *args, **kwargs)
 
     def convert_parameters(self, verb, path, operation: Operation):
         return ParameterBuilder(

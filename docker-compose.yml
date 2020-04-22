@@ -9,7 +9,7 @@ services:
     image: "${MORMO_IMAGE:-joeystevens00/mormo:api}"
     restart: always
     ports:
-      - 8001:8001
+      - "${EXPOSE_PORT:-8001}:8001"
     environment:
       - REDIS_HOST=redis
     build:
